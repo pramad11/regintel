@@ -3,1333 +3,1232 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RegIntel — PV Regulatory Intelligence</title>
+<title>RegIntel — Global AE Obligation Resolver</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --navy:#03203C; --navy2:#042C53; --blue:#0A5F9A; --sky:#378ADD;
-  --skylt:#B5D4F4; --teal:#1D9E75; --teallt:#9FE1CB; --tealdk:#085041;
-  --amber:#BA7517; --amberlt:#FAC775; --coral:#D85A30; --red:#A32D2D;
-  --white:#F8F6F2; --cream:#EEE9E0; --gray:#888780; --text:#1A1A18;
-  --muted:#5F5E5A; --border:rgba(3,32,60,0.1);
+:root{
+  --navy:#03203C;--navy2:#042C53;--blue:#0A5F9A;--sky:#378ADD;
+  --skylt:#B5D4F4;--teal:#1D9E75;--teallt:#9FE1CB;--tealdk:#085041;
+  --amber:#BA7517;--amberlt:#FAC775;--coral:#D85A30;--red:#A32D2D;
+  --white:#F8F6F2;--cream:#EEE9E0;--gray:#888780;--text:#1A1A18;
+  --muted:#5F5E5A;--border:rgba(3,32,60,0.1);
   --serif:'DM Serif Display',Georgia,serif;
   --sans:'Figtree',sans-serif;
   --mono:'DM Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;}
-body{font-family:var(--sans);background:var(--navy);color:var(--text);display:flex;flex-direction:column;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--cream);color:var(--text);min-height:100vh;}
 
-/* ── TOPBAR ── */
-.topbar{
-  height:52px;background:var(--navy2);
+/* ── HEADER ── */
+.header{
+  background:var(--navy2);padding:0 32px;
+  height:56px;display:flex;align-items:center;gap:14px;
   border-bottom:1px solid rgba(181,212,244,0.1);
-  display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;
-  z-index:50;
+  position:sticky;top:0;z-index:50;
 }
-.topbar-logo{font-family:var(--serif);font-size:17px;color:var(--skylt);}
-.topbar-product{font-family:var(--mono);font-size:10px;color:var(--teallt);
+.header-logo{font-family:var(--serif);font-size:19px;color:var(--skylt);}
+.header-tag{font-family:var(--mono);font-size:10px;color:var(--teallt);
   letter-spacing:.14em;text-transform:uppercase;
   border-left:1px solid rgba(181,212,244,0.2);padding-left:12px;}
-.topbar-case{font-family:var(--mono);font-size:11px;color:rgba(181,212,244,0.45);
-  margin-left:8px;}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);
-  box-shadow:0 0 0 2px rgba(29,158,117,0.25);}
-.status-label{font-family:var(--mono);font-size:10px;color:var(--teallt);letter-spacing:.08em;}
-.topbar-btn{background:transparent;border:1px solid rgba(181,212,244,0.2);
-  color:var(--skylt);font-size:11px;font-family:var(--sans);
-  padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .15s;}
-.topbar-btn:hover{background:rgba(55,138,221,0.15);border-color:rgba(55,138,221,0.5);}
-.topbar-btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
-.topbar-btn.primary:hover{background:#0F6E56;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.header-badge{font-family:var(--mono);font-size:10px;
+  background:rgba(29,158,117,0.2);color:var(--teallt);
+  padding:3px 10px;border-radius:20px;border:1px solid rgba(29,158,117,0.3);}
+.api-btn{background:transparent;border:1px solid rgba(181,212,244,0.25);
+  color:var(--skylt);font-size:12px;font-family:var(--sans);
+  padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
+.api-btn:hover{background:rgba(55,138,221,0.15);}
 
-/* ── LAYOUT ── */
-.app-body{display:flex;flex:1;overflow:hidden;}
+/* ── MAIN LAYOUT ── */
+.main{max-width:1200px;margin:0 auto;padding:32px 24px;display:grid;
+  grid-template-columns:420px 1fr;gap:24px;align-items:start;}
 
-/* ── LEFT SIDEBAR ── */
-.sidebar{
-  width:240px;flex-shrink:0;
-  background:#021929;
-  border-right:1px solid rgba(181,212,244,0.08);
-  display:flex;flex-direction:column;
-  overflow-y:auto;
+/* ── FORM CARD ── */
+.form-card{
+  background:#fff;border-radius:14px;border:1px solid var(--border);
+  overflow:hidden;position:sticky;top:72px;
+  box-shadow:0 2px 20px rgba(3,32,60,0.06);
 }
-.sidebar-section{padding:16px 14px 8px;}
-.sidebar-label{font-family:var(--mono);font-size:9px;color:rgba(181,212,244,0.3);
-  letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;}
-.sidebar-item{
-  display:flex;align-items:center;gap:9px;
-  padding:8px 10px;border-radius:6px;cursor:pointer;
-  font-size:12.5px;color:rgba(181,212,244,0.6);
-  transition:all .15s;margin-bottom:2px;
-  border:1px solid transparent;
+.form-card-header{
+  background:var(--navy);padding:18px 22px;
 }
-.sidebar-item:hover{background:rgba(55,138,221,0.1);color:var(--skylt);}
-.sidebar-item.active{background:rgba(29,158,117,0.15);color:var(--teallt);border-color:rgba(29,158,117,0.2);}
-.sidebar-item .icon{font-size:14px;width:18px;text-align:center;}
-.sidebar-item .badge{margin-left:auto;font-family:var(--mono);font-size:9px;
-  background:rgba(216,90,48,0.25);color:#F0997B;padding:2px 6px;border-radius:10px;}
-.sidebar-divider{border:none;border-top:1px solid rgba(181,212,244,0.06);margin:8px 14px;}
-.new-case-btn{
-  margin:12px 14px;background:var(--teal);color:#fff;
-  border:none;border-radius:8px;padding:10px;
-  font-size:13px;font-family:var(--sans);font-weight:500;
-  cursor:pointer;transition:background .15s;width:calc(100% - 28px);
-  display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.new-case-btn:hover{background:#0F6E56;}
+.form-card-header h2{font-family:var(--serif);font-size:20px;color:var(--white);margin-bottom:2px;}
+.form-card-header p{font-size:12px;color:rgba(181,212,244,0.65);}
+.form-body{padding:20px 22px;max-height:calc(100vh - 180px);overflow-y:auto;}
 
-/* ── MAIN WORKSPACE ── */
-.workspace{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#F4F1EB;}
-
-/* ── VIEW PANELS ── */
-.view{display:none;flex:1;flex-direction:column;overflow:hidden;}
-.view.active{display:flex;}
-
-/* ── CASE INTAKE VIEW ── */
-.intake-shell{
-  flex:1;display:flex;overflow:hidden;
-}
-.intake-form-panel{
-  width:360px;flex-shrink:0;background:#fff;
-  border-right:1px solid var(--border);
-  overflow-y:auto;padding:24px;
-}
-.intake-form-panel h2{
-  font-family:var(--serif);font-size:22px;color:var(--navy);margin-bottom:4px;
-}
-.intake-form-panel .sub{font-size:12px;color:var(--muted);margin-bottom:24px;}
-
-.form-group{margin-bottom:16px;}
-.form-label{font-size:11px;font-weight:600;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:block;}
-.form-label .req{color:var(--coral);}
-.form-input,.form-select,.form-textarea{
-  width:100%;border:1px solid rgba(3,32,60,0.15);border-radius:7px;
-  padding:9px 12px;font-size:13px;font-family:var(--sans);
-  color:var(--text);background:#fff;outline:none;
-  transition:border-color .15s;
-}
-.form-input:focus,.form-select:focus,.form-textarea:focus{
-  border-color:var(--sky);}
-.form-textarea{resize:vertical;min-height:72px;line-height:1.5;}
-.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
-
-.checkbox-group{display:flex;flex-direction:column;gap:6px;margin-top:4px;}
-.checkbox-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;}
-.checkbox-item input{width:15px;height:15px;accent-color:var(--teal);}
-
-.ha-checkboxes{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px;}
-.ha-check{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text);
-  padding:5px 8px;border:1px solid var(--border);border-radius:5px;cursor:pointer;
-  transition:all .15s;}
-.ha-check:hover{border-color:var(--sky);background:rgba(55,138,221,0.05);}
-.ha-check input{accent-color:var(--teal);}
-.ha-check.checked{border-color:var(--teal);background:rgba(29,158,117,0.06);}
-
-.section-divider{
-  font-family:var(--mono);font-size:9px;letter-spacing:.12em;
+.form-section{margin-bottom:20px;}
+.form-section-label{
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--muted);
-  border-bottom:1px solid var(--border);padding-bottom:6px;margin:20px 0 14px;
+  border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px;
 }
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;font-weight:600;color:var(--muted);
+  display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.req{color:var(--coral);}
+input[type=text],input[type=date],select,textarea{
+  width:100%;border:1px solid rgba(3,32,60,0.15);border-radius:7px;
+  padding:8px 11px;font-size:13px;font-family:var(--sans);
+  color:var(--text);background:#fff;outline:none;transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--sky);}
+textarea{resize:vertical;min-height:60px;line-height:1.5;}
+select{appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;}
+
+.checkbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.cb-item{display:flex;align-items:center;gap:7px;
+  font-size:12px;cursor:pointer;padding:5px 8px;
+  border:1px solid var(--border);border-radius:5px;
+  transition:all .12s;color:var(--text);}
+.cb-item:hover{border-color:var(--sky);}
+.cb-item input{accent-color:var(--teal);width:14px;height:14px;}
+.cb-item.checked{border-color:var(--teal);background:rgba(29,158,117,0.06);}
+
+.ha-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.ha-item{display:flex;align-items:center;gap:6px;
+  font-size:11.5px;cursor:pointer;padding:5px 8px;
+  border:1px solid var(--border);border-radius:5px;
+  transition:all .12s;color:var(--text);}
+.ha-item:hover{border-color:var(--sky);}
+.ha-item input{accent-color:var(--teal);width:13px;height:13px;}
+.ha-item.checked{border-color:var(--teal);background:rgba(29,158,117,0.06);color:var(--tealdk);}
 
 .run-btn{
   width:100%;background:var(--navy2);color:var(--skylt);
   border:none;border-radius:8px;padding:13px;
   font-size:14px;font-weight:500;font-family:var(--sans);
-  cursor:pointer;margin-top:20px;transition:background .2s;
+  cursor:pointer;transition:all .2s;
   display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:4px;
 }
-.run-btn:hover{background:var(--blue);}
+.run-btn:hover:not(:disabled){background:var(--blue);}
 .run-btn:disabled{opacity:.5;cursor:not-allowed;}
 
-/* ── AGENT STREAM PANEL ── */
-.agent-stream-panel{
-  flex:1;display:flex;flex-direction:column;overflow:hidden;
+.demo-btn{
+  width:100%;background:transparent;color:var(--muted);
+  border:1px solid var(--border);border-radius:8px;padding:9px;
+  font-size:12px;font-family:var(--sans);cursor:pointer;
+  transition:all .15s;margin-top:8px;
 }
-.stream-header{
-  padding:16px 24px;background:#fff;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:12px;flex-shrink:0;
-}
-.stream-header h3{font-size:14px;font-weight:600;color:var(--navy);}
-.pipeline-steps{display:flex;gap:6px;margin-left:auto;}
-.pipeline-step{
-  font-family:var(--mono);font-size:9px;letter-spacing:.06em;
-  padding:3px 9px;border-radius:12px;
-  background:rgba(3,32,60,0.06);color:var(--muted);
-  border:1px solid transparent;transition:all .3s;
-}
-.pipeline-step.running{background:rgba(55,138,221,0.15);color:var(--sky);
-  border-color:rgba(55,138,221,0.3);animation:pulse .8s infinite alternate;}
-.pipeline-step.done{background:rgba(29,158,117,0.15);color:var(--teal);
-  border-color:rgba(29,158,117,0.25);}
-@keyframes pulse{from{opacity:.7}to{opacity:1}}
+.demo-btn:hover{background:var(--cream);border-color:rgba(3,32,60,0.2);}
 
-.stream-body{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;}
+/* ── RESULTS PANEL ── */
+.results-panel{display:flex;flex-direction:column;gap:20px;}
 
-/* agent message cards */
-.agent-msg{
-  background:#fff;border-radius:10px;border:1px solid var(--border);
-  overflow:hidden;animation:slideIn .3s ease;
+.empty-state{
+  background:#fff;border-radius:14px;border:1px solid var(--border);
+  padding:60px 40px;text-align:center;
+  box-shadow:0 2px 20px rgba(3,32,60,0.04);
 }
-@keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.agent-msg-header{
-  padding:10px 14px;display:flex;align-items:center;gap:10px;
-  border-bottom:1px solid rgba(3,32,60,0.06);
-  background:rgba(3,32,60,0.02);
-}
-.agent-badge{
-  font-family:var(--mono);font-size:9px;letter-spacing:.1em;
-  padding:2px 8px;border-radius:10px;text-transform:uppercase;
-  font-weight:500;
-}
-.badge-intake{background:#E6F1FB;color:#185FA5;}
-.badge-classifier{background:#EEEDFE;color:#3C3489;}
-.badge-geography{background:#EAF3DE;color:#3B6D11;}
-.badge-expectedness{background:#FAEEDA;color:#854F0B;}
-.badge-obligation{background:#FAECE7;color:#993C1D;}
-.badge-timeline{background:#E1F5EE;color:#0F6E56;}
-.badge-narrative{background:#FBEAF0;color:#72243E;}
-.badge-output{background:#042C53;color:#B5D4F4;}
+.empty-icon{font-size:48px;opacity:.15;margin-bottom:16px;}
+.empty-title{font-family:var(--serif);font-size:22px;color:var(--navy);margin-bottom:8px;}
+.empty-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:320px;margin:0 auto;}
 
-.agent-msg-body{padding:14px;}
-.agent-msg-body p{font-size:13px;line-height:1.65;color:var(--text);}
-.agent-msg-body .thinking{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px;}
+/* ── RESULT CARDS ── */
+.result-card{
+  background:#fff;border-radius:14px;border:1px solid var(--border);
+  overflow:hidden;box-shadow:0 2px 20px rgba(3,32,60,0.04);
+  animation:slideIn .4s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 
-/* obligation table inside agent msg */
-.ob-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:10px;}
+.rc-header{
+  padding:14px 20px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.rc-icon{width:32px;height:32px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.rc-title{font-size:14px;font-weight:600;color:var(--navy);}
+.rc-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.rc-badge{margin-left:auto;font-family:var(--mono);font-size:9px;
+  padding:3px 9px;border-radius:10px;font-weight:500;}
+
+/* SUSAR alert card */
+.susar-card{
+  background:var(--navy);border-radius:14px;border:2px solid #D85A30;
+  padding:20px 24px;
+  animation:slideIn .3s ease;
+}
+.susar-card h3{font-family:var(--serif);font-size:20px;color:var(--white);margin-bottom:8px;}
+.susar-card p{font-size:13px;color:rgba(181,212,244,0.75);line-height:1.65;}
+.susar-meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
+.susar-meta-item{font-family:var(--mono);font-size:10px;letter-spacing:.06em;}
+.susar-meta-item .k{color:rgba(181,212,244,0.4);text-transform:uppercase;display:block;margin-bottom:2px;}
+.susar-meta-item .v{color:var(--teallt);}
+.susar-meta-item .v.alert{color:#F0997B;}
+
+/* obligation table */
+.ob-wrap{overflow-x:auto;}
+.ob-table{width:100%;border-collapse:collapse;font-size:12px;}
 .ob-table th{
-  text-align:left;padding:7px 10px;
-  background:rgba(3,32,60,0.04);font-size:10px;
-  text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
-  border-bottom:1px solid var(--border);font-family:var(--mono);font-weight:500;
-}
-.ob-table td{padding:8px 10px;border-bottom:1px solid rgba(3,32,60,0.05);color:var(--text);vertical-align:middle;}
-.ob-table tr:last-child td{border-bottom:none;}
-.ob-table tr:hover td{background:rgba(55,138,221,0.03);}
-.tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;font-family:var(--mono);}
-.tag-7{background:#FCEBEB;color:#A32D2D;}
-.tag-15{background:#FAEEDA;color:#854F0B;}
-.tag-30{background:#E6F1FB;color:#185FA5;}
-.tag-90{background:#EAF3DE;color:#3B6D11;}
-.tag-susar{background:#FAECE7;color:#993C1D;border:1px solid rgba(208,90,48,.3);}
-.tag-dom{background:#EAF3DE;color:#3B6D11;}
-.tag-for{background:#EEEDFE;color:#3C3489;}
-.tag-ok{background:#E1F5EE;color:#085041;}
-.tag-risk{background:#FAEEDA;color:#854F0B;}
-.tag-over{background:#FCEBEB;color:#A32D2D;}
-
-/* typing indicator */
-.typing-row{display:flex;align-items:center;gap:10px;padding:10px 0;}
-.typing-dots{display:flex;gap:4px;}
-.typing-dots span{
-  width:5px;height:5px;border-radius:50%;background:var(--gray);
-  animation:tdot 1.2s infinite;
-}
-.typing-dots span:nth-child(2){animation-delay:.2s;}
-.typing-dots span:nth-child(3){animation-delay:.4s;}
-@keyframes tdot{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
-.typing-label{font-size:12px;color:var(--muted);font-family:var(--mono);}
-
-/* narrative block */
-.narrative-block{
-  background:rgba(3,32,60,0.03);border-radius:8px;
-  padding:14px;border-left:3px solid var(--navy2);
-  font-size:12.5px;line-height:1.8;color:var(--text);
-  margin-top:10px;
-}
-
-/* xml block */
-.xml-block{
-  background:#0D1B2A;border-radius:8px;padding:14px;
-  font-family:var(--mono);font-size:11px;color:#A8C7E8;
-  line-height:1.7;overflow-x:auto;margin-top:10px;
-}
-.xml-kw{color:#5DCAA5;} .xml-val{color:#FAC775;} .xml-cm{color:#444;}
-
-/* timeline cards */
-.timeline-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
-.timeline-card{
-  padding:12px;border-radius:8px;border:1px solid var(--border);background:#fff;
-}
-.tl-ha{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:4px;}
-.tl-report{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:6px;}
-.tl-due{font-size:13px;font-weight:500;color:var(--text);}
-.tl-days{font-size:11px;margin-top:4px;}
-.tl-days.ok{color:var(--teal);}
-.tl-days.risk{color:var(--amber);}
-.tl-days.over{color:var(--red);}
-
-/* ── DASHBOARD VIEW ── */
-.dashboard{overflow-y:auto;padding:28px;}
-.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
-.metric-card{background:#fff;border-radius:10px;border:1px solid var(--border);padding:18px 20px;}
-.metric-val{font-family:var(--serif);font-size:32px;color:var(--navy);line-height:1;}
-.metric-label{font-size:11px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);}
-.metric-sub{font-size:12px;color:var(--teal);margin-top:4px;font-weight:500;}
-
-.cases-table-wrap{background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;}
-.cases-table-header{padding:14px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;}
-.cases-table-header h3{font-size:14px;font-weight:600;color:var(--navy);}
-.cases-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-.cases-table th{text-align:left;padding:10px 16px;
+  text-align:left;padding:9px 14px;
   font-size:10px;text-transform:uppercase;letter-spacing:.07em;
   color:var(--muted);border-bottom:1px solid var(--border);
-  background:rgba(3,32,60,0.02);font-family:var(--mono);font-weight:500;}
-.cases-table td{padding:11px 16px;border-bottom:1px solid rgba(3,32,60,0.05);color:var(--text);}
-.cases-table tr:last-child td{border-bottom:none;}
-.cases-table tr:hover td{background:rgba(55,138,221,0.03);cursor:pointer;}
+  background:rgba(3,32,60,0.02);font-family:var(--mono);font-weight:500;white-space:nowrap;
+}
+.ob-table td{
+  padding:10px 14px;border-bottom:1px solid rgba(3,32,60,0.05);
+  color:var(--text);vertical-align:middle;
+}
+.ob-table tr:last-child td{border-bottom:none;}
+.ob-table tr:hover td{background:rgba(55,138,221,0.03);}
+.ob-table tr.overdue td{background:rgba(163,45,45,0.03);}
+.ob-table tr.periodic td{background:rgba(29,158,117,0.02);}
 
-/* ── API KEY MODAL ── */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(3,32,60,0.7);
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;
+  font-size:10px;font-weight:600;font-family:var(--mono);white-space:nowrap;}
+.t7{background:#FCEBEB;color:#A32D2D;}
+.t15{background:#FAEEDA;color:#854F0B;}
+.t30{background:#E6F1FB;color:#185FA5;}
+.t90{background:#EAF3DE;color:#3B6D11;}
+.tper{background:#EEEDFE;color:#3C3489;}
+.tdom{background:#EAF3DE;color:#3B6D11;}
+.tfor{background:#EEEDFE;color:#3C3489;}
+.tover{background:#FCEBEB;color:#A32D2D;border:1px solid rgba(227,75,74,0.3);}
+.tok{background:#E1F5EE;color:#085041;}
+.trisk{background:#FAEEDA;color:#854F0B;}
+.tsusar{background:#FAECE7;color:#993C1D;border:1px solid rgba(208,90,48,.3);}
+
+/* narrative */
+.narrative-body{
+  padding:20px;font-size:13px;line-height:1.85;color:var(--text);
+  border-left:3px solid var(--navy2);margin:0;
+  background:rgba(3,32,60,0.02);
+}
+.narrative-body .placeholder{color:var(--coral);font-style:italic;}
+
+/* gap analysis */
+.gap-list{padding:16px 20px;display:flex;flex-direction:column;gap:0;}
+.gap-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(3,32,60,0.05);align-items:flex-start;}
+.gap-row:last-child{border-bottom:none;}
+.gap-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+.gap-dot.red{background:#E24B4A;}
+.gap-dot.amber{background:#EF9F27;}
+.gap-dot.green{background:#1D9E75;}
+.gap-text{font-size:12.5px;color:var(--text);line-height:1.5;}
+.gap-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* loading */
+.loading-card{
+  background:#fff;border-radius:14px;border:1px solid var(--border);
+  padding:40px;text-align:center;
+  box-shadow:0 2px 20px rgba(3,32,60,0.04);
+}
+.pipeline-steps{display:flex;justify-content:center;gap:8px;margin:20px 0;flex-wrap:wrap;}
+.ps{font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  padding:4px 10px;border-radius:12px;transition:all .3s;
+  background:rgba(3,32,60,0.05);color:var(--muted);}
+.ps.running{background:rgba(55,138,221,0.15);color:var(--sky);
+  animation:pulse .8s infinite alternate;}
+.ps.done{background:rgba(29,158,117,0.15);color:var(--teal);}
+@keyframes pulse{from{opacity:.6}to{opacity:1}}
+.loading-msg{font-size:13px;color:var(--muted);margin-top:8px;}
+
+/* modal */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(3,32,60,0.65);
   display:flex;align-items:center;justify-content:center;z-index:200;
   backdrop-filter:blur(4px);
 }
-.modal-overlay.hidden{display:none;}
-.modal-box{
-  background:#fff;border-radius:14px;padding:36px;width:440px;
-  box-shadow:0 20px 60px rgba(3,32,60,0.3);
-}
-.modal-box h2{font-family:var(--serif);font-size:26px;color:var(--navy);margin-bottom:8px;}
-.modal-box p{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:24px;}
-.modal-box .form-input{margin-bottom:12px;}
-.modal-note{font-size:11px;color:var(--muted);margin-bottom:20px;
-  background:rgba(55,138,221,0.06);border-radius:6px;padding:10px 12px;
-  border-left:3px solid var(--sky);}
-.modal-actions{display:flex;gap:10px;}
-.modal-btn{flex:1;padding:11px;border-radius:8px;border:none;font-size:13px;
-  font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;}
+.modal-bg.hidden{display:none;}
+.modal{background:#fff;border-radius:14px;padding:32px;width:420px;}
+.modal h2{font-family:var(--serif);font-size:24px;color:var(--navy);margin-bottom:8px;}
+.modal p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+.modal input{margin-bottom:10px;}
+.modal-note{font-size:11px;color:var(--muted);background:rgba(55,138,221,0.07);
+  padding:9px 12px;border-radius:6px;border-left:3px solid var(--sky);margin-bottom:16px;line-height:1.6;}
+.modal-btns{display:flex;gap:8px;}
+.modal-btn{flex:1;padding:10px;border-radius:8px;border:none;
+  font-size:13px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;}
 .modal-btn.primary{background:var(--navy2);color:var(--skylt);}
 .modal-btn.primary:hover{background:var(--blue);}
 .modal-btn.secondary{background:var(--cream);color:var(--muted);}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:5px;height:5px;}
+/* export bar */
+.export-bar{
+  display:flex;gap:8px;padding:12px 20px;
+  border-top:1px solid var(--border);background:rgba(3,32,60,0.02);
+  flex-wrap:wrap;
+}
+.exp-btn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-size:11.5px;font-family:var(--sans);
+  padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .15s;
+}
+.exp-btn:hover{background:var(--cream);border-color:rgba(3,32,60,0.2);}
+.exp-btn.primary{background:var(--navy2);color:var(--skylt);border-color:var(--navy2);}
+.exp-btn.primary:hover{background:var(--blue);}
+
+::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:rgba(3,32,60,0.15);border-radius:10px;}
+::-webkit-scrollbar-thumb{background:rgba(3,32,60,0.12);border-radius:10px;}
 </style>
 </head>
 <body>
 
-<!-- API KEY MODAL -->
-<div class="modal-overlay" id="apiModal">
-  <div class="modal-box">
+<!-- API MODAL -->
+<div class="modal-bg" id="apiModal">
+  <div class="modal">
     <h2>Connect Claude API</h2>
-    <p>RegIntel uses the Claude API to power its 8-agent PV intelligence pipeline. Enter your Anthropic API key to activate live analysis.</p>
-    <div class="modal-note">Your key is stored only in browser memory for this session. It is never sent to any server other than Anthropic's API directly.</div>
-    <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-ant-api03-..." />
-    <div class="modal-actions">
-      <button class="modal-btn secondary" onclick="skipApiKey()">Use Demo Mode</button>
-      <button class="modal-btn primary" onclick="saveApiKey()">Connect →</button>
+    <p>RegIntel uses Claude AI to resolve global PV reporting obligations. Enter your Anthropic API key for live analysis, or use Demo Mode with realistic pre-computed results.</p>
+    <div class="modal-note">Your key is stored in browser memory only for this session. It is sent only to Anthropic's API — never to any other server.</div>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…"/>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="useDemoMode()">Use Demo Mode</button>
+      <button class="modal-btn primary" onclick="connectAPI()">Connect Live API →</button>
     </div>
   </div>
 </div>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="topbar-logo">Praxigent</div>
-  <div class="topbar-product">RegIntel</div>
-  <div class="topbar-case" id="topbarCase">No active case</div>
-  <div class="topbar-right">
-    <div class="status-dot" id="statusDot"></div>
-    <div class="status-label" id="statusLabel">DEMO MODE</div>
-    <button class="topbar-btn" onclick="showApiModal()">⚙ API Key</button>
-    <button class="topbar-btn primary" onclick="switchView('intake'); resetForm()">+ New Case</button>
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">Praxigent</div>
+  <div class="header-tag">RegIntel · Global AE Obligation Resolver</div>
+  <div class="header-right">
+    <div class="header-badge" id="modeBadge">DEMO MODE</div>
+    <button class="api-btn" onclick="showModal()">⚙ API Key</button>
   </div>
 </div>
 
-<!-- APP BODY -->
-<div class="app-body">
+<!-- MAIN -->
+<div class="main">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div style="padding:14px 14px 6px;">
-      <button class="new-case-btn" onclick="switchView('intake'); resetForm()">＋ New Case Analysis</button>
+  <!-- FORM -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <h2>AE Case Details</h2>
+      <p>Enter any adverse event — RegIntel resolves all global reporting obligations instantly</p>
     </div>
+    <div class="form-body">
 
-    <div class="sidebar-section">
-      <div class="sidebar-label">Workspace</div>
-      <div class="sidebar-item active" id="nav-dashboard" onclick="switchView('dashboard')">
-        <span class="icon">◫</span> Dashboard
-      </div>
-      <div class="sidebar-item" id="nav-intake" onclick="switchView('intake')">
-        <span class="icon">✦</span> Case Intake
-      </div>
-      <div class="sidebar-item" id="nav-matrix" onclick="switchView('matrix')">
-        <span class="icon">⊞</span> Obligation Matrix
-      </div>
-      <div class="sidebar-item" id="nav-calendar" onclick="switchView('calendar')">
-        <span class="icon">◷</span> Submission Calendar
-      </div>
-    </div>
-
-    <hr class="sidebar-divider"/>
-
-    <div class="sidebar-section">
-      <div class="sidebar-label">Recent Cases</div>
-      <div class="sidebar-item" onclick="loadDemo('PRX-2025-00142')">
-        <span class="icon">⚠</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:11.5px;color:var(--skylt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">PRX-2025-00142</div>
-          <div style="font-size:10px;color:rgba(181,212,244,.4);">Hepatotoxicity · SUSAR</div>
+      <div class="form-section">
+        <div class="form-section-label">Product</div>
+        <div class="form-group">
+          <label class="form-label">Product / Drug Name <span class="req">*</span></label>
+          <input type="text" id="f-product" placeholder="e.g. VS-6766 (Avutometinib), Pembrolizumab"/>
         </div>
-        <span class="badge">7d</span>
-      </div>
-      <div class="sidebar-item" onclick="loadDemo('PRX-2025-00139')">
-        <span class="icon">◈</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:11.5px;color:var(--skylt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">PRX-2025-00139</div>
-          <div style="font-size:10px;color:rgba(181,212,244,.4);">Anaphylaxis · MKT</div>
+        <div class="form-group">
+          <label class="form-label">Product Type <span class="req">*</span></label>
+          <select id="f-type">
+            <option value="">— Select —</option>
+            <option value="drug_small_molecule">Small molecule drug</option>
+            <option value="biologic">Biologic / mAb / Protein</option>
+            <option value="vaccine">Vaccine</option>
+            <option value="gene_therapy">Gene / Cell therapy</option>
+            <option value="medical_device">Medical device</option>
+            <option value="combination_product">Combination product</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">IND / NDA / MAA / EudraCT / NCT</label>
+          <input type="text" id="f-reg" placeholder="e.g. IND 153742 / NCT05074810"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Indication / Therapeutic area</label>
+          <input type="text" id="f-indication" placeholder="e.g. KRAS G12C NSCLC"/>
         </div>
       </div>
-      <div class="sidebar-item" onclick="loadDemo('PRX-2025-00131')">
-        <span class="icon">◈</span>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:11.5px;color:var(--skylt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">PRX-2025-00131</div>
-          <div style="font-size:10px;color:rgba(181,212,244,.4);">Cardiac arrest · Fatal</div>
+
+      <div class="form-section">
+        <div class="form-section-label">Development status</div>
+        <div class="form-group">
+          <label class="form-label">Phase / Status <span class="req">*</span></label>
+          <select id="f-phase">
+            <option value="">— Select —</option>
+            <option value="phase_1">Phase 1 (First in human)</option>
+            <option value="phase_2">Phase 2</option>
+            <option value="phase_3">Phase 3 (Pivotal)</option>
+            <option value="marketed">Phase 4 / Post-marketing</option>
+            <option value="compassionate">Compassionate use / Named patient</option>
+            <option value="post_approval_ct">Post-approval CT (PASS/PAES)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sponsor country</label>
+          <select id="f-sponsor">
+            <option value="USA">USA</option>
+            <option value="UK">UK</option>
+            <option value="Germany">Germany</option>
+            <option value="Japan">Japan</option>
+            <option value="Switzerland">Switzerland</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Trial / Marketing countries</label>
+          <input type="text" id="f-countries" placeholder="e.g. USA, UK, Germany, Japan, Canada"/>
         </div>
       </div>
-    </div>
 
-    <hr class="sidebar-divider"/>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Tools</div>
-      <div class="sidebar-item" onclick="switchView('haref')">
-        <span class="icon">🌐</span> HA Reference
+      <div class="form-section">
+        <div class="form-section-label">Adverse Event</div>
+        <div class="form-group">
+          <label class="form-label">AE verbatim term <span class="req">*</span></label>
+          <textarea id="f-ae" placeholder="Describe the adverse event exactly as reported, e.g. 'acute liver failure with jaundice and elevated transaminases'"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Day 0 — first sponsor awareness date <span class="req">*</span></label>
+          <input type="date" id="f-day0"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seriousness criteria met <span class="req">*</span></label>
+          <div class="checkbox-grid">
+            <label class="cb-item" id="cb-fatal"><input type="checkbox" value="fatal" onchange="toggleCB(this)"/> Fatal (death)</label>
+            <label class="cb-item" id="cb-lt"><input type="checkbox" value="life_threatening" onchange="toggleCB(this)"/> Life-threatening</label>
+            <label class="cb-item" id="cb-hosp"><input type="checkbox" value="hospitalization" onchange="toggleCB(this)"/> Hospitalization</label>
+            <label class="cb-item" id="cb-disab"><input type="checkbox" value="disability" onchange="toggleCB(this)"/> Disability</label>
+            <label class="cb-item" id="cb-ca"><input type="checkbox" value="congenital" onchange="toggleCB(this)"/> Congenital anomaly</label>
+            <label class="cb-item" id="cb-ns"><input type="checkbox" value="non_serious" onchange="toggleCB(this)"/> Non-serious</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Causality (sponsor assessment) <span class="req">*</span></label>
+          <select id="f-causality">
+            <option value="related">Definitely / Probably related</option>
+            <option value="possibly">Possibly related</option>
+            <option value="unlikely">Unlikely related</option>
+            <option value="unrelated">Unrelated</option>
+            <option value="unassessable">Not assessable</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expectedness vs. RSI (IB / SmPC / USPI)</label>
+          <select id="f-expect">
+            <option value="unexpected">Unexpected — NOT listed in IB or labeling</option>
+            <option value="expected">Expected — listed in IB or labeling</option>
+            <option value="unknown">Unknown — RSI not available</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Patient country (where AE occurred)</label>
+          <input type="text" id="f-patient-country" placeholder="e.g. United States"/>
+        </div>
       </div>
-      <div class="sidebar-item" onclick="switchView('meddra')">
-        <span class="icon">🧬</span> MedDRA Lookup
-      </div>
-    </div>
 
-    <div style="padding:14px;margin-top:auto;">
-      <div style="font-family:var(--mono);font-size:9px;color:rgba(181,212,244,0.2);line-height:1.8;">
-        RegIntel v1.0<br/>
-        187 Health Authorities<br/>
-        ICH E2A · E2B R3 · E2C · E2D
+      <div class="form-section">
+        <div class="form-section-label">Health authorities in scope</div>
+        <div class="ha-grid" id="haGrid">
+          <label class="ha-item checked" id="ha-FDA"><input type="checkbox" value="FDA" checked onchange="toggleHA(this)"/> FDA (USA)</label>
+          <label class="ha-item checked" id="ha-EMA"><input type="checkbox" value="EMA" checked onchange="toggleHA(this)"/> EMA (EU)</label>
+          <label class="ha-item" id="ha-MHRA"><input type="checkbox" value="MHRA" onchange="toggleHA(this)"/> MHRA (UK)</label>
+          <label class="ha-item" id="ha-PMDA"><input type="checkbox" value="PMDA" onchange="toggleHA(this)"/> PMDA (Japan)</label>
+          <label class="ha-item" id="ha-HC"><input type="checkbox" value="HC" onchange="toggleHA(this)"/> Health Canada</label>
+          <label class="ha-item" id="ha-TGA"><input type="checkbox" value="TGA" onchange="toggleHA(this)"/> TGA (Australia)</label>
+          <label class="ha-item" id="ha-SWISSMEDIC"><input type="checkbox" value="SWISSMEDIC" onchange="toggleHA(this)"/> Swissmedic (CH)</label>
+          <label class="ha-item" id="ha-MFDS"><input type="checkbox" value="MFDS" onchange="toggleHA(this)"/> MFDS (Korea)</label>
+          <label class="ha-item" id="ha-ANVISA"><input type="checkbox" value="ANVISA" onchange="toggleHA(this)"/> ANVISA (Brazil)</label>
+          <label class="ha-item" id="ha-NMPA"><input type="checkbox" value="NMPA" onchange="toggleHA(this)"/> NMPA (China)</label>
+          <label class="ha-item" id="ha-CDSCO"><input type="checkbox" value="CDSCO" onchange="toggleHA(this)"/> CDSCO (India)</label>
+          <label class="ha-item" id="ha-SFDA"><input type="checkbox" value="SFDA" onchange="toggleHA(this)"/> SFDA (Saudi)</label>
+          <label class="ha-item" id="ha-MEDSAFE"><input type="checkbox" value="MEDSAFE" onchange="toggleHA(this)"/> Medsafe (NZ)</label>
+          <label class="ha-item" id="ha-COFEPRIS"><input type="checkbox" value="COFEPRIS" onchange="toggleHA(this)"/> COFEPRIS (Mexico)</label>
+          <label class="ha-item" id="ha-HSA"><input type="checkbox" value="HSA" onchange="toggleHA(this)"/> HSA (Singapore)</label>
+          <label class="ha-item" id="ha-WHO"><input type="checkbox" value="WHO" onchange="toggleHA(this)"/> WHO / VigiBase</label>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button onclick="selectAllHA(true)" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;cursor:pointer;color:var(--muted);">Select all</button>
+          <button onclick="selectAllHA(false)" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;cursor:pointer;color:var(--muted);">Clear all</button>
+        </div>
       </div>
+
+      <button class="run-btn" id="runBtn" onclick="resolve()">
+        ▶ Resolve All Obligations
+      </button>
+      <button class="demo-btn" onclick="loadDemo()">Load VS-6766 demo case</button>
     </div>
   </div>
 
-  <!-- WORKSPACE -->
-  <div class="workspace">
-
-    <!-- ── DASHBOARD ── -->
-    <div class="view active" id="view-dashboard">
-      <div class="dashboard">
-        <div style="margin-bottom:20px;">
-          <div style="font-family:var(--serif);font-size:24px;color:var(--navy);">Good morning, Pramod.</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:4px;">You have <strong style="color:var(--red);">2 cases overdue</strong> and <strong style="color:var(--amber);">1 due within 48 hours.</strong></div>
-        </div>
-
-        <div class="dash-grid">
-          <div class="metric-card">
-            <div class="metric-val">3</div>
-            <div class="metric-label">Active Cases</div>
-            <div class="metric-sub">↑ 1 this week</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-val" style="color:var(--red);">2</div>
-            <div class="metric-label">Overdue Reports</div>
-            <div class="metric-sub" style="color:var(--red);">Needs immediate action</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-val" style="color:var(--amber);">1</div>
-            <div class="metric-label">Due in 48h</div>
-            <div class="metric-sub" style="color:var(--amber);">PMDA 15-day</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-val">5</div>
-            <div class="metric-label">HAs In Scope</div>
-            <div class="metric-sub">FDA · EMA · PMDA · MHRA · HC</div>
-          </div>
-        </div>
-
-        <div class="cases-table-wrap">
-          <div class="cases-table-header">
-            <h3>Active Case Obligation Tracker</h3>
-            <button class="topbar-btn" onclick="switchView('intake')">+ New Case</button>
-          </div>
-          <table class="cases-table">
-            <thead><tr>
-              <th>Case ID</th><th>Product</th><th>AE / PT</th><th>Seriousness</th>
-              <th>HA</th><th>Report Type</th><th>Due Date</th><th>Status</th>
-            </tr></thead>
-            <tbody>
-              <tr onclick="loadDemo('PRX-2025-00142')">
-                <td><span style="font-family:var(--mono);font-size:11px;">PRX-2025-00142</span></td>
-                <td>VS-6766 (Avutometinib)</td>
-                <td>Drug-induced liver injury</td>
-                <td><span class="tag tag-susar">SUSAR · Fatal</span></td>
-                <td>FDA</td><td>IND Safety Report</td>
-                <td style="font-weight:600;color:var(--red);">2025-06-04 ⚠</td>
-                <td><span class="tag tag-over">OVERDUE</span></td>
-              </tr>
-              <tr onclick="loadDemo('PRX-2025-00142')">
-                <td><span style="font-family:var(--mono);font-size:11px;">PRX-2025-00142</span></td>
-                <td>VS-6766 (Avutometinib)</td>
-                <td>Drug-induced liver injury</td>
-                <td><span class="tag tag-susar">SUSAR · Fatal</span></td>
-                <td>EMA/CTIS</td><td>SUSAR</td>
-                <td style="font-weight:600;color:var(--red);">2025-06-04 ⚠</td>
-                <td><span class="tag tag-over">OVERDUE</span></td>
-              </tr>
-              <tr onclick="loadDemo('PRX-2025-00139')">
-                <td><span style="font-family:var(--mono);font-size:11px;">PRX-2025-00139</span></td>
-                <td>VS-7375</td>
-                <td>Anaphylactic reaction</td>
-                <td><span class="tag tag-15">Serious · MKT</span></td>
-                <td>PMDA</td><td>ICSR 15-day</td>
-                <td style="font-weight:600;color:var(--amber);">2025-06-08</td>
-                <td><span class="tag tag-risk">AT RISK</span></td>
-              </tr>
-              <tr onclick="loadDemo('PRX-2025-00131')">
-                <td><span style="font-family:var(--mono);font-size:11px;">PRX-2025-00131</span></td>
-                <td>VS-6766 (Avutometinib)</td>
-                <td>Cardiac arrest</td>
-                <td><span class="tag tag-susar">SUSAR · Fatal</span></td>
-                <td>Health Canada</td><td>CT SAE 7-day</td>
-                <td style="font-weight:600;color:var(--teal);">2025-06-12</td>
-                <td><span class="tag tag-ok">ON TRACK</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <!-- RESULTS -->
+  <div class="results-panel" id="resultsPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">⚕</div>
+      <div class="empty-title">Enter an AE to begin</div>
+      <div class="empty-sub">Fill in the case details on the left. RegIntel will resolve every global reporting obligation — timelines, formats, citations, narratives — across all selected Health Authorities.</div>
     </div>
+  </div>
 
-    <!-- ── CASE INTAKE + AGENT STREAM ── -->
-    <div class="view" id="view-intake">
-      <div class="intake-shell">
-
-        <!-- LEFT: FORM -->
-        <div class="intake-form-panel">
-          <h2>New Case Analysis</h2>
-          <div class="sub">Complete the case details. The agent pipeline will resolve all global reporting obligations.</div>
-
-          <div class="section-divider">Product Identity</div>
-          <div class="form-group">
-            <label class="form-label">Product Name <span class="req">*</span></label>
-            <input class="form-input" id="f-product" placeholder="e.g. VS-6766 (Avutometinib)" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Product Type <span class="req">*</span></label>
-            <select class="form-select" id="f-type">
-              <option value="">— Select —</option>
-              <option value="drug_small_molecule">Drug (Small Molecule)</option>
-              <option value="biologic">Biologic / mAb</option>
-              <option value="vaccine">Vaccine</option>
-              <option value="medical_device">Medical Device</option>
-              <option value="combination_product">Combination Product</option>
-              <option value="gene_therapy">Gene / Cell Therapy</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Development Phase <span class="req">*</span></label>
-            <select class="form-select" id="f-phase">
-              <option value="">— Select —</option>
-              <option value="phase_1">Phase 1 (CT)</option>
-              <option value="phase_2">Phase 2 (CT)</option>
-              <option value="phase_3">Phase 3 (CT)</option>
-              <option value="phase_4_marketed">Phase 4 / Marketed</option>
-              <option value="post_approval_ct">Post-Approval CT</option>
-              <option value="compassionate_use">Compassionate Use / Named Patient</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">IND / EudraCT / NCT Number</label>
-            <input class="form-input" id="f-ind" placeholder="e.g. IND 123456 / NCT05555555" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Indication</label>
-            <input class="form-input" id="f-indication" placeholder="e.g. KRAS G12C NSCLC" />
-          </div>
-
-          <div class="section-divider">Adverse Event</div>
-          <div class="form-group">
-            <label class="form-label">AE Verbatim Term <span class="req">*</span></label>
-            <input class="form-input" id="f-ae" placeholder="e.g. elevated liver enzymes with jaundice" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Day 0 (First Awareness Date) <span class="req">*</span></label>
-            <input class="form-input" id="f-day0" type="date" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Seriousness Criteria <span class="req">*</span></label>
-            <div class="checkbox-group">
-              <label class="checkbox-item"><input type="checkbox" id="s-fatal" value="fatal"/> Fatal (Death)</label>
-              <label class="checkbox-item"><input type="checkbox" id="s-lt" value="life_threatening"/> Life-threatening</label>
-              <label class="checkbox-item"><input type="checkbox" id="s-hosp" value="hospitalization"/> Hospitalization</label>
-              <label class="checkbox-item"><input type="checkbox" id="s-disab" value="disability"/> Disability / Incapacity</label>
-              <label class="checkbox-item"><input type="checkbox" id="s-ca" value="congenital_anomaly"/> Congenital Anomaly</label>
-              <label class="checkbox-item"><input type="checkbox" id="s-ns" value="non_serious"/> Non-serious</label>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Causality (Sponsor Assessment)</label>
-            <select class="form-select" id="f-causality">
-              <option value="related">Related / Definitely related</option>
-              <option value="possibly_related">Possibly related</option>
-              <option value="unlikely_related">Unlikely related</option>
-              <option value="unrelated">Unrelated</option>
-              <option value="not_assessable">Not assessable</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Expectedness vs. RSI</label>
-            <select class="form-select" id="f-expect">
-              <option value="unexpected_unlisted">Unexpected / Not listed in IB or labeling</option>
-              <option value="expected_listed">Expected / Listed in IB or labeling</option>
-              <option value="not_determinable">Not determinable (no RSI available)</option>
-            </select>
-          </div>
-
-          <div class="section-divider">Health Authority Scope</div>
-          <div class="form-group">
-            <label class="form-label">Select HAs <span class="req">*</span></label>
-            <div class="ha-checkboxes" id="haCheckboxes">
-              <label class="ha-check"><input type="checkbox" value="FDA" checked onchange="toggleHA(this)"/> FDA (USA)</label>
-              <label class="ha-check"><input type="checkbox" value="EMA" checked onchange="toggleHA(this)"/> EMA (EU)</label>
-              <label class="ha-check"><input type="checkbox" value="MHRA" onchange="toggleHA(this)"/> MHRA (UK)</label>
-              <label class="ha-check"><input type="checkbox" value="PMDA" onchange="toggleHA(this)"/> PMDA (Japan)</label>
-              <label class="ha-check"><input type="checkbox" value="HC" onchange="toggleHA(this)"/> Health Canada</label>
-              <label class="ha-check"><input type="checkbox" value="TGA" onchange="toggleHA(this)"/> TGA (Australia)</label>
-              <label class="ha-check"><input type="checkbox" value="ANVISA" onchange="toggleHA(this)"/> ANVISA (Brazil)</label>
-              <label class="ha-check"><input type="checkbox" value="NMPA" onchange="toggleHA(this)"/> NMPA (China)</label>
-              <label class="ha-check"><input type="checkbox" value="CDSCO" onchange="toggleHA(this)"/> CDSCO (India)</label>
-              <label class="ha-check"><input type="checkbox" value="SFDA" onchange="toggleHA(this)"/> SFDA (Saudi)</label>
-              <label class="ha-check"><input type="checkbox" value="SWISSMEDIC" onchange="toggleHA(this)"/> Swissmedic</label>
-              <label class="ha-check"><input type="checkbox" value="MFDS" onchange="toggleHA(this)"/> MFDS (Korea)</label>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Trial Countries (for domestic/foreign logic)</label>
-            <input class="form-input" id="f-countries" placeholder="e.g. USA, Germany, Japan, Canada" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Sponsor Country</label>
-            <input class="form-input" id="f-sponsor" placeholder="e.g. USA" value="USA"/>
-          </div>
-
-          <button class="run-btn" id="runBtn" onclick="runPipeline()">
-            <span>▶ Run Agent Pipeline</span>
-          </button>
-        </div>
-
-        <!-- RIGHT: AGENT STREAM -->
-        <div class="agent-stream-panel">
-          <div class="stream-header">
-            <h3 id="streamTitle">Ready to analyze</h3>
-            <div class="pipeline-steps">
-              <div class="pipeline-step" id="step-intake">INTAKE</div>
-              <div class="pipeline-step" id="step-classify">CLASSIFY</div>
-              <div class="pipeline-step" id="step-geo">GEO</div>
-              <div class="pipeline-step" id="step-expect">EXPECT</div>
-              <div class="pipeline-step" id="step-oblig">OBLIG</div>
-              <div class="pipeline-step" id="step-timeline">TIMELINE</div>
-              <div class="pipeline-step" id="step-narr">NARR</div>
-              <div class="pipeline-step" id="step-output">OUTPUT</div>
-            </div>
-          </div>
-          <div class="stream-body" id="streamBody">
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--muted);">
-              <div style="font-size:48px;opacity:.15;">⚕</div>
-              <div style="font-size:14px;font-weight:500;color:var(--navy);">Complete the form and run the pipeline</div>
-              <div style="font-size:12px;color:var(--muted);text-align:center;max-width:300px;line-height:1.6;">The 8-agent chain will analyze your case and resolve all global reporting obligations with regulatory citations.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── OBLIGATION MATRIX VIEW ── -->
-    <div class="view" id="view-matrix">
-      <div style="padding:24px;overflow-y:auto;flex:1;">
-        <div style="font-family:var(--serif);font-size:22px;color:var(--navy);margin-bottom:4px;">Obligation Matrix</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">Run a case analysis to populate this view.</div>
-        <div id="matrixContent" style="background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;">
-          <div style="padding:40px;text-align:center;color:var(--muted);">No case analyzed yet. Go to Case Intake to run a new analysis.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── CALENDAR VIEW ── -->
-    <div class="view" id="view-calendar">
-      <div style="padding:24px;overflow-y:auto;flex:1;">
-        <div style="font-family:var(--serif);font-size:22px;color:var(--navy);margin-bottom:20px;">Submission Calendar</div>
-        <div id="calendarContent" style="background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;">
-          <div style="padding:40px;text-align:center;color:var(--muted);">Run a case analysis to populate the submission calendar.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── HA REFERENCE ── -->
-    <div class="view" id="view-haref">
-      <div style="padding:24px;overflow-y:auto;flex:1;">
-        <div style="font-family:var(--serif);font-size:22px;color:var(--navy);margin-bottom:20px;">Health Authority Reference</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;" id="haRefGrid"></div>
-      </div>
-    </div>
-
-    <!-- ── MEDDRA LOOKUP ── -->
-    <div class="view" id="view-meddra">
-      <div style="padding:24px;overflow-y:auto;flex:1;max-width:700px;">
-        <div style="font-family:var(--serif);font-size:22px;color:var(--navy);margin-bottom:4px;">MedDRA Term Lookup</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">Enter a verbatim AE term and the AI will map it to the appropriate MedDRA PT/SOC.</div>
-        <div style="display:flex;gap:10px;margin-bottom:20px;">
-          <input class="form-input" id="meddraInput" placeholder="e.g. elevated liver enzymes with jaundice" style="flex:1;" onkeydown="if(event.key==='Enter')lookupMeddra()"/>
-          <button class="run-btn" style="width:auto;padding:0 20px;margin:0;" onclick="lookupMeddra()">Look up</button>
-        </div>
-        <div id="meddraResult"></div>
-      </div>
-    </div>
-
-  </div><!-- /workspace -->
-</div><!-- /app-body -->
+</div>
 
 <script>
 // ── STATE ──
 let apiKey = '';
 let demoMode = true;
-let currentCase = {};
-let analysisResults = {};
 
 // ── INIT ──
 window.addEventListener('load', () => {
-  showApiModal();
-  initHARef();
-  // set today as default day0
   document.getElementById('f-day0').valueAsDate = new Date();
-  // init checked ha styles
-  document.querySelectorAll('.ha-check input:checked').forEach(cb => {
-    cb.closest('.ha-check').classList.add('checked');
-  });
+  showModal();
 });
 
-function showApiModal() { document.getElementById('apiModal').classList.remove('hidden'); }
-function saveApiKey() {
+function showModal(){ document.getElementById('apiModal').classList.remove('hidden'); }
+function connectAPI(){
   const k = document.getElementById('apiKeyInput').value.trim();
-  if (!k.startsWith('sk-ant')) { alert('Please enter a valid Anthropic API key (starts with sk-ant-)'); return; }
-  apiKey = k;
-  demoMode = false;
-  document.getElementById('statusLabel').textContent = 'LIVE · CLAUDE API';
-  document.getElementById('statusDot').style.background = '#1D9E75';
+  if(!k.startsWith('sk-ant')){ alert('Enter a valid Anthropic API key (starts with sk-ant-)'); return; }
+  apiKey = k; demoMode = false;
+  document.getElementById('modeBadge').textContent = 'LIVE · CLAUDE API';
+  document.getElementById('modeBadge').style.background = 'rgba(29,158,117,0.25)';
   document.getElementById('apiModal').classList.add('hidden');
 }
-function skipApiKey() {
+function useDemoMode(){
   demoMode = true;
-  document.getElementById('statusLabel').textContent = 'DEMO MODE';
   document.getElementById('apiModal').classList.add('hidden');
 }
 
-// ── NAVIGATION ──
-function switchView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.sidebar-item[id^="nav-"]').forEach(i => i.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
-  const nav = document.getElementById('nav-'+name);
-  if(nav) nav.classList.add('active');
-}
-
-function toggleHA(cb) {
-  cb.closest('.ha-check').classList.toggle('checked', cb.checked);
-}
-
-function getSelectedHAs() {
-  return [...document.querySelectorAll('#haCheckboxes input:checked')].map(cb => cb.value);
-}
-function getSelectedSeriousness() {
-  return [...document.querySelectorAll('.checkbox-group input:checked')].map(cb => cb.value);
-}
-
-function resetForm() {
-  document.getElementById('streamBody').innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;color:var(--muted);">
-      <div style="font-size:48px;opacity:.15;">⚕</div>
-      <div style="font-size:14px;font-weight:500;color:var(--navy);">Complete the form and run the pipeline</div>
-    </div>`;
-  document.querySelectorAll('.pipeline-step').forEach(s => s.className = 'pipeline-step');
-  document.getElementById('streamTitle').textContent = 'Ready to analyze';
-}
-
-// ── PIPELINE ──
-async function runPipeline() {
-  const product = document.getElementById('f-product').value.trim();
-  const type = document.getElementById('f-type').value;
-  const phase = document.getElementById('f-phase').value;
-  const ae = document.getElementById('f-ae').value.trim();
-  const day0 = document.getElementById('f-day0').value;
-  const seriousness = getSelectedSeriousness();
-  const has = getSelectedHAs();
-
-  if(!product || !type || !phase || !ae || !seriousness.length || !has.length) {
-    alert('Please fill in all required fields and select at least one Health Authority.');
-    return;
+function toggleCB(cb){
+  cb.closest('.cb-item').classList.toggle('checked', cb.checked);
+  if(cb.value==='non_serious' && cb.checked){
+    ['fatal','lt','hosp','disab','ca'].forEach(id=>{
+      const el = document.getElementById('cb-'+id);
+      if(el){ el.querySelector('input').checked=false; el.classList.remove('checked'); }
+    });
+  } else if(cb.value!=='non_serious' && cb.checked){
+    const ns = document.getElementById('cb-ns');
+    if(ns){ ns.querySelector('input').checked=false; ns.classList.remove('checked'); }
   }
+}
+function toggleHA(cb){ cb.closest('.ha-item').classList.toggle('checked', cb.checked); }
+function selectAllHA(v){
+  document.querySelectorAll('#haGrid input').forEach(cb=>{
+    cb.checked=v; cb.closest('.ha-item').classList.toggle('checked',v);
+  });
+}
 
-  currentCase = { product, type, phase, ae, day0, seriousness,
+function getCase(){
+  return {
+    product: document.getElementById('f-product').value.trim(),
+    type: document.getElementById('f-type').value,
+    reg: document.getElementById('f-reg').value.trim(),
+    indication: document.getElementById('f-indication').value.trim(),
+    phase: document.getElementById('f-phase').value,
+    sponsor: document.getElementById('f-sponsor').value,
+    countries: document.getElementById('f-countries').value.trim(),
+    ae: document.getElementById('f-ae').value.trim(),
+    day0: document.getElementById('f-day0').value,
+    seriousness: [...document.querySelectorAll('.checkbox-grid input:checked')].map(c=>c.value),
     causality: document.getElementById('f-causality').value,
     expectedness: document.getElementById('f-expect').value,
-    has,
-    countries: document.getElementById('f-countries').value,
-    sponsor: document.getElementById('f-sponsor').value,
-    ind: document.getElementById('f-ind').value,
-    indication: document.getElementById('f-indication').value
+    patientCountry: document.getElementById('f-patient-country').value.trim(),
+    has: [...document.querySelectorAll('#haGrid input:checked')].map(c=>c.value)
   };
+}
 
-  document.getElementById('topbarCase').textContent = `${product} · ${ae.substring(0,30)}…`;
-  document.getElementById('runBtn').disabled = true;
-  document.getElementById('streamBody').innerHTML = '';
-  document.getElementById('streamTitle').textContent = 'Running agent pipeline…';
+function loadDemo(){
+  document.getElementById('f-product').value = 'VS-6766 (Avutometinib)';
+  document.getElementById('f-type').value = 'drug_small_molecule';
+  document.getElementById('f-reg').value = 'IND 153742 / NCT05074810';
+  document.getElementById('f-indication').value = 'KRAS G12C NSCLC (RAMP 205 study)';
+  document.getElementById('f-phase').value = 'phase_3';
+  document.getElementById('f-sponsor').value = 'USA';
+  document.getElementById('f-countries').value = 'USA, UK, Germany, France, Spain, Canada, Australia';
+  document.getElementById('f-ae').value = 'Acute liver failure with jaundice and coagulopathy — subject died';
+  const d = new Date(); d.setDate(d.getDate()-2);
+  document.getElementById('f-day0').value = d.toISOString().slice(0,10);
+  document.getElementById('f-patient-country').value = 'United States';
+  // seriousness
+  document.querySelectorAll('.checkbox-grid input').forEach(cb=>{
+    cb.checked = ['fatal','hospitalization'].includes(cb.value);
+    cb.closest('.cb-item').classList.toggle('checked', cb.checked);
+  });
+  document.getElementById('f-causality').value = 'possibly';
+  document.getElementById('f-expect').value = 'unexpected';
+  // HAs
+  const haSelect = ['FDA','EMA','MHRA','HC','TGA','SWISSMEDIC'];
+  document.querySelectorAll('#haGrid input').forEach(cb=>{
+    cb.checked = haSelect.includes(cb.value);
+    cb.closest('.ha-item').classList.toggle('checked', cb.checked);
+  });
+}
 
-  if(demoMode || !apiKey) {
-    await runDemoPipeline(currentCase);
-  } else {
-    await runLivePipeline(currentCase);
+// ── MAIN RESOLVER ──
+async function resolve(){
+  const c = getCase();
+  if(!c.product||!c.type||!c.phase||!c.ae||!c.seriousness.length||!c.has.length){
+    alert('Please fill all required fields (marked *) and select at least one Health Authority.');
+    return;
   }
-
+  document.getElementById('runBtn').disabled = true;
+  showLoading();
+  if(demoMode||!apiKey){ await runDemo(c); }
+  else { await runLive(c); }
   document.getElementById('runBtn').disabled = false;
 }
 
-// ── LIVE PIPELINE ──
-async function runLivePipeline(c) {
-  const isFatal = c.seriousness.includes('fatal');
-  const isLT = c.seriousness.includes('life_threatening');
-  const isCT = !c.phase.includes('marketed');
-  const isUnexpected = c.expectedness === 'unexpected_unlisted';
-  const isSUSAR = isCT && (isFatal||isLT||c.seriousness.includes('hospitalization')) && isUnexpected;
+function showLoading(){
+  const panel = document.getElementById('resultsPanel');
+  panel.innerHTML = `
+    <div class="loading-card">
+      <div style="font-family:var(--serif);font-size:20px;color:var(--navy);margin-bottom:6px;">Resolving obligations…</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Running 8-agent pipeline across all selected Health Authorities</div>
+      <div class="pipeline-steps">
+        <span class="ps running" id="ps-intake">INTAKE</span>
+        <span class="ps" id="ps-classify">CLASSIFY</span>
+        <span class="ps" id="ps-geo">GEOGRAPHY</span>
+        <span class="ps" id="ps-expect">EXPECTEDNESS</span>
+        <span class="ps" id="ps-oblig">OBLIGATIONS</span>
+        <span class="ps" id="ps-timeline">TIMELINE</span>
+        <span class="ps" id="ps-narr">NARRATIVE</span>
+        <span class="ps" id="ps-output">OUTPUT</span>
+      </div>
+      <div class="loading-msg" id="loadingMsg">Validating case criteria…</div>
+    </div>`;
+}
 
-  const systemPrompt = `You are the Praxigent RegIntel PV Regulatory Intelligence Agent — an expert in global pharmacovigilance regulations across all ICH and non-ICH health authorities.
+function setPS(id, state){ const el=document.getElementById('ps-'+id); if(el) el.className='ps '+state; }
+function setMsg(m){ const el=document.getElementById('loadingMsg'); if(el) el.textContent=m; }
+function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-You are analyzing a case and must provide a comprehensive regulatory intelligence report.
+// ── LIVE API ──
+async function runLive(c){
+  const isFatal = c.seriousness.includes('fatal')||c.seriousness.includes('life_threatening');
+  const isCT = !c.phase.includes('marketed')&&c.phase!=='post_approval_ct';
+  const isUnexpected = c.expectedness==='unexpected'||c.expectedness==='unknown';
+  const isRelated = ['related','possibly'].includes(c.causality);
+  const isSUSAR = isCT && c.seriousness.some(s=>s!=='non_serious') && isUnexpected && isRelated;
+  const isSerious = c.seriousness.some(s=>s!=='non_serious');
 
-CASE DATA:
+  const prompt = `You are the Praxigent RegIntel PV Regulatory Intelligence Agent — a global pharmacovigilance regulatory expert covering all ICH and non-ICH health authorities.
+
+CASE INPUT:
 Product: ${c.product} (${c.type})
-Phase: ${c.phase}
-IND/Number: ${c.ind || 'not provided'}
-Indication: ${c.indication || 'not provided'}
-Adverse Event (verbatim): ${c.ae}
-Day 0 (first awareness): ${c.day0}
+Phase/Status: ${c.phase}
+Regulatory #: ${c.reg||'not provided'}
+Indication: ${c.indication||'not provided'}
+Sponsor country: ${c.sponsor}
+Trial/Marketing countries: ${c.countries||'not specified'}
+Patient country: ${c.patientCountry||'not specified'}
+AE verbatim: ${c.ae}
+Day 0 (sponsor awareness): ${c.day0}
 Seriousness: ${c.seriousness.join(', ')}
 Causality: ${c.causality}
-Expectedness: ${c.expectedness}
-SUSAR determination: ${isSUSAR ? 'YES - SUSAR' : 'No SUSAR'}
+Expectedness vs RSI: ${c.expectedness}
+SUSAR status: ${isSUSAR?'CONFIRMED SUSAR':'Not a SUSAR'}
 Health Authorities in scope: ${c.has.join(', ')}
-Trial countries: ${c.countries || 'not specified'}
-Sponsor country: ${c.sponsor || 'USA'}
 
-Provide a structured analysis with ALL of the following sections, clearly labeled:
+Provide a comprehensive regulatory intelligence report with ALL sections below. Be extremely specific — cite exact regulation articles, exact timelines, exact formats. Do not be generic.
 
-## AGENT 1: CASE INTAKE SUMMARY
-Summarize key case attributes and confirm minimum valid case criteria (patient + reporter + product + AE).
+## CASE SUMMARY
+One paragraph confirming: valid case criteria met (ICH E2A), SUSAR determination with rationale, Day 0 confirmation, and clock start.
 
-## AGENT 2: MedDRA CLASSIFICATION
-Code the verbatim AE term. Provide: PT name, PT code (best estimate), SOC, HLGT, HLT. Note any coding ambiguity.
+## MEDDRA CODING
+Code the verbatim AE to MedDRA v27.1. Provide:
+- Primary PT name and code
+- All associated PTs (if multiple findings)
+- SOC, HLGT, HLT
+- Coding rationale
 
-## AGENT 3: GEOGRAPHY & DOMESTIC/FOREIGN
-For each HA in scope, state whether this is a DOMESTIC or FOREIGN case and why. Note any local language requirements.
+## GLOBAL REPORTING OBLIGATIONS
+For EACH of the following HAs (${c.has.join(', ')}), provide a complete row:
+HA | Regulation article | Report name | Timeline | Due date (calculate from ${c.day0}) | Domestic/Foreign | Format | Submission route | Special conditions
 
-## AGENT 4: EXPECTEDNESS ASSESSMENT  
-Confirm expected vs unexpected status. Confirm SUSAR status with rationale citing ICH E2A criteria.
+Be precise: cite "21 CFR 312.32(c)(1)" not just "FDA rules". Calculate actual due dates from Day 0 = ${c.day0}.
 
-## AGENT 5: REPORTING OBLIGATIONS TABLE
-For EACH selected HA, provide a row with: HA | Regulation cited | Report type | Timeline | Due date (calculate from Day 0 ${c.day0}) | Domestic/Foreign | Format | Submission route.
-Be specific — cite actual regulation articles (e.g. "21 CFR 312.32(c)(1)").
+## PERIODIC REPORTING OBLIGATIONS
+List all periodic reports triggered (DSUR, PSUR/PBRER, PADER, line listings) with schedules.
 
-## AGENT 6: TIMELINE & DUE DATES
-List all due dates in order from earliest to latest. Flag any that are overdue or within 48 hours. Include follow-up report deadlines.
+## DOMESTIC vs FOREIGN ANALYSIS
+For each HA, explain domestic or foreign classification and what this means for the reporting obligation.
 
-## AGENT 7: CIOMS I NARRATIVE (DRAFT)
-Write a complete CIOMS I compliant narrative in third person, past tense. Include patient demographics (use placeholders), suspect product, AE description, and outcome.
+## TIMELINE — ALL DUE DATES IN ORDER
+List every due date chronologically from earliest to latest. Flag OVERDUE or AT RISK (within 72h).
 
-## AGENT 8: KEY ACTIONS & GAP ANALYSIS
-List the top 3-5 actions the PV team must take immediately. Flag any missing information that could delay submission.
+## CIOMS I NARRATIVE DRAFT
+Write a complete CIOMS I narrative. Third person, past tense. Include all ICH E2A Section 3 elements. Use [BRACKET] for fields needing completion from source data.
 
-Be thorough, precise, and cite specific regulations throughout.`;
+## GAP ANALYSIS — MISSING DATA
+List: (RED) missing mandatory fields blocking submission, (AMBER) recommended fields, (GREEN) confirmed complete.
 
-  const steps = ['intake','classify','geo','expect','oblig','timeline','narr','output'];
-  let stepIdx = 0;
-
-  const setStep = (name, state) => {
-    const el = document.getElementById('step-'+name);
-    if(el) el.className = 'pipeline-step ' + state;
-  };
-
-  // Show thinking for each agent
-  const agentNames = ['INTAKE','CLASSIFIER','GEOGRAPHY','EXPECTEDNESS','OBLIGATION','TIMELINE','NARRATIVE','OUTPUT'];
-  const agentBadges = ['badge-intake','badge-classifier','badge-geography','badge-expectedness','badge-obligation','badge-timeline','badge-narrative','badge-output'];
-
-  // Add thinking card
-  const thinkCard = appendAgentCard('ORCHESTRATOR', 'badge-output', `<p class="thinking">Initializing 8-agent pipeline for <strong>${c.product}</strong> — ${c.ae}</p><div class="typing-row"><div class="typing-dots"><span></span><span></span><span></span></div><div class="typing-label">routing to agents…</div></div>`);
+## IMMEDIATE ACTION PLAN
+Numbered list: exactly what the PV team must do in the next 24–48 hours, in priority order.`;
 
   try {
-    setStep(steps[0], 'running');
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content: systemPrompt }]
-      })
-    });
-
-    if(!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error?.message || 'API error');
-    }
-
-    const data = await response.json();
-    const fullText = data.content[0].text;
-
-    // Remove thinking card
-    thinkCard.remove();
-
-    // Parse sections and render as agent cards
-    const sections = [
-      { match: 'AGENT 1', badge: 'badge-intake', label: 'INTAKE AGENT' },
-      { match: 'AGENT 2', badge: 'badge-classifier', label: 'CLASSIFIER AGENT' },
-      { match: 'AGENT 3', badge: 'badge-geography', label: 'GEOGRAPHY AGENT' },
-      { match: 'AGENT 4', badge: 'badge-expectedness', label: 'EXPECTEDNESS AGENT' },
-      { match: 'AGENT 5', badge: 'badge-obligation', label: 'OBLIGATION AGENT' },
-      { match: 'AGENT 6', badge: 'badge-timeline', label: 'TIMELINE AGENT' },
-      { match: 'AGENT 7', badge: 'badge-narrative', label: 'NARRATIVE AGENT' },
-      { match: 'AGENT 8', badge: 'badge-output', label: 'OUTPUT AGENT' }
-    ];
-
-    // Split text by section headers
-    let remaining = fullText;
-    sections.forEach((sec, i) => {
-      setStep(steps[i], 'running');
-      const nextSec = sections[i+1];
-      let chunk = '';
-      const startIdx = remaining.indexOf('## '+sec.match);
-      if(startIdx !== -1) {
-        const endIdx = nextSec ? remaining.indexOf('## '+nextSec.match, startIdx+1) : remaining.length;
-        chunk = remaining.slice(startIdx, endIdx !== -1 ? endIdx : remaining.length).trim();
-        chunk = chunk.replace(/^## AGENT \d+:[^\n]+\n/, '').trim();
-      }
-      if(chunk) {
-        appendAgentCard(sec.label, sec.badge, `<p style="white-space:pre-wrap;font-size:13px;line-height:1.7;">${escHtml(chunk)}</p>`);
-      }
-      setStep(steps[i], 'done');
-    });
-
-    document.getElementById('streamTitle').textContent = 'Analysis complete — ' + c.has.length + ' HAs resolved';
-    buildMatrixFromText(fullText, c);
-    buildCalendarFromText(fullText, c);
-
-  } catch(e) {
-    thinkCard.remove();
-    appendAgentCard('ERROR', 'badge-obligation',
-      `<p style="color:var(--red);">API Error: ${e.message}</p><p style="margin-top:8px;font-size:12px;color:var(--muted);">Check your API key and try again, or use Demo Mode.</p>`);
-  }
-}
-
-// ── DEMO PIPELINE ──
-async function runDemoPipeline(c) {
-  const isFatal = c.seriousness.includes('fatal') || c.seriousness.includes('life_threatening');
-  const isCT = !c.phase.includes('marketed');
-  const isUnexpected = c.expectedness === 'unexpected_unlisted';
-  const isSUSAR = isCT && isFatal && isUnexpected;
-  const timeline = isFatal ? 7 : 15;
-  const day0 = new Date(c.day0 || new Date());
-  const dueDate = new Date(day0); dueDate.setDate(dueDate.getDate() + timeline);
-  const dueDateStr = dueDate.toISOString().slice(0,10);
-
-  const steps = ['intake','classify','geo','expect','oblig','timeline','narr','output'];
-
-  async function stepDelay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-  // INTAKE
-  setStep('intake','running');
-  await stepDelay(600);
-  appendAgentCard('INTAKE AGENT', 'badge-intake', `
-    <p class="thinking">Validating minimum case criteria per ICH E2A…</p>
-    <p>Case accepted — all minimum valid case criteria met:</p>
-    <ul style="margin:8px 0 0 16px;font-size:13px;line-height:1.8;">
-      <li>✓ Identifiable patient (demographics to be confirmed)</li>
-      <li>✓ Identifiable reporter (source captured)</li>
-      <li>✓ Suspect product: <strong>${c.product}</strong></li>
-      <li>✓ Adverse event: <strong>${c.ae}</strong></li>
-    </ul>
-    <div style="margin-top:10px;padding:8px 12px;background:rgba(3,32,60,0.04);border-radius:6px;font-size:12px;">
-      <strong>Day 0:</strong> ${c.day0} &nbsp;·&nbsp; <strong>Phase:</strong> ${c.phase.replace(/_/g,' ')} &nbsp;·&nbsp; <strong>HAs in scope:</strong> ${c.has.join(' · ')}
-    </div>
-  `);
-  setStep('intake','done'); setStep('classify','running');
-
-  // CLASSIFIER
-  await stepDelay(700);
-  appendAgentCard('CLASSIFIER AGENT', 'badge-classifier', `
-    <p class="thinking">Mapping verbatim term to MedDRA v27.1 PT/SOC hierarchy…</p>
-    <div style="margin-top:10px;background:rgba(3,32,60,0.03);border-radius:6px;padding:12px;font-size:12.5px;line-height:1.9;">
-      <div><strong>Verbatim:</strong> ${c.ae}</div>
-      <div><strong>MedDRA PT:</strong> ${getMeddraPT(c.ae)} &nbsp;<span style="font-family:var(--mono);font-size:10px;color:var(--muted);">[PT ${Math.floor(Math.random()*900000+10000000)}]</span></div>
-      <div><strong>SOC:</strong> ${getMeddraSoc(c.ae)}</div>
-      <div style="margin-top:6px;"><strong>Seriousness:</strong> ${isFatal ? '<span class="tag tag-susar">FATAL / LIFE-THREATENING</span>' : '<span class="tag tag-15">SERIOUS</span>'}</div>
-      <div><strong>SUSAR:</strong> ${isSUSAR ? '<span class="tag tag-susar">YES — SUSAR CONFIRMED</span>' : '<span class="tag tag-ok">No SUSAR</span>'}</div>
-    </div>
-  `);
-  setStep('classify','done'); setStep('geo','running');
-
-  // GEOGRAPHY
-  await stepDelay(600);
-  const hasRows = c.has.map(ha => {
-    const isDom = ['FDA','HC'].includes(ha) ? c.sponsor.toUpperCase().includes('USA') || ha==='HC' : ['EMA','MHRA','TGA'].includes(ha);
-    return `<tr><td><strong>${ha}</strong></td><td>${isDom ? '<span class="tag tag-dom">DOMESTIC</span>' : '<span class="tag tag-for">FOREIGN</span>'}</td><td style="font-size:11.5px;color:var(--muted);">${getHACountry(ha)}</td><td style="font-size:11.5px;">${getLocalLang(ha)}</td></tr>`;
-  }).join('');
-  appendAgentCard('GEOGRAPHY AGENT', 'badge-geography', `
-    <p class="thinking">Applying domestic/foreign reporter logic per jurisdiction…</p>
-    <table class="ob-table" style="margin-top:10px;">
-      <thead><tr><th>HA</th><th>Case Classification</th><th>Country</th><th>Local Language</th></tr></thead>
-      <tbody>${hasRows}</tbody>
-    </table>
-    <p style="font-size:11.5px;color:var(--muted);margin-top:10px;">Note: FDA (21 CFR 312.32) requires reporting of ALL IND study SAEs regardless of country of occurrence.</p>
-  `);
-  setStep('geo','done'); setStep('expect','running');
-
-  // EXPECTEDNESS
-  await stepDelay(600);
-  appendAgentCard('EXPECTEDNESS AGENT', 'badge-expectedness', `
-    <p class="thinking">Comparing coded PT against Reference Safety Information…</p>
-    <div style="margin-top:10px;padding:12px;border-radius:6px;background:${isUnexpected ? 'rgba(208,90,48,0.06)' : 'rgba(29,158,117,0.06)'};border-left:3px solid ${isUnexpected ? 'var(--coral)' : 'var(--teal)'};">
-      <div style="font-weight:600;font-size:13px;color:${isUnexpected ? 'var(--red)' : 'var(--teal)'};">
-        ${isUnexpected ? '⚠ UNEXPECTED — Not listed in current RSI' : '✓ EXPECTED — Listed in current RSI'}
-      </div>
-      <div style="font-size:12px;margin-top:6px;color:var(--muted);">
-        ${isUnexpected ? 'The coded PT was not found in the Investigator\'s Brochure (current version). Per ICH E2A, this AE is classified as unexpected/unlisted.' : 'The coded PT is listed in the current RSI. Standard reporting timelines apply.'}
-      </div>
-    </div>
-    ${isSUSAR ? '<div style="margin-top:10px;padding:10px 12px;background:#FAECE7;border-radius:6px;font-size:12.5px;color:#993C1D;font-weight:500;">⚠ SUSAR CONFIRMED: Serious + Unexpected + Causally related in CT setting. Expedited reporting clock STARTED at Day 0.</div>' : ''}
-  `);
-  setStep('expect','done'); setStep('oblig','running');
-
-  // OBLIGATION
-  await stepDelay(800);
-  const oblRows = buildObligationRows(c, isFatal, isCT, isSUSAR, timeline, dueDateStr);
-  appendAgentCard('OBLIGATION AGENT', 'badge-obligation', `
-    <p class="thinking">Querying Regulatory Obligation Database across ${c.has.length} health authorities…</p>
-    <div style="overflow-x:auto;margin-top:10px;">
-    <table class="ob-table">
-      <thead><tr><th>HA</th><th>Regulation</th><th>Report Type</th><th>Timeline</th><th>Due Date</th><th>D/F</th><th>Format</th></tr></thead>
-      <tbody>${oblRows}</tbody>
-    </table>
-    </div>
-    ${isSUSAR ? '<div style="margin-top:10px;font-size:11.5px;color:var(--muted);padding:8px 12px;background:rgba(3,32,60,0.03);border-radius:6px;">SUSAR alert: Notify IRB/Ethics Committee and Investigator(s) simultaneously per GCP requirements. Blinding considerations apply if double-blind study.</div>' : ''}
-  `);
-  setStep('oblig','done'); setStep('timeline','running');
-
-  // TIMELINE
-  await stepDelay(600);
-  const tlCards = c.has.map(ha => {
-    const tl = isFatal ? 7 : (ha === 'TGA' && !isFatal ? 15 : 15);
-    const due = new Date(day0); due.setDate(due.getDate() + tl);
-    const daysLeft = Math.ceil((due - new Date()) / 86400000);
-    const statusCls = daysLeft < 0 ? 'over' : daysLeft <= 2 ? 'risk' : 'ok';
-    const statusTxt = daysLeft < 0 ? `${Math.abs(daysLeft)}d OVERDUE` : daysLeft === 0 ? 'DUE TODAY' : `${daysLeft}d remaining`;
-    return `<div class="timeline-card">
-      <div class="tl-ha">${ha}</div>
-      <div class="tl-report">${isSUSAR ? 'SUSAR' : isCT ? 'SAE Report' : 'ICSR'} · ${tl}-day</div>
-      <div class="tl-due">${due.toISOString().slice(0,10)}</div>
-      <div class="tl-days ${statusCls}">${statusTxt}</div>
-    </div>`;
-  }).join('');
-  appendAgentCard('TIMELINE AGENT', 'badge-timeline', `
-    <p class="thinking">Calculating due dates from Day 0 with HA holiday calendars…</p>
-    <div class="timeline-grid" style="margin-top:10px;">${tlCards}</div>
-    <div style="margin-top:12px;font-size:11.5px;color:var(--muted);">Clock basis: Calendar days (FDA/EMA/PMDA/MHRA). Day 0 = ${c.day0}. Follow-up report due 15 calendar days after new significant information.</div>
-  `);
-  setStep('timeline','done'); setStep('narr','running');
-
-  // NARRATIVE
-  await stepDelay(700);
-  appendAgentCard('NARRATIVE AGENT', 'badge-narrative', `
-    <p class="thinking">Drafting ICH E2B R3-compliant CIOMS I narrative…</p>
-    <div class="narrative-block">
-      A [age]-year-old [sex] patient with [indication] received ${c.product} [dose/route/frequency] beginning [start date]. On [onset date], the patient developed ${c.ae} (${getMeddraPT(c.ae)}). ${isFatal ? 'The patient subsequently died on [date of death].' : 'The patient was hospitalized on [date] for management of the event.'} Relevant medical history includes [medical history]. Concomitant medications at the time of the event included [concomitant medications]. Laboratory findings showed [relevant labs]. The suspect drug was ${c.causality === 'related' ? 'withdrawn' : 'continued'} following the event. ${c.causality === 'related' || c.causality === 'possibly_related' ? 'The reporter assessed a causal relationship between '+c.product+' and the event.' : ''} The sponsor assessed causality as <strong>${c.causality.replace(/_/g,' ')}</strong>. This event is considered <strong>${c.expectedness === 'unexpected_unlisted' ? 'unexpected and not listed in the current Investigator\'s Brochure' : 'expected and listed in the current reference safety information'}</strong>.
-    </div>
-    <div style="margin-top:8px;font-size:11px;color:var(--muted);">Placeholders in brackets require completion with actual patient data before submission. Narrative length: ~180 words (target 150–400).</div>
-  `);
-  setStep('narr','done'); setStep('output','running');
-
-  // OUTPUT
-  await stepDelay(700);
-  appendAgentCard('OUTPUT AGENT', 'badge-output', `
-    <p class="thinking">Assembling final deliverables — obligation matrix, E2B R3 XML stub, submission calendar…</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
-      <div style="padding:12px;background:rgba(3,32,60,0.03);border-radius:8px;border:1px solid var(--border);">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px;">E2B R3 XML STUB</div>
-        <div class="xml-block" style="font-size:10px;padding:10px;">
-<span class="xml-kw">&lt;ichicsr</span> lang=<span class="xml-val">"en"</span><span class="xml-kw">&gt;</span><br/>
-&nbsp;&lt;safetyreportid&gt;<span class="xml-val">${generateCaseId()}</span>&lt;/safetyreportid&gt;<br/>
-&nbsp;&lt;serious&gt;<span class="xml-val">1</span>&lt;/serious&gt;<br/>
-&nbsp;&lt;seriousness${isFatal?'death':'lifethreatening'}&gt;<span class="xml-val">1</span>&lt;/seriousness${isFatal?'death':'lifethreatening'}&gt;<br/>
-&nbsp;&lt;reporttype&gt;<span class="xml-val">${isCT?'2':'1'}</span>&lt;/reporttype&gt;<br/>
-&nbsp;&lt;primarysourcecountry&gt;<span class="xml-val">US</span>&lt;/primarysourcecountry&gt;<br/>
-&nbsp;<span class="xml-cm">&lt;!-- patient, reaction, drug sections --&gt;</span><br/>
-<span class="xml-kw">&lt;/ichicsr&gt;</span>
-        </div>
-      </div>
-      <div style="padding:12px;background:rgba(3,32,60,0.03);border-radius:8px;border:1px solid var(--border);">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px;">GAP ANALYSIS</div>
-        <div style="font-size:12px;line-height:1.8;">
-          ${c.ind ? '✓' : '⚠'} IND/Study number ${c.ind ? 'captured' : 'MISSING'}<br/>
-          ⚠ Patient age/sex/weight required<br/>
-          ⚠ AE onset date required<br/>
-          ⚠ Reporter details required<br/>
-          ⚠ Concomitant meds list required<br/>
-          ${c.expectedness === 'not_determinable' ? '⚠ RSI not uploaded — expectedness unconfirmed' : '✓ Expectedness determined'}
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;">
-      <button class="topbar-btn primary" onclick="switchView('matrix')" style="font-size:12px;">View Full Matrix →</button>
-      <button class="topbar-btn" onclick="switchView('calendar')" style="font-size:12px;">View Calendar →</button>
-    </div>
-  `);
-  setStep('output','done');
-
-  document.getElementById('streamTitle').textContent = `Analysis complete — ${c.has.length} HAs, ${c.has.length * (isSUSAR ? 1 : 1)} expedited reports`;
-  populateMatrix(c, isFatal, isCT, isSUSAR, timeline, dueDateStr);
-  populateCalendar(c, isFatal, isCT, isSUSAR, day0);
-}
-
-function setStep(name, state) {
-  const el = document.getElementById('step-'+name);
-  if(el) el.className = 'pipeline-step ' + state;
-}
-
-function appendAgentCard(label, badgeClass, bodyHtml) {
-  const sb = document.getElementById('streamBody');
-  const card = document.createElement('div');
-  card.className = 'agent-msg';
-  card.innerHTML = `
-    <div class="agent-msg-header">
-      <span class="agent-badge ${badgeClass}">${label}</span>
-    </div>
-    <div class="agent-msg-body">${bodyHtml}</div>`;
-  sb.appendChild(card);
-  sb.scrollTop = sb.scrollHeight;
-  return card;
-}
-
-function buildObligationRows(c, isFatal, isCT, isSUSAR, timeline, dueDateStr) {
-  const HA_RULES = {
-    FDA:  { reg: '21 CFR 312.32(c)(1)', report: isSUSAR?'IND Safety Report':'ICSR FAERS', fmt:'MedWatch/E2B R3', route:'FDA ESM' },
-    EMA:  { reg: 'EU CT Reg 536/2014 Art.42', report: isSUSAR?'SUSAR via CTIS':'ICSR EudraVigilance', fmt:'E2B R3', route:'EV EVWEB' },
-    MHRA: { reg: 'SI 2004/1031', report: isSUSAR?'SUSAR':'Yellow Card ICSR', fmt:'E2B R3', route:'MHRA Portal' },
-    PMDA: { reg: 'GCP Ordinance Art.20', report: isSUSAR?'SAE Report':'ICSR J-ICSR', fmt:'J-ICSR E2B R3', route:'PMDA Gateway' },
-    HC:   { reg: 'C.05.012', report: isSUSAR?'CT SAE Report':'MedEffect ICSR', fmt:'E2B R3', route:'MedEffect' },
-    TGA:  { reg: 'TGA CT Regs', report: isSUSAR?'CT SUSAR':'DAEN ICSR', fmt:'E2B R2/R3', route:'TGA Portal' },
-    ANVISA:{ reg: 'RDC 204/2017', report:'NOTIVISA ICSR', fmt:'NOTIVISA', route:'NOTIVISA' },
-    NMPA: { reg: 'NMPA PV Regs 2021', report:'China ICSR', fmt:'China E2B', route:'NMPA Portal' },
-    CDSCO:{ reg: 'Drugs & Cosmetics Act', report:'SUGAM ICSR', fmt:'E2B R2', route:'SUGAM' },
-    SFDA: { reg: 'SFDA Resolution 2020', report:'ICSR NPC', fmt:'E2B R2', route:'SFDA Portal' },
-    SWISSMEDIC:{ reg: 'HMG Art.59', report:'ElViS ICSR', fmt:'E2B R3', route:'Swissmedic ElViS' },
-    MFDS: { reg: 'Pharmaceutical Act Art.68', report:'DUR ICSR', fmt:'E2B R3', route:'MFDS e-DUR' }
-  };
-  return c.has.map(ha => {
-    const r = HA_RULES[ha] || {reg:'—',report:'ICSR',fmt:'E2B R3',route:'National Portal'};
-    const isDom = ['FDA','HC'].includes(ha);
-    return `<tr>
-      <td><strong>${ha}</strong></td>
-      <td style="font-size:10.5px;color:var(--muted);">${r.reg}</td>
-      <td>${r.report} ${isSUSAR?'<span class="tag tag-susar">SUSAR</span>':''}</td>
-      <td><span class="tag ${isFatal?'tag-7':'tag-15'}">${timeline}d</span></td>
-      <td style="font-weight:600;">${dueDateStr}</td>
-      <td>${isDom?'<span class="tag tag-dom">DOM</span>':'<span class="tag tag-for">FOR</span>'}</td>
-      <td style="font-size:10.5px;">${r.fmt}</td>
-    </tr>`;
-  }).join('');
-}
-
-function populateMatrix(c, isFatal, isCT, isSUSAR, timeline, dueDateStr) {
-  const rows = buildObligationRows(c, isFatal, isCT, isSUSAR, timeline, dueDateStr);
-  document.getElementById('matrixContent').innerHTML = `
-    <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;">
-      <div style="font-weight:600;color:var(--navy);">${c.product} — Obligation Matrix</div>
-      ${isSUSAR?'<span class="tag tag-susar">SUSAR ALERT</span>':''}
-      <div style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted);">Day 0: ${c.day0}</div>
-    </div>
-    <div style="overflow-x:auto;">
-    <table class="ob-table" style="width:100%;">
-      <thead><tr><th>HA</th><th>Regulation</th><th>Report Type</th><th>Timeline</th><th>Due Date</th><th>D/F</th><th>Format</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
-}
-
-function populateCalendar(c, isFatal, isCT, isSUSAR, day0) {
-  const items = c.has.map(ha => {
-    const tl = isFatal ? 7 : 15;
-    const due = new Date(day0); due.setDate(due.getDate() + tl);
-    const daysLeft = Math.ceil((due - new Date()) / 86400000);
-    const cls = daysLeft < 0 ? 'tag-over' : daysLeft <= 2 ? 'tag-risk' : 'tag-ok';
-    const status = daysLeft < 0 ? 'OVERDUE' : daysLeft <= 2 ? 'AT RISK' : 'ON TRACK';
-    return `<tr>
-      <td><strong>${ha}</strong></td>
-      <td>${isSUSAR?'SUSAR':'ICSR'} ${tl}-day</td>
-      <td style="font-family:var(--mono);font-size:12px;">${due.toISOString().slice(0,10)}</td>
-      <td><span class="tag ${cls}">${status}</span></td>
-      <td style="color:var(--muted);font-size:12px;">${daysLeft < 0 ? Math.abs(daysLeft)+'d late' : daysLeft+'d left'}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('calendarContent').innerHTML = `
-    <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-weight:600;color:var(--navy);">Submission Calendar — ${c.product}</div>
-    <table class="ob-table" style="width:100%;">
-      <thead><tr><th>HA</th><th>Report Type</th><th>Due Date</th><th>Status</th><th>Time</th></tr></thead>
-      <tbody>${items}</tbody>
-    </table>`;
-}
-
-function buildMatrixFromText(text, c) {
-  document.getElementById('matrixContent').innerHTML = `
-    <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-weight:600;color:var(--navy);">${c.product} — AI-Generated Obligation Matrix</div>
-    <div style="padding:16px;font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap;">${escHtml(text.match(/## AGENT 5[\s\S]*?(?=## AGENT 6|$)/)?.[0]?.replace(/^## AGENT 5:[^\n]+\n/,'')?.trim() || 'See stream for obligation details.')}</div>`;
-}
-
-function buildCalendarFromText(text, c) {
-  document.getElementById('calendarContent').innerHTML = `
-    <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-weight:600;color:var(--navy);">${c.product} — AI-Generated Timeline</div>
-    <div style="padding:16px;font-size:13px;line-height:1.7;color:var(--text);white-space:pre-wrap;">${escHtml(text.match(/## AGENT 6[\s\S]*?(?=## AGENT 7|$)/)?.[0]?.replace(/^## AGENT 6:[^\n]+\n/,'')?.trim() || 'See stream for timeline details.')}</div>`;
-}
-
-// ── MEDDRA LOOKUP ──
-async function lookupMeddra() {
-  const term = document.getElementById('meddraInput').value.trim();
-  if(!term) return;
-  const result = document.getElementById('meddraResult');
-  result.innerHTML = '<div style="color:var(--muted);font-size:13px;">Looking up…</div>';
-
-  if(demoMode || !apiKey) {
-    result.innerHTML = `
-      <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:12px;">MEDDRA v27.1 CODING RESULT</div>
-        <div style="display:grid;gap:8px;">
-          <div><span style="font-size:11px;color:var(--muted);">VERBATIM TERM</span><br/><strong>${term}</strong></div>
-          <div><span style="font-size:11px;color:var(--muted);">PREFERRED TERM (PT)</span><br/><strong style="color:var(--navy);">${getMeddraPT(term)}</strong> <span style="font-family:var(--mono);font-size:11px;color:var(--muted);">[${Math.floor(Math.random()*9000000+10000000)}]</span></div>
-          <div><span style="font-size:11px;color:var(--muted);">SOC</span><br/><strong>${getMeddraSoc(term)}</strong></div>
-          <div><span style="font-size:11px;color:var(--muted);">CODING CONFIDENCE</span><br/><span class="tag tag-ok">HIGH</span></div>
-        </div>
-      </div>`;
-    return;
-  }
-
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    setPS('intake','running'); setMsg('Validating case criteria…');
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514', max_tokens:500,
-        messages:[{role:'user',content:`You are a MedDRA coding expert. Code this verbatim adverse event term to MedDRA v27.1. Provide: PT name, PT code (estimate), SOC, HLGT, HLT, and any coding notes. Verbatim: "${term}"`}]
+        model:'claude-sonnet-4-20250514',
+        max_tokens:6000,
+        messages:[{role:'user',content:prompt}]
       })
     });
-    const data = await resp.json();
-    result.innerHTML = `<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px;font-size:13px;line-height:1.7;white-space:pre-wrap;">${escHtml(data.content[0].text)}</div>`;
-  } catch(e) {
-    result.innerHTML = `<div style="color:var(--red);">${e.message}</div>`;
+    if(!res.ok){
+      const err=await res.json();
+      throw new Error(err.error?.message||'API error '+res.status);
+    }
+    const data = await res.json();
+    const text = data.content[0].text;
+
+    // animate pipeline
+    const steps=['classify','geo','expect','oblig','timeline','narr','output'];
+    for(let i=0;i<steps.length;i++){
+      setPS(steps[i-1]||'intake','done');
+      setPS(steps[i],'running');
+      setMsg(['Coding MedDRA PT/SOC…','Resolving geography…','Checking expectedness…',
+        'Querying obligation database…','Calculating due dates…',
+        'Drafting CIOMS narrative…','Assembling output…'][i]);
+      await delay(300);
+    }
+    setPS('output','done');
+
+    renderLiveResults(c, text, isSUSAR, isFatal, isSerious, isCT);
+  } catch(e){
+    document.getElementById('resultsPanel').innerHTML=`
+      <div class="result-card"><div class="rc-header">
+        <div style="color:var(--red);font-weight:600;">API Error: ${e.message}</div>
+      </div>
+      <div style="padding:16px;font-size:13px;color:var(--muted);">Check your API key and try again, or switch to Demo Mode.</div></div>`;
   }
 }
 
-// ── DEMO LOADER ──
-function loadDemo(caseId) {
-  switchView('intake');
-  document.getElementById('f-product').value = caseId === 'PRX-2025-00142' ? 'VS-6766 (Avutometinib)' : caseId === 'PRX-2025-00139' ? 'VS-7375' : 'VS-6766 (Avutometinib)';
-  document.getElementById('f-type').value = 'drug_small_molecule';
-  document.getElementById('f-phase').value = caseId === 'PRX-2025-00139' ? 'phase_4_marketed' : 'phase_3';
-  document.getElementById('f-ae').value = caseId === 'PRX-2025-00142' ? 'elevated liver enzymes with jaundice' : caseId === 'PRX-2025-00139' ? 'anaphylactic reaction with hypotension' : 'cardiac arrest';
-  document.getElementById('f-day0').value = caseId === 'PRX-2025-00142' ? '2025-05-28' : '2025-05-22';
-  document.getElementById('f-ind').value = caseId === 'PRX-2025-00142' ? 'IND 153742 / NCT05555555' : '';
-  document.getElementById('f-indication').value = 'KRAS G12C NSCLC';
-  document.getElementById('f-countries').value = 'USA, Germany, Japan, Canada';
-  document.getElementById('s-fatal').checked = caseId !== 'PRX-2025-00139';
-  document.getElementById('s-hosp').checked = true;
-  document.getElementById('f-expect').value = 'unexpected_unlisted';
-  // Select FDA + EMA + PMDA + HC
-  document.querySelectorAll('#haCheckboxes input').forEach(cb => {
-    cb.checked = ['FDA','EMA','PMDA','HC','MHRA'].includes(cb.value);
-    cb.closest('.ha-check').classList.toggle('checked', cb.checked);
-  });
+function renderLiveResults(c, text, isSUSAR, isFatal, isSerious, isCT){
+  const panel = document.getElementById('resultsPanel');
+  panel.innerHTML = '';
+
+  // extract sections
+  function extractSection(heading){
+    const re = new RegExp('## '+heading+'[\\s\\S]*?(?=## |$)');
+    const m = text.match(re);
+    return m ? m[0].replace(/^## [^\n]+\n/,'').trim() : '';
+  }
+
+  const day0 = new Date(c.day0);
+  const tl = isFatal ? 7 : 15;
+  const dueDate = new Date(day0); dueDate.setDate(dueDate.getDate()+tl);
+
+  // SUSAR alert
+  if(isSUSAR){
+    const sCard = document.createElement('div');
+    sCard.className = 'susar-card';
+    sCard.innerHTML = `
+      <h3>⚠ SUSAR Confirmed — Expedited Reporting Active</h3>
+      <p>${extractSection('CASE SUMMARY').substring(0,300)}…</p>
+      <div class="susar-meta">
+        <div class="susar-meta-item"><span class="k">Day 0</span><span class="v alert">${c.day0}</span></div>
+        <div class="susar-meta-item"><span class="k">Clock expires</span><span class="v alert">${dueDate.toISOString().slice(0,10)}</span></div>
+        <div class="susar-meta-item"><span class="k">HAs in scope</span><span class="v">${c.has.length} authorities</span></div>
+        <div class="susar-meta-item"><span class="k">Timeline</span><span class="v alert">${tl}-calendar-day</span></div>
+      </div>`;
+    panel.appendChild(sCard);
+  }
+
+  // Full AI text card
+  const mainCard = document.createElement('div');
+  mainCard.className = 'result-card';
+  mainCard.innerHTML = `
+    <div class="rc-header">
+      <div class="rc-icon" style="background:#E6F1FB;">🌐</div>
+      <div><div class="rc-title">Complete Global Obligation Analysis</div>
+      <div class="rc-sub">${c.product} · ${c.phase} · ${c.has.length} Health Authorities · Day 0: ${c.day0}</div></div>
+      <span class="rc-badge" style="background:#E1F5EE;color:#085041;">AI ANALYSIS</span>
+    </div>
+    <div style="padding:20px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:600px;overflow-y:auto;">${escHtml(text)}</div>
+    <div class="export-bar">
+      <button class="exp-btn primary" onclick="copyText(\`${escHtml(text).replace(/`/g,"'")}\`)">Copy full analysis</button>
+      <button class="exp-btn" onclick="printResults()">Print / Save PDF</button>
+    </div>`;
+  panel.appendChild(mainCard);
 }
 
-// ── HA REFERENCE ──
-const HA_DATA = [
-  {code:'FDA',country:'United States',region:'North America',e2b:'R3',url:'https://www.fda.gov',rule:'21 CFR 312/314/600'},
-  {code:'EMA',country:'European Union',region:'Europe · ICH',e2b:'R3',url:'https://www.ema.europa.eu',rule:'EU CT Reg 536/2014'},
-  {code:'MHRA',country:'United Kingdom',region:'Europe · ICH',e2b:'R3',url:'https://www.gov.uk/mhra',rule:'SI 2004/1031'},
-  {code:'PMDA',country:'Japan',region:'APAC · ICH',e2b:'R3',url:'https://www.pmda.go.jp',rule:'GCP Ordinance Art.20'},
-  {code:'Health Canada',country:'Canada',region:'North America · ICH',e2b:'R3',url:'https://www.canada.ca',rule:'C.05.012'},
-  {code:'TGA',country:'Australia',region:'APAC',e2b:'R3',url:'https://www.tga.gov.au',rule:'TGA CT/Marketed Regs'},
-  {code:'ANVISA',country:'Brazil',region:'Latin America',e2b:'R2',url:'https://www.gov.br/anvisa',rule:'RDC 204/2017'},
-  {code:'NMPA',country:'China',region:'APAC · ICH',e2b:'R3',url:'https://www.nmpa.gov.cn',rule:'NMPA PV Regulations'},
-  {code:'CDSCO',country:'India',region:'APAC',e2b:'R2',url:'https://cdsco.gov.in',rule:'Drugs & Cosmetics Act'},
-  {code:'SFDA',country:'Saudi Arabia',region:'Middle East',e2b:'R2',url:'https://www.sfda.gov.sa',rule:'SFDA Resolution 2020'},
-  {code:'Swissmedic',country:'Switzerland',region:'Europe · ICH',e2b:'R3',url:'https://www.swissmedic.ch',rule:'HMG Art.59'},
-  {code:'MFDS',country:'South Korea',region:'APAC · ICH',e2b:'R3',url:'https://www.mfds.go.kr',rule:'Pharmaceutical Act'}
-];
+// ── DEMO MODE ──
+async function runDemo(c){
+  const isFatal = c.seriousness.includes('fatal')||c.seriousness.includes('life_threatening');
+  const isCT = !c.phase.includes('marketed')&&c.phase!=='post_approval_ct';
+  const isUnexpected = c.expectedness==='unexpected'||c.expectedness==='unknown';
+  const isRelated = ['related','possibly'].includes(c.causality);
+  const isSUSAR = isCT && c.seriousness.some(s=>s!=='non_serious') && isUnexpected && isRelated;
+  const isSerious = c.seriousness.some(s=>s!=='non_serious');
+  const tl = isFatal?7:isSerious?15:90;
 
-function initHARef() {
-  const grid = document.getElementById('haRefGrid');
-  grid.innerHTML = HA_DATA.map(ha => `
-    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--teal);font-weight:500;margin-bottom:4px;">${ha.code}</div>
-      <div style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:2px;">${ha.country}</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">${ha.region}</div>
-      <div style="font-size:11.5px;line-height:1.7;">
-        <div><span style="color:var(--muted);">E2B:</span> <strong>${ha.e2b}</strong></div>
-        <div><span style="color:var(--muted);">Key regulation:</span> ${ha.rule}</div>
+  const steps=['intake','classify','geo','expect','oblig','timeline','narr','output'];
+  const msgs=['Validating case criteria…','Coding MedDRA PT/SOC…','Resolving geography…',
+    'Checking expectedness vs RSI…','Querying obligation database…',
+    'Calculating due dates…','Drafting CIOMS narrative…','Assembling full output…'];
+
+  for(let i=0;i<steps.length;i++){
+    if(i>0) setPS(steps[i-1],'done');
+    setPS(steps[i],'running'); setMsg(msgs[i]);
+    await delay(500);
+  }
+  setPS('output','done');
+
+  const day0 = new Date(c.day0);
+  const buildRows = () => c.has.map(ha=>{
+    const cfg = HA_CONFIG[ha]||{reg:'National regulation',report:'ICSR',fmt:'E2B R2/R3',route:'National portal',tl:15};
+    const htl = isFatal?(cfg.tl7||7):isSerious?(cfg.tl15||15):(cfg.tl90||90);
+    const due = new Date(day0); due.setDate(due.getDate()+htl);
+    const daysLeft = Math.ceil((due-new Date())/86400000);
+    const stCls = daysLeft<0?'tover':daysLeft<=2?'trisk':'tok';
+    const stTxt = daysLeft<0?`${Math.abs(daysLeft)}d OVERDUE`:daysLeft<=1?'DUE TODAY':`${daysLeft}d left`;
+    const isDom = isCountryDomestic(ha, c.sponsor, c.countries);
+    const report = isSUSAR?(cfg.susar||cfg.report+' (SUSAR)'):cfg.report;
+    const tlTag = htl<=7?'t7':htl<=15?'t15':htl<=30?'t30':htl<=90?'t90':'tper';
+    return `<tr class="${daysLeft<0?'overdue':htl>30?'periodic':''}">
+      <td><strong>${ha}</strong></td>
+      <td style="font-size:10.5px;color:var(--muted);">${cfg.reg}</td>
+      <td>${report} ${isSUSAR?'<span class="tag tsusar">SUSAR</span>':''}</td>
+      <td><span class="tag ${tlTag}">${htl===7?'7 cal. days':htl===15?'15 cal. days':htl===30?'30 days':htl===90?'90 days':'Periodic'}</span></td>
+      <td style="font-weight:600;">${due.toISOString().slice(0,10)}</td>
+      <td><span class="tag ${isDom?'tdom':'tfor'}">${isDom?'DOM':'FOR'}</span></td>
+      <td style="font-size:10.5px;">${cfg.fmt}</td>
+      <td style="font-size:10.5px;">${cfg.route}</td>
+      <td><span class="tag ${stCls}">${stTxt}</span></td>
+    </tr>`;
+  }).join('');
+
+  const panel = document.getElementById('resultsPanel');
+  panel.innerHTML = '';
+
+  // 1. SUSAR ALERT
+  if(isSUSAR){
+    const dueDate = new Date(day0); dueDate.setDate(dueDate.getDate()+7);
+    const daysLeft = Math.ceil((dueDate-new Date())/86400000);
+    panel.insertAdjacentHTML('beforeend',`
+      <div class="susar-card">
+        <h3>⚠ SUSAR Confirmed — ${tl}-Day Clock Running</h3>
+        <p>This case meets all three SUSAR criteria under ICH E2A: (1) <strong>Serious</strong> — ${c.seriousness.join(', ')}, (2) <strong>Unexpected</strong> — AE not listed in current Reference Safety Information, (3) <strong>Causally related</strong> — investigator/sponsor assessed as ${c.causality}. Expedited ${tl}-calendar-day reporting obligation is active across all ${c.has.length} Health Authorities in scope.</p>
+        <div class="susar-meta">
+          <div class="susar-meta-item"><span class="k">Product</span><span class="v">${c.product}</span></div>
+          <div class="susar-meta-item"><span class="k">Day 0</span><span class="v alert">${c.day0}</span></div>
+          <div class="susar-meta-item"><span class="k">All reports due</span><span class="v alert">${dueDate.toISOString().slice(0,10)}</span></div>
+          <div class="susar-meta-item"><span class="k">Days remaining</span><span class="v ${daysLeft<=2?'alert':''}">${daysLeft>0?daysLeft+'d':Math.abs(daysLeft)+'d OVERDUE'}</span></div>
+          <div class="susar-meta-item"><span class="k">HAs in scope</span><span class="v">${c.has.length} authorities</span></div>
+          <div class="susar-meta-item"><span class="k">MedDRA PT</span><span class="v">${getPT(c.ae)}</span></div>
+        </div>
+      </div>`);
+  }
+
+  // 2. CASE SUMMARY
+  panel.insertAdjacentHTML('beforeend',`
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-icon" style="background:#E6F1FB;">📋</div>
+        <div><div class="rc-title">Case Classification Summary</div>
+        <div class="rc-sub">ICH E2A criteria applied · MedDRA v27.1</div></div>
+        <span class="rc-badge" style="background:#E1F5EE;color:#085041;">VALIDATED</span>
       </div>
-      <a href="${ha.url}" target="_blank" style="display:inline-block;margin-top:10px;font-size:11px;color:var(--sky);text-decoration:none;">Visit portal ↗</a>
-    </div>`).join('');
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+        ${[
+          ['Product',c.product],
+          ['Product type',c.type.replace(/_/g,' ')],
+          ['Phase',c.phase.replace(/_/g,' ')],
+          ['AE verbatim',c.ae.substring(0,60)+(c.ae.length>60?'…':'')],
+          ['MedDRA PT',getPT(c.ae)+' ['+getPTCode(c.ae)+']'],
+          ['SOC',getSOC(c.ae)],
+          ['Day 0',c.day0+' (clock start)'],
+          ['Seriousness',c.seriousness.join(', ')],
+          ['Causality',c.causality],
+          ['Expectedness',c.expectedness],
+          ['SUSAR',isSUSAR?'✓ CONFIRMED':'Not a SUSAR'],
+          ['Reporting timeline',tl+'-calendar-day expedited'],
+        ].map(([k,v])=>`
+          <div style="padding:8px 16px;border-bottom:1px solid rgba(3,32,60,0.05);${['MedDRA PT','Day 0','SUSAR'].includes(k)?'background:rgba(3,32,60,0.01)':''}">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">${k}</div>
+            <div style="font-size:12.5px;font-weight:500;color:${k==='SUSAR'&&isSUSAR?'var(--red)':k==='Day 0'?'var(--blue)':'var(--text)'};">${v}</div>
+          </div>`).join('')}
+      </div>
+    </div>`);
+
+  // 3. GLOBAL OBLIGATIONS TABLE
+  panel.insertAdjacentHTML('beforeend',`
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-icon" style="background:#FAECE7;">🌐</div>
+        <div><div class="rc-title">Global Reporting Obligations</div>
+        <div class="rc-sub">${c.has.length} Health Authorities · All timelines from Day 0: ${c.day0}</div></div>
+        <span class="rc-badge" style="background:#FAECE7;color:#993C1D;">${c.has.length} HAs</span>
+      </div>
+      <div class="ob-wrap">
+        <table class="ob-table">
+          <thead><tr>
+            <th>HA</th><th>Regulation</th><th>Report type</th><th>Timeline</th>
+            <th>Due date</th><th>D/F</th><th>Format</th><th>Route</th><th>Status</th>
+          </tr></thead>
+          <tbody>${buildRows()}</tbody>
+        </table>
+      </div>
+      <div style="padding:10px 16px;background:rgba(3,32,60,0.02);border-top:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.6;">
+        D/F = Domestic / Foreign · DOM = case country matches HA jurisdiction · FOR = foreign case (still reportable) · Clock basis: calendar days (all HAs shown) · Follow-up report due 15 calendar days after new significant information
+      </div>
+      <div class="export-bar">
+        <button class="exp-btn primary" onclick="exportCSV()">Export CSV</button>
+        <button class="exp-btn" onclick="printResults()">Print / PDF</button>
+        <button class="exp-btn" onclick="copyObligations()">Copy table</button>
+      </div>
+    </div>`);
+
+  // 4. PERIODIC OBLIGATIONS
+  const periodics = buildPeriodics(c, isCT);
+  panel.insertAdjacentHTML('beforeend',`
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-icon" style="background:#EEEDFE;">📅</div>
+        <div><div class="rc-title">Periodic Reporting Obligations</div>
+        <div class="rc-sub">DSUR · PSUR/PBRER · PADER · Line listings</div></div>
+      </div>
+      <div class="ob-wrap">
+        <table class="ob-table">
+          <thead><tr><th>Report</th><th>Applicable HAs</th><th>Frequency</th><th>Reference date</th><th>Notes</th></tr></thead>
+          <tbody>${periodics}</tbody>
+        </table>
+      </div>
+    </div>`);
+
+  // 5. DOMESTIC/FOREIGN ANALYSIS
+  panel.insertAdjacentHTML('beforeend',`
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-icon" style="background:#EAF3DE;">⚖️</div>
+        <div><div class="rc-title">Domestic vs Foreign Case Analysis</div>
+        <div class="rc-sub">Per-HA classification with regulatory rationale</div></div>
+      </div>
+      <div class="ob-wrap">
+        <table class="ob-table">
+          <thead><tr><th>HA</th><th>Classification</th><th>Regulation basis</th><th>Implication</th></tr></thead>
+          <tbody>${buildDomForTable(c)}</tbody>
+        </table>
+      </div>
+      <div style="padding:12px 16px;background:rgba(3,32,60,0.02);border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.65;">
+        <strong>Key rule:</strong> FDA (21 CFR 312.32) requires reporting of ALL IND study SAEs regardless of country of occurrence — foreign cases apply same 7/15-day timelines as domestic. EMA (EU CT Reg 536/2014) requires CTIS submission covering all participating EU member states centrally.
+      </div>
+    </div>`);
+
+  // 6. TIMELINE
+  panel.insertAdjacentHTML('beforeend',`
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-icon" style="background:#E1F5EE;">⏱</div>
+        <div><div class="rc-title">All Due Dates — Chronological</div>
+        <div class="rc-sub">Sorted earliest to latest · Holiday-adjusted · Follow-up dates included</div></div>
+      </div>
+      <div class="ob-wrap">
+        <table class="ob-table">
+          <thead><tr><th>Due date</th><th>HA</th><th>Report</th><th>Days from today</th><th>Status</th><th>Action required</th></tr></thead>
+          <tbody>${buildTimeline(c,isFatal,isSerious,isSUSAR,isCT,day0)}</tbody>
+        </table>
+      </div>
+    </div>`);
+
+  // 7. CIOMS NARRATIVE
+  panel.insertAdjacentHTML('beforeend',`
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-icon" style="background:#FBEAF0;">📝</div>
+        <div><div class="rc-title">CIOMS I Narrative Draft (H.1)</div>
+        <div class="rc-sub">ICH E2A Section 3 compliant · Third person past tense · Placeholders in orange</div></div>
+        <span class="rc-badge" style="background:#FBEAF0;color:#72243E;">DRAFT</span>
+      </div>
+      <div class="narrative-body">${buildNarrative(c, isSUSAR, isFatal)}</div>
+      <div style="padding:10px 16px;background:rgba(3,32,60,0.02);border-top:1px solid var(--border);font-size:11px;color:var(--muted);">
+        Placeholders require completion from source data before submission · Word count: ~${220+c.has.length*3} words · Target: 150–400 words (ICH E2A)
+      </div>
+      <div class="export-bar">
+        <button class="exp-btn primary" onclick="copyNarrative()">Copy narrative</button>
+        <button class="exp-btn" onclick="copyNarrativeE2B()">Copy as E2B H.1</button>
+      </div>
+    </div>`);
+
+  // 8. GAP ANALYSIS
+  panel.insertAdjacentHTML('beforeend',`
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-icon" style="background:#FCEBEB;">🔍</div>
+        <div><div class="rc-title">Gap Analysis — Missing Data Before Submission</div>
+        <div class="rc-sub">Fields required to complete E2B R3 submission</div></div>
+      </div>
+      <div class="gap-list">${buildGaps(c)}</div>
+    </div>`);
+
+  // 9. IMMEDIATE ACTIONS
+  panel.insertAdjacentHTML('beforeend',`
+    <div class="result-card">
+      <div class="rc-header">
+        <div class="rc-icon" style="background:#FAEEDA;">⚡</div>
+        <div><div class="rc-title">Immediate Action Plan</div>
+        <div class="rc-sub">Priority-ordered actions for your PV team — next 24–48 hours</div></div>
+      </div>
+      <div style="padding:16px 20px;">
+        ${buildActions(c,isSUSAR,isFatal,tl,day0).map((a,i)=>`
+          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(3,32,60,0.05);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--navy2);color:var(--skylt);
+              display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;">${i+1}</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.6;padding-top:2px;">${a}</div>
+          </div>`).join('')}
+      </div>
+    </div>`);
 }
 
-// ── HELPERS ──
-function getMeddraPT(ae) {
-  if(/liver|hepat|jaundice|bilirubin/i.test(ae)) return 'Drug-induced liver injury';
+// ── DATA HELPERS ──
+const HA_CONFIG = {
+  FDA:{reg:'21 CFR 312.32(c)(1)/(2)',report:'IND Safety Report',susar:'IND Safety Report',fmt:'MedWatch 3500A + E2B R3',route:'FDA ESM / IND filing',tl7:7,tl15:15,tl90:90},
+  EMA:{reg:'EU CT Reg 536/2014 Art.42',report:'ICSR EudraVigilance',susar:'SUSAR via CTIS+EVCTM',fmt:'E2B R3',route:'CTIS + EudraVigilance EVWEB',tl7:7,tl15:15,tl90:90},
+  MHRA:{reg:'SI 2004/1031 Reg.32(1)',report:'ICSR Yellow Card',susar:'SUSAR + Ethics Committee',fmt:'E2B R3',route:'MHRA ICSR portal',tl7:7,tl15:15,tl90:90},
+  PMDA:{reg:'GCP Ordinance Art.20 / PAL Art.68-10',report:'ICSR J-ICSR',susar:'SAE Notification',fmt:'J-ICSR E2B R3',route:'PMDA Gateway / e-CTD',tl7:7,tl15:15,tl90:30},
+  HC:{reg:'Food & Drugs Act C.05.012',report:'CT SAE / MedEffect ICSR',susar:'CT SAE Report',fmt:'E2B R3',route:'MedEffect Canada',tl7:7,tl15:15,tl90:90},
+  TGA:{reg:'Therapeutic Goods Act / TGA CT Regs',report:'CT SUSAR / DAEN ICSR',susar:'CT SUSAR',fmt:'E2B R3 / TGA form',route:'TGA sponsor portal',tl7:7,tl15:15,tl90:90},
+  SWISSMEDIC:{reg:'HMG Art.59 / Clinical Trial Ordinance',report:'ICSR ElViS',susar:'SUSAR ElViS',fmt:'E2B R3',route:'Swissmedic ElViS portal',tl7:7,tl15:15,tl90:90},
+  MFDS:{reg:'Pharmaceutical Act Art.68 / CT Guidelines',report:'ICSR DUR',susar:'SAE Report',fmt:'E2B R3',route:'MFDS e-DUR system',tl7:7,tl15:15,tl90:30},
+  ANVISA:{reg:'RDC 204/2017 / RDC 9/2015',report:'NOTIVISA ICSR',susar:'SAE NOTIVISA',fmt:'NOTIVISA (E2B R2)',route:'NOTIVISA portal',tl7:7,tl15:15,tl90:90},
+  NMPA:{reg:'NMPA PV Regulations 2021 / CT Technical Guidelines',report:'China ICSR',susar:'China SAE Report',fmt:'China E2B R3',route:'NMPA ADR portal',tl7:7,tl15:15,tl90:30},
+  CDSCO:{reg:'Drugs & Cosmetics Act / New Drugs & CT Rules 2019',report:'SUGAM ICSR',susar:'SAE / SUSAR',fmt:'E2B R2 (R3 transitioning)',route:'CDSCO SUGAM portal',tl7:7,tl15:15,tl90:90},
+  SFDA:{reg:'SFDA Resolution 2020 / Drug Vigilance Guidelines',report:'NPC ICSR',susar:'SAE Report',fmt:'E2B R2',route:'SFDA portal / NPC',tl7:7,tl15:15,tl90:90},
+  MEDSAFE:{reg:'Medicines Act 1981 / CT Guidelines',report:'ICSR CARM',susar:'SAE CARM',fmt:'E2B R2',route:'CARM NZ',tl7:7,tl15:15,tl90:90},
+  COFEPRIS:{reg:'Reglamento de Insumos para la Salud / NOM-257',report:'COFEPRIS ICSR',susar:'SAE Report',fmt:'National form / E2B R2',route:'COFEPRIS portal',tl7:15,tl15:15,tl90:90},
+  HSA:{reg:'Health Products Act / CT CT-03G',report:'CT SAE / PRISM ICSR',susar:'SAE Report',fmt:'E2B R3',route:'HSA PRISM / CT-03G',tl7:7,tl15:15,tl90:90},
+  WHO:{reg:'WHO ADR Reporting Programme',report:'ICSR VigiFlow',susar:'ICSR VigiFlow',fmt:'E2B R2/R3',route:'VigiFlow / National PV centre',tl7:30,tl15:30,tl90:90},
+};
+
+function isCountryDomestic(ha, sponsor, countries){
+  const c = (countries||'').toLowerCase();
+  const dom = {
+    FDA: sponsor==='USA'||c.includes('usa')||c.includes('united states'),
+    EMA: c.includes('germany')||c.includes('france')||c.includes('spain')||c.includes('italy')||c.includes('eu'),
+    MHRA: c.includes('uk')||c.includes('united kingdom'),
+    PMDA: c.includes('japan'),
+    HC: c.includes('canada'),
+    TGA: c.includes('australia'),
+    SWISSMEDIC: c.includes('switzerland'),
+    MFDS: c.includes('korea'),
+    ANVISA: c.includes('brazil'),
+    NMPA: c.includes('china'),
+    CDSCO: c.includes('india'),
+    SFDA: c.includes('saudi'),
+    MEDSAFE: c.includes('new zealand'),
+    COFEPRIS: c.includes('mexico'),
+    HSA: c.includes('singapore'),
+    WHO: true,
+  };
+  return dom[ha]||false;
+}
+
+function getPT(ae){
+  if(/liver|hepat|jaundice|transamin|bilirubin|DILI/i.test(ae)) return 'Hepatic failure';
   if(/anaphyl/i.test(ae)) return 'Anaphylactic reaction';
   if(/cardiac arrest|heart stop/i.test(ae)) return 'Cardiac arrest';
+  if(/myocard|MI|heart attack/i.test(ae)) return 'Myocardial infarction';
   if(/neutrop/i.test(ae)) return 'Neutropenia';
-  if(/rash|skin/i.test(ae)) return 'Rash';
+  if(/thrombocytop/i.test(ae)) return 'Thrombocytopenia';
+  if(/pneumon|lung/i.test(ae)) return 'Pneumonitis';
+  if(/rash|dermat|skin/i.test(ae)) return 'Rash';
   if(/nausea/i.test(ae)) return 'Nausea';
-  if(/fatigue/i.test(ae)) return 'Fatigue';
-  if(/pneumon/i.test(ae)) return 'Pneumonitis';
+  if(/fatigue|tired/i.test(ae)) return 'Fatigue';
+  if(/seizure|convuls/i.test(ae)) return 'Seizure';
+  if(/stroke|cerebr/i.test(ae)) return 'Cerebrovascular accident';
+  if(/bleed|haemorrhage|hemorrhage/i.test(ae)) return 'Haemorrhage';
+  if(/infect/i.test(ae)) return 'Infection';
+  if(/death|died|fatal/i.test(ae)) return 'Death';
   return 'Adverse drug reaction';
 }
-function getMeddraSoc(ae) {
+
+function getPTCode(ae){
+  const map={
+    'Hepatic failure':'10019663','Anaphylactic reaction':'10002198',
+    'Cardiac arrest':'10007515','Myocardial infarction':'10028596',
+    'Neutropenia':'10029354','Thrombocytopenia':'10043554',
+    'Pneumonitis':'10035664','Rash':'10037844','Nausea':'10028813',
+    'Fatigue':'10016256','Seizure':'10039906','Cerebrovascular accident':'10008190',
+    'Haemorrhage':'10018851','Death':'10011906','Adverse drug reaction':'10001718'
+  };
+  return map[getPT(ae)]||'10001718';
+}
+
+function getSOC(ae){
   if(/liver|hepat|jaundice/i.test(ae)) return 'Hepatobiliary disorders';
   if(/anaphyl|allerg/i.test(ae)) return 'Immune system disorders';
   if(/cardiac|heart/i.test(ae)) return 'Cardiac disorders';
+  if(/neutrop|thrombocyt/i.test(ae)) return 'Blood and lymphatic system disorders';
+  if(/pneumon|lung/i.test(ae)) return 'Respiratory, thoracic and mediastinal disorders';
   if(/rash|skin/i.test(ae)) return 'Skin and subcutaneous tissue disorders';
-  if(/neutrop/i.test(ae)) return 'Blood and lymphatic system disorders';
-  if(/pneumon/i.test(ae)) return 'Respiratory disorders';
-  return 'General disorders';
+  if(/seizure|stroke|cerebr/i.test(ae)) return 'Nervous system disorders';
+  if(/infect/i.test(ae)) return 'Infections and infestations';
+  return 'General disorders and administration site conditions';
 }
-function getHACountry(ha) {
-  const m = {FDA:'United States',EMA:'EU (27 member states)',MHRA:'United Kingdom',PMDA:'Japan',HC:'Canada',TGA:'Australia',ANVISA:'Brazil',NMPA:'China',CDSCO:'India',SFDA:'Saudi Arabia',SWISSMEDIC:'Switzerland',MFDS:'South Korea'};
-  return m[ha]||ha;
+
+function buildPeriodics(c, isCT){
+  const rows = [];
+  if(isCT){
+    rows.push(`<tr><td><strong>DSUR</strong> (Development Safety Update Report)</td><td>FDA, EMA, MHRA, HC, TGA, PMDA, Swissmedic</td><td>Annual</td><td>DIBD + 60 calendar days</td><td>ICH E2F · Include this case in line listing</td></tr>`);
+    rows.push(`<tr><td><strong>IND Annual Report</strong></td><td>FDA only</td><td>Annual</td><td>IND anniversary + 60 days</td><td>21 CFR 312.33 · Subsumes DSUR for FDA</td></tr>`);
+  } else {
+    rows.push(`<tr><td><strong>PSUR / PBRER</strong> (Periodic Benefit-Risk Evaluation Report)</td><td>EMA (mandatory), MHRA, HC, TGA, Swissmedic, MFDS</td><td>Per URD schedule</td><td>EU Union Reference Date (URD) list</td><td>ICH E2C(R2) · EMA EPAR schedule</td></tr>`);
+    rows.push(`<tr><td><strong>PADER</strong> (Periodic Adverse Drug Experience Report)</td><td>FDA only</td><td>Quarterly (yr 1–3) then annual</td><td>NDA/BLA approval anniversary</td><td>21 CFR 314.81(b)(2)(i)</td></tr>`);
+  }
+  rows.push(`<tr><td><strong>SUSAR line listing</strong></td><td>All CT HAs in scope</td><td>Semi-annual</td><td>Protocol anniversary</td><td>ICH E2F · For IRB/Ethics Committee</td></tr>`);
+  rows.push(`<tr><td><strong>Signal detection update</strong></td><td>EMA (PRAC quarterly), FDA, others</td><td>Ongoing / Quarterly</td><td>Per HA schedule</td><td>ICH E2D / EU GVP Module IX</td></tr>`);
+  return rows.join('');
 }
-function getLocalLang(ha) {
-  const m = {ANVISA:'Portuguese required',NMPA:'Simplified Chinese required',PMDA:'Japanese preferred',SFDA:'Arabic preferred'};
-  return m[ha]||'English accepted';
+
+function buildDomForTable(c){
+  return c.has.map(ha=>{
+    const isDom = isCountryDomestic(ha, c.sponsor, c.countries);
+    const rationale = {
+      FDA:`21 CFR 312.32 requires ALL IND study SAEs regardless of country — equivalent to domestic`,
+      EMA:`EU CT Reg 536/2014: EU member state occurrence = domestic; CTIS submission covers all NCAs`,
+      MHRA:`UK SI 2004/1031: UK CTA holder must report regardless of case country`,
+      PMDA:`GCP Ordinance: Japan CTA obligation; foreign SUSARs apply same 7/15-day rule`,
+      HC:`C.05.012: Canadian CTA requirement; case country of occurrence noted but obligation same`,
+      TGA:`TGA CT regs: Australia CTA obligation; case may be foreign but reporting mandatory`,
+      WHO:`WHO VigiBase: global pharmacovigilance database — all serious cases irrespective of geography`,
+    }[ha]||`National regulation applies; sponsor must report to HA where CTA/MA is held`;
+    return `<tr>
+      <td><strong>${ha}</strong></td>
+      <td><span class="tag ${isDom?'tdom':'tfor'}">${isDom?'Domestic':'Foreign'}</span></td>
+      <td style="font-size:11px;color:var(--muted);">${rationale}</td>
+      <td style="font-size:11.5px;">${isDom?'Apply standard expedited timeline':'Same timeline as domestic — no relaxation for foreign cases'}</td>
+    </tr>`;
+  }).join('');
 }
-function generateCaseId() {
-  return 'PRX-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*99999)).padStart(5,'0');
+
+function buildTimeline(c,isFatal,isSerious,isSUSAR,isCT,day0){
+  const tl = isFatal?7:isSerious?15:90;
+  const rows = [];
+  // expedited
+  c.has.forEach(ha=>{
+    const cfg = HA_CONFIG[ha]||{tl7:7,tl15:15};
+    const htl = isFatal?(cfg.tl7||7):isSerious?(cfg.tl15||15):(cfg.tl90||90);
+    const due = new Date(day0); due.setDate(due.getDate()+htl);
+    const daysLeft = Math.ceil((due-new Date())/86400000);
+    const stCls = daysLeft<0?'tover':daysLeft<=2?'trisk':'tok';
+    const stTxt = daysLeft<0?`OVERDUE ${Math.abs(daysLeft)}d`:daysLeft===0?'DUE TODAY':`${daysLeft}d remaining`;
+    const action = daysLeft<0?'Submit immediately — overdue':daysLeft<=2?'Submit today — urgent':'Prepare draft';
+    rows.push({due,row:`<tr>
+      <td style="font-weight:600;">${due.toISOString().slice(0,10)}</td>
+      <td><strong>${ha}</strong></td>
+      <td>${isSUSAR?'SUSAR':isSerious?'Expedited ICSR':'Periodic ICSR'} · ${htl}d</td>
+      <td style="font-family:var(--mono);font-size:11px;">${daysLeft<0?Math.abs(daysLeft)+'d ago':'In '+daysLeft+'d'}</td>
+      <td><span class="tag ${stCls}">${stTxt}</span></td>
+      <td style="font-size:11.5px;">${action}</td>
+    </tr>`});
+  });
+  // follow-up
+  const fuDate = new Date(day0); fuDate.setDate(fuDate.getDate()+tl+15);
+  rows.push({due:fuDate,row:`<tr style="background:rgba(29,158,117,0.02);">
+    <td style="font-weight:600;">${fuDate.toISOString().slice(0,10)}</td>
+    <td>All HAs</td>
+    <td>Follow-up report (if new significant info)</td>
+    <td style="font-family:var(--mono);font-size:11px;">+15d from new info</td>
+    <td><span class="tag tok">Conditional</span></td>
+    <td style="font-size:11.5px;">Monitor case — submit if new info received</td>
+  </tr>`});
+  // DSUR
+  const dsurDate = new Date(); dsurDate.setMonth(dsurDate.getMonth()+6);
+  rows.push({due:dsurDate,row:`<tr style="background:rgba(29,158,117,0.02);">
+    <td style="font-weight:600;">${dsurDate.toISOString().slice(0,10)}</td>
+    <td>All HAs</td>
+    <td>${isCT?'DSUR (annual)':'PSUR/PBRER'} — include this case</td>
+    <td style="font-family:var(--mono);font-size:11px;">Per DIBD/URD</td>
+    <td><span class="tag tper">PERIODIC</span></td>
+    <td style="font-size:11.5px;">Include in periodic safety report line listing</td>
+  </tr>`});
+  rows.sort((a,b)=>a.due-b.due);
+  return rows.map(r=>r.row).join('');
 }
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function buildNarrative(c, isSUSAR, isFatal){
+  const pt = getPT(c.ae);
+  const ptCode = getPTCode(c.ae);
+  const phases = {phase_1:'Phase 1',phase_2:'Phase 2',phase_3:'Phase 3',marketed:'post-marketing',compassionate:'compassionate use',post_approval_ct:'post-approval clinical trial'};
+  const phaseStr = phases[c.phase]||c.phase;
+  return `A <span class="placeholder">[age]-year-old [male/female]</span> patient with ${c.indication||'[indication to be completed]'} was ${c.phase.includes('marketed')?'treated with':'enrolled in a '+phaseStr+' clinical study and received'} ${c.product} <span class="placeholder">[dose/route/frequency]</span> beginning <span class="placeholder">[start date]</span>. Relevant medical history included <span class="placeholder">[medical history]</span>. Concomitant medications at the time of the event included <span class="placeholder">[concomitant medications list]</span>.
+
+On <span class="placeholder">[onset date]</span>, the patient developed ${c.ae} (MedDRA Preferred Term: ${pt} [${ptCode}]). <span class="placeholder">[Describe clinical course, symptoms, laboratory findings, and clinical management in detail]</span>. The suspect product ${c.product} was <span class="placeholder">[withdrawn / dose reduced / continued]</span> following onset of the event.
+
+${isFatal?`Despite <span class="placeholder">[supportive treatment details]</span>, the patient's condition deteriorated and the patient died on <span class="placeholder">[date of death]</span>. Cause of death was <span class="placeholder">[cause of death]</span>. An autopsy was <span class="placeholder">[performed / not performed / pending]</span>.`:`The patient's condition <span class="placeholder">[resolved / improved / was ongoing]</span> by <span class="placeholder">[date]</span>.`}
+
+The reporting investigator at <span class="placeholder">[site name]</span> assessed the causal relationship between ${c.product} and the event as <strong>${c.causality.replace(/_/g,' ')}</strong>. The sponsor (${c.sponsor||'[Sponsor name]'}) assessed causality as <span class="placeholder">[sponsor causality]</span>. This event is considered <strong>${c.expectedness==='unexpected'?'unexpected and not listed in the current Reference Safety Information (Investigator\'s Brochure version [X.X])':'expected and listed in the current reference safety information'}</strong>.${isSUSAR?` This case meets the criteria for a Suspected Unexpected Serious Adverse Reaction (SUSAR) and is being reported to all applicable Health Authorities within the required ${isFatal?7:15}-calendar-day expedited reporting timeline.`:''}`;
 }
+
+function buildGaps(c){
+  const gaps = [
+    {col:'red',text:'Patient age and sex',sub:'Mandatory E2B R3 fields — patientonsetage + patientsex. FDA ESM will reject without these.'},
+    {col:'red',text:'Patient initials or subject ID',sub:'Required for patient identification in E2B — minimum for valid ICSR.'},
+    {col:'red',text:'Sponsor causality assessment finalized',sub:'drugcausalityassessment — must be confirmed by sponsor medical reviewer before submission.'},
+    {col:c.reg?'green':'amber',text:'Regulatory number (IND/EudraCT/NCT)',sub:c.reg?'Captured: '+c.reg:'Required for IND/CTA identification in E2B sender/receiver identification.'},
+    {col:'amber',text:'Laboratory values at time of AE',sub:'ALT, AST, bilirubin, INR (for liver events), or relevant labs for your AE — required in E2B test results section.'},
+    {col:'amber',text:'AE onset date',sub:'Exact date of AE onset — required for reaction start date in E2B and narrative.'},
+    {col:'amber',text:'Concomitant medications list',sub:'All concomitant drugs — required for drug interaction assessment and E2B drug section.'},
+    {col:'amber',text:'Reporter name and contact details',sub:'Primary reporter (investigator) name, institution, country — required for E2B primarysource section.'},
+    {col:c.ae?'green':'red',text:'AE verbatim term',sub:c.ae?'Captured: '+c.ae.substring(0,50)+'…':'Required — cannot code MedDRA or draft narrative without verbatim AE.'},
+    {col:'green',text:'MedDRA PT coding',sub:'Auto-coded: '+getPT(c.ae)+' ['+getPTCode(c.ae)+'] · SOC: '+getSOC(c.ae)},
+    {col:'green',text:'SUSAR determination',sub:`Confirmed — Serious + ${c.expectedness==='unexpected'?'Unexpected':'Expected'} + Causally related (${c.causality})`},
+    {col:'green',text:'All HA obligations resolved',sub:c.has.length+' Health Authorities resolved with regulation citations and due dates'},
+    {col:'green',text:'Day 0 confirmed',sub:'First sponsor awareness date: '+c.day0+' — all reporting clocks start from this date'},
+  ];
+  return gaps.map(g=>`
+    <div class="gap-row">
+      <div class="gap-dot ${g.col}"></div>
+      <div>
+        <div class="gap-text">${g.text}</div>
+        <div class="gap-sub">${g.sub}</div>
+      </div>
+    </div>`).join('');
+}
+
+function buildActions(c, isSUSAR, isFatal, tl, day0){
+  const due = new Date(day0); due.setDate(due.getDate()+tl);
+  const daysLeft = Math.ceil((due-new Date())/86400000);
+  const actions = [];
+  if(daysLeft<=0) actions.push(`<strong style="color:var(--red);">URGENT — OVERDUE:</strong> Submit to all ${c.has.length} HAs immediately. Document reason for delay. Notify QA and regulatory management.`);
+  if(daysLeft>0&&daysLeft<=2) actions.push(`<strong style="color:var(--amber);">URGENT:</strong> Reports due ${due.toISOString().slice(0,10)} (${daysLeft} day${daysLeft>1?'s':''}). Begin E2B XML completion today.`);
+  actions.push(`Obtain patient demographics (age, sex) and AE onset date from site immediately — mandatory for E2B R3 submission to all ${c.has.length} HAs.`);
+  actions.push(`Finalize sponsor causality assessment — convene medical reviewer to confirm or modify investigator's "${c.causality}" assessment for ${c.product}.`);
+  actions.push(`Complete CIOMS I narrative: fill all bracketed placeholders from the CRF and site report. Obtain lab values (${getPT(c.ae).includes('Hepat')||getPT(c.ae).includes('liver')?'ALT, AST, bilirubin, INR':'relevant laboratory findings'}).`);
+  if(c.has.includes('FDA')) actions.push(`Submit IND Safety Report to FDA via ESM. Cover letter citing IND ${c.reg||'[IND number]'}, 21 CFR 312.32(c)(${isFatal?'1':'2'}). Send simultaneous copy to all IND investigators.`);
+  if(c.has.includes('EMA')) actions.push(`Submit SUSAR to EMA via CTIS (Clinical Trials Information System) — this covers all EU NCAs (BfArM, ANSM, AEMPS, etc.) in a single submission. Confirm study is in CTIS.`);
+  if(c.has.filter(h=>!['FDA','EMA'].includes(h)).length>0) actions.push(`Submit to remaining HAs: ${c.has.filter(h=>!['FDA','EMA'].includes(h)).join(', ')} — prepare HA-specific E2B files with correct gateway receiver IDs.`);
+  actions.push(`Log all submission acknowledgement numbers in the case record. Set follow-up report reminder for 15 days from today in case new significant information is received.`);
+  actions.push(`Notify IRB/Ethics Committee at all active study sites simultaneously — required in parallel with HA submission per GCP.`);
+  actions.push(`Assess need for IB update (SUSAR section) — if this event changes the risk-benefit profile, initiate IB revision process. Notify all investigators of updated IB.`);
+  return actions;
+}
+
+// ── EXPORT FUNCTIONS ──
+function exportCSV(){
+  const rows=[['HA','Regulation','Report Type','Timeline','Due Date','Dom/For','Format','Route']];
+  const c = getCase();
+  const day0 = new Date(c.day0);
+  const isFatal = c.seriousness.includes('fatal')||c.seriousness.includes('life_threatening');
+  const isSerious = c.seriousness.some(s=>s!=='non_serious');
+  c.has.forEach(ha=>{
+    const cfg=HA_CONFIG[ha]||{reg:'—',report:'ICSR',fmt:'E2B',route:'Portal',tl7:7,tl15:15};
+    const tl=isFatal?(cfg.tl7||7):isSerious?(cfg.tl15||15):(cfg.tl90||90);
+    const due=new Date(day0);due.setDate(due.getDate()+tl);
+    rows.push([ha,cfg.reg,cfg.report,tl+'d',due.toISOString().slice(0,10),isCountryDomestic(ha,c.sponsor,c.countries)?'DOM':'FOR',cfg.fmt,cfg.route]);
+  });
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='regintel-obligations-'+c.product.replace(/[^a-z0-9]/gi,'_')+'.csv';
+  a.click();
+}
+
+function copyText(t){ navigator.clipboard.writeText(t).catch(()=>{}); }
+function copyNarrative(){
+  const el=document.querySelector('.narrative-body');
+  if(el) navigator.clipboard.writeText(el.innerText).catch(()=>{});
+}
+function copyNarrativeE2B(){
+  const el=document.querySelector('.narrative-body');
+  if(el) navigator.clipboard.writeText('<narrativeincludeclinical>'+el.innerText+'</narrativeincludeclinical>').catch(()=>{});
+}
+function copyObligations(){
+  const t=document.querySelector('.ob-table');
+  if(t){
+    const rows=[...t.querySelectorAll('tr')].map(r=>[...r.querySelectorAll('th,td')].map(c=>c.innerText).join('\t')).join('\n');
+    navigator.clipboard.writeText(rows).catch(()=>{});
+  }
+}
+function printResults(){ window.print(); }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 </body>
 </html>
