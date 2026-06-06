@@ -1065,8 +1065,37 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
     WHO:      {name:'WHO/UMC',fullname:'World Health Organization — VigiBase',flag:'🌍',country:'Global / International',countryCode:'WW',color:'#5F5E5A',bg:'#F1EFE8'},
   };
 
+  // Map case attributes to condition string
+  function getCaseCondition(isFatal, isSerious, isSUSAR, isCT, c){
+    const isUnexp = c.expectedness==='unexpected'||c.expectedness==='unknown';
+    const isRelated = ['related','possibly'].includes(c.causality);
+    if(isCT && isFatal && isUnexp && isRelated) return 'ct_susar_fatal';
+    if(isCT && isSerious && isUnexp && isRelated) return 'ct_susar_serious';
+    if(!isCT && isFatal && isUnexp) return 'mkt_unexpected_serious';
+    if(!isCT && isSerious && isUnexp) return 'mkt_unexpected_serious';
+    if(!isCT && isSerious && !isUnexp) return 'mkt_expected_serious';
+    if(!isSerious) return 'non_serious';
+    return 'ct_susar_serious';
+  }
+
+  // Filter which report rows apply to this case
+  function getApplicableReports(ha, condition){
+    const cfg = HA_CONFIG[ha];
+    if(!cfg || !cfg.reports) return [];
+    return cfg.reports.filter(r => {
+      if(r.condition === 'always') return true;
+      if(r.condition === 'periodic') return true;
+      if(r.condition === 'signal') return false; // shown separately
+      if(r.condition === condition) return true;
+      // escalation: ct_susar_fatal also shows ct_susar_serious (follow-up)
+      if(condition === 'ct_susar_fatal' && r.condition === 'ct_susar_serious') return false;
+      if(condition === 'mkt_unexpected_serious' && r.condition === 'mkt_expected_serious') return false;
+      return false;
+    });
+  }
+
   function getHAObligation(ha, c, isFatal, isSerious, isSUSAR, isCT, day0) {
-    const cfg = HA_CONFIG[ha] || {reg:'National regulation',report:'ICSR',susar:'SAE Report',fmt:'E2B R3',route:'National portal',tl7:7,tl15:15,tl90:90};
+    const cfg = HA_CONFIG[ha]||{reg:'National regulation',report:'ICSR',susar:'SAE Report',fmt:'E2B R3',route:'National portal',tl7:7,tl15:15,tl90:90,reports:[]};
     const htl = isFatal?(cfg.tl7||7):isSerious?(cfg.tl15||15):(cfg.tl90||90);
     const isDom = isCountryDomestic(ha, c.sponsor, c.countries);
     const due = new Date(day0); due.setDate(due.getDate()+htl);
@@ -1075,13 +1104,6 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
     return {
       cfg, htl, isDom, due, daysLeft, isNonSerious,
       reportName: isSUSAR ? (cfg.susar||cfg.report) : cfg.report,
-      status: daysLeft<0?'over':daysLeft<=2?'risk':'ok',
-      statusTxt: daysLeft<0?`${Math.abs(daysLeft)}d OVERDUE`:daysLeft===0?'DUE TODAY':`${daysLeft}d left`,
-      tlTag: htl<=7?'t7':htl<=15?'t15':htl<=30?'t30':htl<=90?'t90':'tper',
-      tlLabel: htl===7?'7 calendar days':htl===15?'15 calendar days':htl===30?'30 days':htl===90?'90 days':'Periodic',
-      stripeColor: daysLeft<0?'#E24B4A':daysLeft<=2?'#EF9F27':htl>30?'#7F77DD':'#1D9E75',
-    };
-  }
 
   // ── Summary header ──
   const allDue = c.has.map(ha=>{
@@ -1190,43 +1212,65 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
           </div>
           <div class="t-ha-body" id="habody-${hid}">`;
 
-      // ── Expedited report row ──
-      const reportTypeLabel = isSUSAR ? ob.reportName : (isSerious ? ob.reportName : 'Periodic ICSR');
-      html += `
-            <div class="t-report" style="cursor:default;" onmouseenter="showDetail('det-${hid}')" onmouseleave="hideDetail('det-${hid}')">
+      // ── Report rows from HA_CONFIG.reports[] ──
+      const condition = getCaseCondition(isFatal, isSerious, isSUSAR, isCT, c);
+      const applicableReports = getApplicableReports(ha, condition);
+
+      if(applicableReports.length === 0){
+        // fallback single row
+        html += `
+            <div class="t-report" style="cursor:default;">
               <div class="t-report-stripe" style="background:${ob.stripeColor};"></div>
               <div class="t-report-inner">
-                <div style="display:flex;flex-direction:column;gap:2px;min-width:180px;">
-                  <span class="t-report-type">${reportTypeLabel}</span>
-                  <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">${ob.cfg.reg.split(';')[0]}</span>
-                </div>
+                <span class="t-report-type">${ob.reportName}</span>
                 <span class="tag ${ob.tlTag}">${ob.tlLabel}</span>
-                <span style="font-size:11px;color:var(--muted);">Due: <strong style="color:var(--text);">${ob.due.toISOString().slice(0,10)}</strong></span>
+                <span style="font-size:11px;color:var(--muted);">Due: <strong>${ob.due.toISOString().slice(0,10)}</strong></span>
                 <span style="margin-left:auto;"><span class="tag ${ob.status==='over'?'tover':ob.status==='risk'?'trisk':'tok'}">${ob.statusTxt}</span></span>
-                <div id="det-${hid}" class="t-report-detail">
-                  <strong>Format:</strong> ${ob.cfg.fmt} &nbsp;·&nbsp; <strong>Route:</strong> ${ob.cfg.route}<br>
-                  <strong>Clock:</strong> Calendar days from Day 0 (${c.day0}) &nbsp;·&nbsp; <strong>Classification:</strong> ${isDom?'Domestic — case country matches HA jurisdiction':'Foreign — case from outside HA jurisdiction, still reportable'}<br>
-                  <strong>Follow-up:</strong> Due 15 calendar days after any new significant information received
-                </div>
               </div>
             </div>`;
+      } else {
+        applicableReports.forEach((rep, ri) => {
+          const isPeriodic = rep.condition === 'periodic' || rep.condition === 'always';
+          const repTL = rep.tl;
+          let repDue = null, repDaysLeft = null, repStatus = 'ok', repStatusTxt = '', repStripe = '#1D9E75';
+          let repTlTag = 'tper', repTlLabel = rep.tlBasis;
 
-      // ── Periodic report row (always shown) ──
-      const periodicName = isCT ? 'DSUR (annual)' : 'PSUR / PBRER';
-      const periodicRef = isCT ? 'ICH E2F · 60 days after DIBD' : 'Per EURD / URD list';
-      html += `
-            <div class="t-report" style="background:rgba(127,119,221,0.02);cursor:default;">
-              <div class="t-report-stripe" style="background:#7F77DD;"></div>
+          if(repTL && !isPeriodic){
+            repDue = new Date(day0); repDue.setDate(repDue.getDate()+repTL);
+            repDaysLeft = Math.ceil((repDue-new Date())/86400000);
+            repStatus = repDaysLeft<0?'over':repDaysLeft<=2?'risk':'ok';
+            repStatusTxt = repDaysLeft<0?`${Math.abs(repDaysLeft)}d OVERDUE`:repDaysLeft===0?'DUE TODAY':`${repDaysLeft}d left`;
+            repStripe = repDaysLeft<0?'#E24B4A':repDaysLeft<=2?'#EF9F27':'#1D9E75';
+            repTlTag = repTL<=7?'t7':repTL<=15?'t15':repTL<=30?'t30':'t90';
+            repTlLabel = repTL===7?'7 calendar days':repTL===15?'15 calendar days':repTL===30?'30 days':repTL===90?'90 days':rep.tlBasis;
+          } else {
+            repStripe = rep.condition==='always'?'#878580':'#7F77DD';
+            repTlTag = 'tper';
+          }
+
+          const detId = `det-${hid}-${ri}`;
+          html += `
+            <div class="t-report" onmouseenter="showDetail('${detId}')" onmouseleave="hideDetail('${detId}')">
+              <div class="t-report-stripe" style="background:${repStripe};"></div>
               <div class="t-report-inner">
-                <div style="display:flex;flex-direction:column;gap:2px;min-width:180px;">
-                  <span class="t-report-type" style="color:#3C3489;">${periodicName}</span>
-                  <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">${periodicRef}</span>
+                <div style="display:flex;flex-direction:column;gap:1px;min-width:200px;">
+                  <span class="t-report-type" style="${isPeriodic?'color:#3C3489;':''}">${rep.label}</span>
+                  <span style="font-size:10px;color:#378ADD;font-family:var(--mono);">${rep.reg}</span>
                 </div>
-                <span class="tag tper">Periodic</span>
-                <span style="font-size:11px;color:var(--muted);">Per ${isCT?'DIBD anniversary':'product URD schedule'}</span>
-                <span style="margin-left:auto;"><span class="tag tper">Include in report</span></span>
+                <span class="tag ${repTlTag}" style="flex-shrink:0;">${repTlLabel}</span>
+                ${repDue?`<span style="font-size:11px;color:var(--muted);">Due: <strong style="color:var(--text);">${repDue.toISOString().slice(0,10)}</strong></span>`:`<span style="font-size:11px;color:var(--muted);">${repTlLabel}</span>`}
+                <span style="margin-left:auto;flex-shrink:0;">
+                  ${repDaysLeft!==null?`<span class="tag ${repStatus==='over'?'tover':repStatus==='risk'?'trisk':'tok'}">${repStatusTxt}</span>`:`<span class="tag tper">${isPeriodic?'Periodic':'—'}</span>`}
+                </span>
+                <div id="${detId}" class="t-report-detail" style="display:none;">
+                  <div style="font-size:11.5px;font-weight:500;color:var(--navy);margin-bottom:4px;">${rep.regFull}</div>
+                  <div><strong>Format:</strong> ${rep.format} &nbsp;·&nbsp; <strong>Route:</strong> ${rep.route}</div>
+                  <div style="margin-top:4px;color:var(--muted);">${rep.notes}</div>
+                </div>
               </div>
             </div>`;
+        });
+      }
 
       html += `</div></div>`; // close ha-body, t-ha
     });
@@ -1318,24 +1362,181 @@ function hideDetail(id){ const el=document.getElementById(id); if(el) el.style.d
 
 
 // ── DATA HELPERS ──
+
+// Each HA entry has: primary reg, plus a 'reports' array (one per applicable regulation/report type)
+// reports[]: { label, reg, regFull, condition, tl, tlBasis, format, route, notes }
+// condition: 'ct_susar_fatal'|'ct_susar_serious'|'mkt_unexpected_fatal'|'mkt_unexpected_serious'|
+//            'mkt_expected_serious'|'non_serious'|'periodic'|'signal'|'always'
+
 const HA_CONFIG = {
-  FDA:{reg:'21 CFR 312.32(c)(1)/(2)',report:'IND Safety Report',susar:'IND Safety Report',fmt:'MedWatch 3500A + E2B R3',route:'FDA ESM / IND filing',tl7:7,tl15:15,tl90:90},
-  EMA:{reg:'EU CT Reg 536/2014 Art.42',report:'ICSR EudraVigilance',susar:'SUSAR via CTIS+EVCTM',fmt:'E2B R3',route:'CTIS + EudraVigilance EVWEB',tl7:7,tl15:15,tl90:90},
-  MHRA:{reg:'SI 2004/1031 Reg.32(1)',report:'ICSR Yellow Card',susar:'SUSAR + Ethics Committee',fmt:'E2B R3',route:'MHRA ICSR portal',tl7:7,tl15:15,tl90:90},
-  PMDA:{reg:'GCP Ordinance Art.20 / PAL Art.68-10',report:'ICSR J-ICSR',susar:'SAE Notification',fmt:'J-ICSR E2B R3',route:'PMDA Gateway / e-CTD',tl7:7,tl15:15,tl90:30},
-  HC:{reg:'Food & Drugs Act C.05.012',report:'CT SAE / MedEffect ICSR',susar:'CT SAE Report',fmt:'E2B R3',route:'MedEffect Canada',tl7:7,tl15:15,tl90:90},
-  TGA:{reg:'Therapeutic Goods Act / TGA CT Regs',report:'CT SUSAR / DAEN ICSR',susar:'CT SUSAR',fmt:'E2B R3 / TGA form',route:'TGA sponsor portal',tl7:7,tl15:15,tl90:90},
-  SWISSMEDIC:{reg:'HMG Art.59 / Clinical Trial Ordinance',report:'ICSR ElViS',susar:'SUSAR ElViS',fmt:'E2B R3',route:'Swissmedic ElViS portal',tl7:7,tl15:15,tl90:90},
-  MFDS:{reg:'Pharmaceutical Act Art.68 / CT Guidelines',report:'ICSR DUR',susar:'SAE Report',fmt:'E2B R3',route:'MFDS e-DUR system',tl7:7,tl15:15,tl90:30},
-  ANVISA:{reg:'RDC 204/2017 / RDC 9/2015',report:'NOTIVISA ICSR',susar:'SAE NOTIVISA',fmt:'NOTIVISA (E2B R2)',route:'NOTIVISA portal',tl7:7,tl15:15,tl90:90},
-  NMPA:{reg:'NMPA PV Regulations 2021 / CT Technical Guidelines',report:'China ICSR',susar:'China SAE Report',fmt:'China E2B R3',route:'NMPA ADR portal',tl7:7,tl15:15,tl90:30},
-  CDSCO:{reg:'Drugs & Cosmetics Act / New Drugs & CT Rules 2019',report:'SUGAM ICSR',susar:'SAE / SUSAR',fmt:'E2B R2 (R3 transitioning)',route:'CDSCO SUGAM portal',tl7:7,tl15:15,tl90:90},
-  SFDA:{reg:'SFDA Resolution 2020 / Drug Vigilance Guidelines',report:'NPC ICSR',susar:'SAE Report',fmt:'E2B R2',route:'SFDA portal / NPC',tl7:7,tl15:15,tl90:90},
-  MEDSAFE:{reg:'Medicines Act 1981 / CT Guidelines',report:'ICSR CARM',susar:'SAE CARM',fmt:'E2B R2',route:'CARM NZ',tl7:7,tl15:15,tl90:90},
-  COFEPRIS:{reg:'Reglamento de Insumos para la Salud / NOM-257',report:'COFEPRIS ICSR',susar:'SAE Report',fmt:'National form / E2B R2',route:'COFEPRIS portal',tl7:15,tl15:15,tl90:90},
-  HSA:{reg:'Health Products Act / CT CT-03G',report:'CT SAE / PRISM ICSR',susar:'SAE Report',fmt:'E2B R3',route:'HSA PRISM / CT-03G',tl7:7,tl15:15,tl90:90},
-  WHO:{reg:'WHO ADR Reporting Programme',report:'ICSR VigiFlow',susar:'ICSR VigiFlow',fmt:'E2B R2/R3',route:'VigiFlow / National PV centre',tl7:30,tl15:30,tl90:90},
+
+  FDA:{
+    reg:'21 CFR 312.32 / 314.81 / 600.80',
+    report:'IND Safety Report',susar:'IND Safety Report (SUSAR)',fmt:'MedWatch 3500A + E2B R3',route:'FDA ESM / IND filing',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'IND 7-day Safety Report',reg:'21 CFR 312.32(c)(1)',regFull:'IND Safety Report — fatal or life-threatening unexpected SAR',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R3 + MedWatch 3500A',route:'FDA ESM (Electronic Submissions Gateway)',notes:'Due 7 calendar days from Day 0. Must notify all investigators simultaneously. Clock: Day 0 = sponsor awareness.'},
+      {label:'IND 15-day Safety Report',reg:'21 CFR 312.32(c)(2)',regFull:'IND Safety Report — serious unexpected SAR (non-fatal/non-LT)',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 + MedWatch 3500A',route:'FDA ESM',notes:'Due 15 calendar days from Day 0. Applies to unexpected serious ADRs that are not fatal/life-threatening.'},
+      {label:'NDA/BLA 15-day Alert Report',reg:'21 CFR 314.81(b)(2)(i)',regFull:'Post-marketing 15-day Alert Report — serious unexpected ADR',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 (mandatory electronic)',route:'FDA ESG — FAERS gateway',notes:'Applies to marketed products. Both domestic and foreign cases. Unexpected = not in current USPI.'},
+      {label:'15-day Alert — Biologic',reg:'21 CFR 600.80(c)',regFull:'Biological product 15-day expedited safety report',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'FDA ESG — FAERS gateway',notes:'Applies to BLA-approved biologics. Same 15-day timeline as NDA post-marketing.'},
+      {label:'Post-mkt ICSR — marketed drug (NDA) 15-day',reg:'21 CFR 314.80',regFull:'21 CFR 314.80 — Post-marketing reporting of adverse drug experiences for marketed drugs (NDA)',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 / MedWatch 3500A',route:'FDA ESG — FAERS gateway',notes:'21 CFR 314.80 is the primary post-marketing ADR reporting regulation for NDA-approved drugs. Serious unexpected ADRs — 15-day expedited alert report to FDA FAERS. Distinct from 314.81 (which covers periodic reports). Both domestic and foreign cases. Per FDA FAERS Electronic Submission Guidance (June 2015).'},
+      {label:'IND Annual Safety Report',reg:'21 CFR 312.33',regFull:'Annual IND Safety Report — aggregate safety summary',condition:'periodic',tl:null,tlBasis:'annual',format:'Narrative report + line listing',route:'IND filing via ESG',notes:'Due within 60 days of IND anniversary. Includes all SAEs from prior 12 months. Subsumes DSUR for FDA IND purposes.'},
+      {label:'PADER — Periodic ADR Report',reg:'21 CFR 314.81(b)(2)(ii)',regFull:'Periodic Adverse Drug Experience Report (PADER)',condition:'periodic',tl:null,tlBasis:'quarterly yr1-3, then annual',format:'Aggregate report + line listing',route:'FDA ESG eCTD',notes:'Quarterly for first 3 years post-NDA approval, then annually. Due 90 days after period end.'},
+      {label:'DSUR',reg:'21 CFR 312.70 / ICH E2F',regFull:'Development Safety Update Report (ICH E2F)',condition:'periodic',tl:null,tlBasis:'annual',format:'ICH E2F DSUR format',route:'FDA ESG',notes:'Due 60 days after DIBD (Development International Birth Date) anniversary. Required for IND-held products.'},
+    ]
+  },
+
+  EMA:{
+    reg:'Dir 2001/83/EC Art.107a · Reg 726/2004 · EU CT Reg 536/2014 · GVP VI/VII/IX',
+    report:'ICSR EudraVigilance',susar:'SUSAR via CTIS+EVCTM',fmt:'E2B R3',route:'CTIS + EudraVigilance EVWEB',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'SUSAR — fatal/life-threatening',reg:'EU CT Reg 536/2014 Art.42(2)',regFull:'Clinical Trial Regulation 536/2014 — SUSAR fatal or life-threatening',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R3 via EVCTM',route:'CTIS (Clinical Trials Information System) + EudraVigilance EVCTM',notes:'Covers all EU/EEA member states via single CTIS submission. Sponsor notifies all investigators simultaneously. Non-EU trials: SUSARs from non-EU sources reportable if EU CTA is active.'},
+      {label:'SUSAR — other serious',reg:'EU CT Reg 536/2014 Art.42(3)',regFull:'Clinical Trial Regulation 536/2014 — SUSAR non-fatal/non-LT serious',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 via EVCTM',route:'CTIS + EudraVigilance EVCTM',notes:'Blinding waiver applies for double-blind studies — unblind only when mandatory. CTIS submission covers all participating EU NCAs automatically (BfArM DE, ANSM FR, AEMPS ES, AIFA IT, CBG-MEB NL, etc.).'},
+      {label:'Annual Safety Report (ASR/DSUR)',reg:'EU CT Reg 536/2014 Art.43',regFull:'Annual Safety Report — development safety summary for EU CTs',condition:'periodic',tl:null,tlBasis:'annual',format:'ASR per Annex III of 536/2014 / ICH E2F DSUR',route:'CTIS portal',notes:'Due annually from first approval of CT in EU. Covers all SUSARs and line listings. Includes cumulative tabulation of SAEs.'},
+      {label:'Post-mkt ICSR — unexpected serious (foreign)',reg:'Dir 2001/83/EC Art.107a(1) · GVP Module VI Rev 2',regFull:'GVP Module VI — Management and Reporting of Adverse Reactions to Medicinal Products, Rev 2 (EMA/873138/2011 Rev2)',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 mandatory',route:'EudraVigilance (EV) gateway — EVWEB / E2B gateway',notes:'GVP Module VI Section VI.B.6.2: Serious unexpected ADRs from third-country (non-EEA) sources — 15-day expedited report to EudraVigilance. MAH must hold valid EV account. Applies to all EU centrally authorised (CAP) and nationally authorised products.'},
+      {label:'Post-mkt ICSR — unexpected serious (domestic/EEA)',reg:'Dir 2001/83/EC Art.107a(1) · GVP Module VI Rev 2 §VI.B.6.1',regFull:'GVP Module VI §VI.B.6.1 — Serious unexpected ADRs from EEA sources',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'EudraVigilance gateway',notes:'EEA-sourced serious unexpected ADRs: 15-day expedited reporting to EudraVigilance. Replaces direct NCA reporting for CAPs; NCA reporting required for nationally authorised products (NAPs).'},
+      {label:'Post-mkt ICSR — non-serious (EEA)',reg:'Dir 2001/83/EC Art.107a(2) · GVP Module VI §VI.B.6.3',regFull:'GVP Module VI §VI.B.6.3 — Non-serious ADRs from EEA sources',condition:'non_serious',tl:90,tlBasis:'calendar days',format:'E2B R3',route:'EudraVigilance',notes:'Non-serious ADRs from EEA sources: 90-day reporting to EudraVigilance. Non-serious ADRs from non-EEA sources: NOT required in EudraVigilance but included in PSUR.'},
+      {label:'PSUR / PBRER',reg:'Dir 2001/83/EC Art.107b · Reg 726/2004 Art.28 · GVP Module VII',regFull:'GVP Module VII — Periodic Safety Update Report (PSUR/PBRER per ICH E2C(R2))',condition:'periodic',tl:null,tlBasis:'per EURD list',format:'PSUR/PBRER per ICH E2C(R2) — eCTD format',route:'EMA eSubmission portal (eCTD) — PSUR repository',notes:'Submission schedule per EU Reference Date (EURD) list published on EMA website. Assessed by PRAC (Pharmacovigilance Risk Assessment Committee). CAPs: single PSUR to EMA. NAPs: submit to each relevant NCA. Includes benefit-risk evaluation (PBRER format per ICH E2C(R2)).'},
+      {label:'Signal Detection & Management',reg:'Reg 726/2004 Art.28a · GVP Module IX Rev 1',regFull:'GVP Module IX — Signal Management (EMA/827661/2011 Rev 1)',condition:'signal',tl:null,tlBasis:'ongoing/quarterly',format:'Signal evaluation report',route:'EVDAS (EudraVigilance Data Analysis System) — PRAC quarterly agenda',notes:'MAH must perform signal detection using EudraVigilance data at minimum monthly. Validated signals submitted to PRAC quarterly. Uses EVDAS for disproportionality analysis (ROR/PRR). GVP Module IX defines signal detection, validation, prioritisation, assessment workflow.'},
+      {label:'RMP — Risk Management Plan',reg:'Reg 726/2004 Art.14(8) · GVP Module V Rev 2',regFull:'GVP Module V — Risk Management Systems (EMA/838713/2011 Rev 2)',condition:'signal',tl:null,tlBasis:'event-triggered',format:'RMP per GVP Module V template',route:'Via MAA / variation submission',notes:'RMP required for all new MAAs and significant changes. Must be updated when new safety information identified. PRAC may request RMP update as outcome of signal assessment. Hepatic failure as Important Identified Risk triggers additional pharmacovigilance activities.'},
+      {label:'QPPV Notification',reg:'Dir 2001/83/EC Art.104 · GVP Module I',regFull:'GVP Module I — Pharmacovigilance systems and their quality systems',condition:'always',tl:null,tlBasis:'immediate',format:'Internal SOP',route:'Internal QPPV notification',notes:'QPPV (Qualified Person for Pharmacovigilance) must be immediately informed of all serious expected and unexpected ADRs. QPPV has overall responsibility for EU pharmacovigilance system. Documented in PhV system master file (PSMF).'},
+    ]
+  },
+
+  MHRA:{
+    reg:'Human Medicines Regs 2012 SI 2012/1916 · SI 2004/1031 · UK GVP post-Brexit',
+    report:'ICSR / Yellow Card',susar:'SUSAR + Ethics Committee',fmt:'E2B R3',route:'MHRA ICSR portal',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'SUSAR — fatal/life-threatening',reg:'SI 2004/1031 Sch.1 Part 2 Para.7(1)',regFull:'Medicines for Human Use (Clinical Trials) Regulations 2004 — Schedule 1 Part 2 Para 7(1)',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R3',route:'MHRA ICSR Gateway (separate from EudraVigilance post-Brexit)',notes:'UK is no longer part of EudraVigilance network post-Brexit (Jan 2021). MHRA maintains own ICSR database. Must also notify Ethics Committee. Applies to all UK CTAs and foreign SUSARs for UK CTA holders.'},
+      {label:'SUSAR — other serious',reg:'SI 2004/1031 Sch.1 Part 2 Para.7(2)',regFull:'CT Regulations 2004 — SUSAR non-fatal/non-LT serious',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'MHRA ICSR Gateway',notes:'Simultaneous notification to UK Ethics Committee required. MHRA eSub portal: submissions.mhra.gov.uk.'},
+      {label:'Post-mkt ICSR — serious unexpected',reg:'SI 2012/1916 Reg.187',regFull:'Human Medicines Regulations 2012 — Regulation 187: Expedited reporting of unexpected serious ADRs',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'MHRA ICSR Gateway / eSub portal',notes:'Post-Brexit: MHRA operates independently from EMA. Foreign serious unexpected ADRs for UK-authorised products — 15-day expedited report to MHRA. Not reported via EudraVigilance.'},
+      {label:'UK PSUR',reg:'SI 2012/1916 Reg.188 · UK GVP Module VII',regFull:'UK GVP Module VII — Periodic Safety Update Report (UK-adapted post-Brexit)',condition:'periodic',tl:null,tlBasis:'per MHRA schedule',format:'PSUR/PBRER format — eCTD',route:'MHRA eSub portal',notes:'Post-Brexit UK PSURs may be decoupled from EU PSUR cycle. Separate submission to MHRA. Check MHRA product-specific PSUR schedule. UK retains ICH E2C(R2) PBRER format.'},
+      {label:'UK GVP Module VI — ICSR reporting framework',reg:'UK GVP Module VI (MHRA adapted post-Brexit)',regFull:'UK GVP Module VI — Management and Reporting of Adverse Reactions to Medicinal Products (UK-adapted, largely aligned to EU GVP Module VI Rev 2)',condition:'always',tl:null,tlBasis:'per event type',format:'E2B R3 via MHRA gateway',route:'MHRA ICSR Gateway (separate from EudraVigilance since Jan 2021)',notes:'Post-Brexit, MHRA maintains its own UK GVP guidance largely aligned to EU GVP Module VI. UK GVP Module VI covers: collection, management, and submission of ICSRs for UK-authorised products. Serious unexpected ADRs: 15-day expedited. Non-serious: 90-day. All submissions go to MHRA, NOT EudraVigilance. Yellow Card Scheme is the UK spontaneous reporting system.'},
+      {label:'UK Signal Management',reg:'UK GVP Module IX (retained EU law + UK guidance)',regFull:'UK GVP Module IX — Signal management post-Brexit',condition:'signal',tl:null,tlBasis:'ongoing',format:'Signal evaluation',route:'MHRA safety assessment',notes:'MAH must report confirmed new safety signals to MHRA promptly. MHRA PHC (Pharmacovigilance Expert Advisory Group) reviews signals. UK Yellow Card Scheme supplements spontaneous signal detection.'},
+    ]
+  },
+
+  PMDA:{
+    reg:'PMD Act Art.68-10 · MHLW Ordinance 135 · GCP Ordinance · GPSP',
+    report:'ICSR (J-ICSR)',susar:'SAE Notification',fmt:'J-ICSR E2B R3',route:'PMDA Gateway',tl7:7,tl15:15,tl90:30,
+    reports:[
+      {label:'CT SAE — fatal/LT (domestic)',reg:'GCP Ordinance (MHLW Ordinance No.28) Art.20',regFull:'Good Clinical Practice Ordinance — Article 20: Adverse event reporting in clinical trials',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'J-ICSR E2B R3 (PMDA format)',route:'PMDA Electronic Safety Gateway (ESG)',notes:'Japanese GCP requires 7-day reporting for fatal/life-threatening unexpected SAEs in CTs. Japanese narrative (日本語) may be required — confirm with PMDA.'},
+      {label:'CT SAE — other serious (domestic)',reg:'GCP Ordinance Art.20 / PMSB Notification',regFull:'GCP Ordinance — Article 20: Other serious unexpected adverse events',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'J-ICSR E2B R3',route:'PMDA ESG',notes:'15-day for non-fatal serious unexpected SAEs. Quarterly line listing to PMDA also required.'},
+      {label:'Foreign SAR — unexpected serious',reg:'PMD Act Art.68-10(2) · MHLW Notification 2003',regFull:'Pharmaceutical and Medical Device Act Article 68-10(2) — Foreign serious ADR reporting',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'J-ICSR E2B R3',route:'PMDA ESG',notes:'MAH in Japan must report foreign serious UNEXPECTED ADRs — 15 calendar days from Japanese MAH awareness. Japanese entity (BMS/Pfizer KK etc.) bears obligation — coordination with global PV required.'},
+      {label:'Foreign SAR — expected serious',reg:'PMD Act Art.68-10(2) · MHLW Notification',regFull:'PMD Act — Expected serious foreign ADR: 30-day report',condition:'mkt_expected_serious',tl:30,tlBasis:'calendar days',format:'J-ICSR E2B R3',route:'PMDA ESG',notes:'Expected serious ADRs from foreign sources — 30 calendar days from Japanese MAH awareness. Check Japanese Package Insert (添付文書) for expectedness — Japanese labeling may differ from global RSI.'},
+      {label:'Japanese Periodic Safety Report (定期的安全性最新報告)',reg:'MHLW GVP Ordinance No.135 Art.14 · GPSP',regFull:'Good Vigilance Practice Ordinance Article 14 — Periodic Safety Update Report',condition:'periodic',tl:null,tlBasis:'annual or per schedule',format:'Japanese PSUR format (DSUR/PSUR hybrid)',route:'PMDA submission portal',notes:'Annual periodic safety report — Japanese-specific format blending DSUR and PSUR elements. Submitted per product re-examination (再審査) schedule. PMDA may conduct re-examination review.'},
+    ]
+  },
+
+  HC:{
+    reg:'FDR C.05.012 · Food & Drugs Act S.21.71 · HC PV Guidance 2011',
+    report:'CT SAE / MedEffect ICSR',susar:'CT SAE Report',fmt:'E2B R3',route:'MedEffect Canada',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'CT SAE — fatal/LT',reg:'FDR C.05.012(1)(a)',regFull:'Food and Drug Regulations C.05.012(1)(a) — Serious adverse drug reactions in clinical trials: fatal or life-threatening',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'CIOMS I / E2B R3',route:'Health Canada — MedEffect Canada submission',notes:'7-day for fatal/life-threatening unexpected SADRs in CTs. CT must hold Canadian CTA. Sponsor submits to Health Canada Therapeutic Products Directorate (TPD).'},
+      {label:'CT SAE — other serious',reg:'FDR C.05.012(1)(b)',regFull:'Food and Drug Regulations C.05.012(1)(b) — Other serious unexpected ADRs in clinical trials',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'CIOMS I / E2B R3',route:'MedEffect Canada',notes:'15-day for non-fatal serious unexpected SADRs. Annual summary of SADRs also required.'},
+      {label:'Post-mkt mandatory report — C.01.016 (marketed products)',reg:'FDR C.01.016',regFull:'Food and Drug Regulations C.01.016 — Mandatory reporting of serious adverse drug reactions and medical device incidents for marketed health products',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 / CIOMS I',route:'Canada Vigilance Program — MedEffect Canada',notes:'FDR C.01.016 is the primary post-marketing mandatory ADR reporting article for marketed health products in Canada. Serious unexpected ADRs — 15-day report. Applies to all products with Canadian DIN (Drug Identification Number). Per Health Canada Guidance Document for Marketed Health Products Vigilance (2011).'},
+      {label:'Post-mkt mandatory problem report — unexpected serious',reg:'Food & Drugs Act S.21.71 · FDR C.01.017(2)',regFull:'Food and Drugs Act Section 21.71 — Mandatory reporting of serious adverse drug reactions (post-marketing)',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 / CIOMS I',route:'Canada Vigilance Program — MedEffect Canada online',notes:'MAH holding Canadian DIN (Drug Identification Number) must report serious unexpected ADRs — both domestic and foreign. HC Guidance 2011 applies. 15-day from MAH awareness.'},
+      {label:'Post-mkt mandatory — expected serious (foreign)',reg:'HC Reporting Guidance 2011',regFull:'Health Canada Guidance — Reporting Adverse Reactions to Marketed Health Products (2011)',condition:'mkt_expected_serious',tl:30,tlBasis:'calendar days',format:'E2B R3 / CIOMS I',route:'Canada Vigilance Program',notes:'Serious expected ADRs from foreign sources — 30-day report under HC guidance. Include in periodic safety report if not reported expeditiously.'},
+      {label:'Periodic Safety Report (PSUR/PBRER)',reg:'HC Guidance / ICH E2C(R2) · Guidance Document for Marketed Health Products Vigilance (2011)',regFull:'Health Canada Periodic Safety Report — ICH E2C(R2) PBRER format, per Guidance Document for Marketed Health Products Vigilance (2011)',condition:'periodic',tl:null,tlBasis:'per HC product lifecycle',format:'PSUR/PBRER — ICH E2C(R2)',route:'HC eSubmission portal',notes:'HC accepts ICH PSUR/PBRER format. Product Monograph update may be triggered by safety findings. Check HC product-specific submission schedule.'},
+    ]
+  },
+
+  TGA:{
+    reg:'Therapeutic Goods Act 1989 · TGA CT Regs · TGA Reporting Requirements',
+    report:'CT SUSAR / DAEN ICSR',susar:'CT SUSAR',fmt:'E2B R3 / TGA form',route:'TGA sponsor portal',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'CT SUSAR — fatal/LT',reg:'TGA CT Adverse Event Reporting Requirements 2021',regFull:'TGA Clinical Trial Adverse Event Reporting Requirements — fatal/life-threatening SUSAR',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R3 or TGA notification form',route:'TGA Sponsor/Industry portal (SARIS)',notes:'7-day for fatal/life-threatening SUSARs from Australian or foreign CT sites (if Australian CTA active). Notify TGA and Ethics Committee simultaneously.'},
+      {label:'CT SUSAR — other serious',reg:'TGA CT Adverse Event Reporting Requirements 2021',regFull:'TGA CT Reporting — other serious unexpected adverse events',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 / TGA form',route:'TGA SARIS portal',notes:'15-day reporting. Annual safety report also required for TGA CTN/CTA schemes.'},
+      {label:'Post-mkt ICSR — serious unexpected',reg:'Therapeutic Goods Act 1989 S.29A · TGA Reporting Guidance',regFull:'Therapeutic Goods Act Section 29A — Mandatory reporting of adverse events for registered goods',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 preferred / CIOMS I',route:'TGA DAEN (Database of Adverse Event Notifications) / SARIS',notes:'Sponsors of registered therapeutic goods must report serious unexpected ADRs. Both domestic (Australia) and foreign cases. 15-day from sponsor awareness.'},
+      {label:'Post-mkt ICSR — serious expected',reg:'TGA Reporting Guidance',regFull:'TGA Post-marketing adverse event reporting — expected serious ADR',condition:'mkt_expected_serious',tl:90,tlBasis:'calendar days',format:'E2B R3 / CIOMS I',route:'TGA DAEN / SARIS',notes:'Serious EXPECTED ADRs — 90-day reporting. Non-serious ADRs — 6 months. Include in periodic report.'},
+      {label:'Australian Pharmacovigilance Responsibilities Guidelines',reg:'TGA Australian PV Responsibilities Guidelines · Therapeutic Goods Act 1989',regFull:'Australian Pharmacovigilance Responsibilities Guidelines (TGA) — comprehensive guidance on post-market safety monitoring obligations for sponsors of registered therapeutic goods',condition:'always',tl:null,tlBasis:'per event type',format:'E2B R3 / CIOMS I / TGA DAEN',route:'TGA DAEN (Database of Adverse Event Notifications) / SARIS (Safety Reporting Information System)',notes:'The Australian Pharmacovigilance Responsibilities Guidelines (published by TGA) is the primary PV guidance document for sponsors of registered medicines and devices in Australia. It defines obligations for: expedited ICSR reporting (15-day serious unexpected; 90-day serious expected; 6-month non-serious), PSUR submission, signal detection, and product safety updates. Aligned with ICH E2A, E2B(R3), and E2C(R2).'},
+      {label:'Annual PSUR',reg:'TGA Guidance on PSURs · ICH E2C(R2)',regFull:'TGA Periodic Safety Update Report requirements — ICH E2C(R2) format',condition:'periodic',tl:null,tlBasis:'annual or per TGA schedule',format:'PSUR/PBRER — ICH E2C(R2)',route:'TGA eSub portal',notes:'TGA PSUR submission timing aligned with EU PSUR cycle where possible. Check TGA product registration for specific schedule.'},
+    ]
+  },
+
+  SWISSMEDIC:{reg:'HMG Art.59 · Clinical Trial Ordinance (KlinV) · Swissmedic PV Guidelines',report:'ICSR ElViS',susar:'SUSAR ElViS',fmt:'E2B R3',route:'Swissmedic ElViS portal',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'CT SUSAR — fatal/LT',reg:'KlinV Art.62 / HMG Art.59',regFull:'Clinical Trial Ordinance (KlinV) Article 62 — SUSAR reporting',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R3',route:'Swissmedic ElViS (electronic safety reporting system)',notes:'Switzerland is not EU member but aligns closely with EU CT Regulation. ElViS is Swissmedic\'s dedicated safety reporting portal.'},
+      {label:'CT SUSAR — other serious',reg:'KlinV Art.62',regFull:'Clinical Trial Ordinance — other serious unexpected ADRs in CTs',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'Swissmedic ElViS',notes:'15-day SUSAR reporting. Annual development safety summary also required.'},
+      {label:'Post-mkt ICSR — serious unexpected',reg:'HMG Art.59 · Swissmedic PV Guidelines',regFull:'Heilmittelgesetz Article 59 — Post-marketing safety reporting',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'Swissmedic ElViS',notes:'Swissmedic requires 15-day expedited reports for serious unexpected ADRs from all sources. Aligns with EU GVP Module VI framework.'},
+      {label:'PSUR',reg:'HMG Art.59 · ICH E2C(R2)',regFull:'HMG — Periodic Safety Update Report',condition:'periodic',tl:null,tlBasis:'per Swissmedic schedule',format:'PSUR/PBRER ICH E2C(R2)',route:'Swissmedic eSub',notes:'Swissmedic typically aligns PSUR schedule with EU EURD list dates.'},
+    ]
+  },
+
+  MFDS:{reg:'Pharmaceutical Act Art.68 · CT Guidelines · MFDS PV Regulations 2020',report:'ICSR DUR',susar:'SAE Report',fmt:'E2B R3',route:'MFDS e-DUR',tl7:7,tl15:15,tl90:30,
+    reports:[
+      {label:'KGVP — Korea Good Pharmacovigilance Practices',reg:'KGVP (MFDS Notice) · Pharmaceutical Affairs Act Art.68',regFull:'Korea Good Pharmacovigilance Practices (KGVP) — MFDS pharmacovigilance guideline governing all aspects of safety reporting for Korean-authorized products',condition:'always',tl:null,tlBasis:'per event type',format:'E2B R3',route:'MFDS e-DUR (Drug Utilization Review) system',notes:'KGVP is the Korean GVP equivalent, published by MFDS as a national pharmacovigilance notice. Korea has been an ICH member since 2016 and KGVP is aligned to ICH E2A, E2B R3, E2C(R2), and E2D guidelines. KGVP defines obligations for: ICSR collection, MedDRA coding, expedited/periodic reporting, signal detection, and PSUR submission.'},
+      {label:'CT SAE — fatal/LT',reg:'Pharmaceutical Act Art.68-13 · MFDS CT Guidelines',regFull:'Korean Pharmaceutical Act — Clinical trial SAE reporting',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R3',route:'MFDS e-DUR (Drug Utilization Review) system',notes:'Korea ICH member since 2016. Aligns with ICH E2A. 7-day for fatal/LT unexpected.'},
+      {label:'Post-mkt ICSR — serious unexpected',reg:'Pharmaceutical Act Art.68 · MFDS Notification 2020-71',regFull:'MFDS Pharmacovigilance Regulations — Post-marketing ICSR reporting',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'MFDS e-DUR',notes:'15-day for serious unexpected. Foreign cases of Korean-authorized products.'},
+      {label:'Post-mkt ICSR — serious expected (foreign)',reg:'MFDS Notification 2020-71',regFull:'MFDS — Expected serious foreign ADR reporting',condition:'mkt_expected_serious',tl:30,tlBasis:'calendar days',format:'E2B R3',route:'MFDS e-DUR',notes:'30-day for serious expected ADRs from foreign sources.'},
+      {label:'PSUR',reg:'Pharmaceutical Act · ICH E2C(R2)',regFull:'MFDS — Periodic Safety Update Report',condition:'periodic',tl:null,tlBasis:'per MFDS schedule',format:'PSUR/PBRER ICH E2C(R2)',route:'MFDS eSub',notes:'Per product approval date schedule.'},
+    ]
+  },
+
+  ANVISA:{reg:'RDC 204/2017 · RDC 9/2015 · Law 6360/1976',report:'NOTIVISA ICSR',susar:'SAE NOTIVISA',fmt:'NOTIVISA (E2B R2)',route:'NOTIVISA portal',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'CT SAE — fatal/LT',reg:'RDC 204/2017 Art.8',regFull:'ANVISA Resolution RDC 204/2017 — Clinical trial safety reporting',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'NOTIVISA form / E2B R2',route:'NOTIVISA portal (notivisa.anvisa.gov.br)',notes:'Portuguese language narrative required. Brazil requires separate sponsor and investigator reports.'},
+      {label:'Post-mkt ICSR — serious',reg:'RDC 9/2015 Art.11',regFull:'ANVISA Resolution RDC 9/2015 — Post-marketing pharmacovigilance',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'NOTIVISA / E2B R2',route:'NOTIVISA portal',notes:'15-day for serious (unexpected and expected). Portuguese narrative mandatory.'},
+      {label:'PSUR / Relatório Periódico',reg:'RDC 9/2015 Art.18',regFull:'ANVISA — Relatório Periódico de Farmacovigilância',condition:'periodic',tl:null,tlBasis:'per ANVISA schedule',format:'Brazilian PSUR format',route:'ANVISA regulatory portal',notes:'Brazil-specific PSUR format. Due dates per ANVISA registration anniversary.'},
+    ]
+  },
+
+  NMPA:{reg:'NMPA PV Regulations 2021 · CT Technical Guidelines 2020',report:'China ICSR',susar:'China SAE Report',fmt:'China E2B R3',route:'NMPA ADR portal',tl7:7,tl15:15,tl90:30,
+    reports:[
+      {label:'CT SAE — fatal/LT',reg:'NMPA CT Technical Guidelines 2020 §5.2',regFull:'NMPA Clinical Trial Safety Reporting Technical Guidelines — fatal/life-threatening SUSAR',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'China E2B R3',route:'NMPA Adverse Drug Reaction (ADR) reporting portal',notes:'China NMPA ICH member since 2017. Simplified Chinese narrative required. Domestic case priority — China-originating cases treated as domestic.'},
+      {label:'Post-mkt ICSR — serious unexpected',reg:'NMPA PV Regulations 2021 Art.67',regFull:'NMPA Pharmacovigilance Regulations 2021 — Post-marketing ICSR',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'China E2B R3',route:'NMPA ADR portal',notes:'15-day for serious unexpected. Chinese narrative required.'},
+      {label:'Post-mkt ICSR — serious expected (foreign)',reg:'NMPA PV Regulations 2021 Art.67',regFull:'NMPA — Expected serious foreign ADR',condition:'mkt_expected_serious',tl:30,tlBasis:'calendar days',format:'China E2B R3',route:'NMPA ADR portal',notes:'30-day for serious expected foreign ADRs.'},
+      {label:'Annual PSUR (国家药监局)',reg:'NMPA PV Regulations 2021 Art.72',regFull:'NMPA — Annual pharmacovigilance report',condition:'periodic',tl:null,tlBasis:'annual',format:'NMPA PSUR format',route:'NMPA portal',notes:'Annual Chinese-specific PSUR. Due per marketing approval anniversary.'},
+    ]
+  },
+
+  CDSCO:{reg:'Drugs & Cosmetics Act 1940 · New Drugs & CT Rules 2019 · CDSCO PV Guidelines',report:'SUGAM ICSR',susar:'SAE / SUSAR',fmt:'E2B R2 (R3 transitioning)',route:'CDSCO SUGAM portal',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'CT SAE — fatal/LT',reg:'New Drugs & CT Rules 2019 Rule 30(7)',regFull:'New Drugs and Clinical Trials Rules 2019 — SAE reporting in clinical trials',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R2 (R3 adoption in progress)',route:'CDSCO SUGAM portal',notes:'Indian regulatory framework. CDSCO and ethics committee notification required simultaneously.'},
+      {label:'PvPI Guidance — Pharmacovigilance Programme of India',reg:'PvPI Guidance (CDSCO/IPC) · Drugs & Cosmetics Act 1940',regFull:'Pharmacovigilance Programme of India (PvPI) Guidance — national pharmacovigilance framework operated by the Indian Pharmacopoeia Commission (IPC) on behalf of CDSCO',condition:'always',tl:null,tlBasis:'per event type',format:'E2B R2 (R3 in transition)',route:'PvPI National Coordination Centre (NCC) — IPC, Ghaziabad / CDSCO SUGAM portal',notes:'PvPI is India's national pharmacovigilance programme, coordinated by the Indian Pharmacopoeia Commission (IPC) under CDSCO. It operates a network of ~250 ADR Monitoring Centres (AMCs) across India. PvPI Guidance defines: ICSR collection and coding (MedDRA), reporting timelines (15-day serious unexpected, 90-day others), PSUR requirements, and signal detection methodology. Submissions are made to the PvPI NCC which feeds VigiBase (WHO).'},
+      {label:'Post-mkt ICSR — serious',reg:'Drugs & Cosmetics Act · CDSCO PV Guidelines 2011',regFull:'CDSCO Pharmacovigilance Guidelines — Post-marketing serious ADR reporting',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R2',route:'CDSCO SUGAM / PvPI (Pharmacovigilance Programme of India)',notes:'India PvPI centre coordinates post-marketing safety. 15-day for serious unexpected.'},
+      {label:'PSUR',reg:'CDSCO PV Guidelines / ICH E2C(R2)',regFull:'CDSCO — Periodic Safety Update Report requirements',condition:'periodic',tl:null,tlBasis:'per CDSCO schedule',format:'PSUR/PBRER ICH E2C(R2)',route:'CDSCO eSub',notes:'Per product approval anniversary.'},
+    ]
+  },
+
+  SFDA:{reg:'SFDA Pharmacovigilance Resolution 2020 · Drug Vigilance Guidelines',report:'NPC ICSR',susar:'SAE Report',fmt:'E2B R2',route:'SFDA portal / NPC',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'Saudi GVP Module VI — ICSR framework',reg:'Saudi GVP Module VI · SFDA Pharmacovigilance Standards',regFull:'Saudi Food and Drug Authority — GVP Module VI: Management and Reporting of Adverse Reactions (aligned to ICH E2A/E2B and EU GVP Module VI)',condition:'always',tl:null,tlBasis:'per event type',format:'E2B R2 / CIOMS I',route:'SFDA National Pharmacovigilance Centre (NPC) portal',notes:'Saudi GVP Module VI is the SFDA-specific pharmacovigilance guideline governing collection, management, and submission of ICSRs for Saudi-registered products. It aligns with ICH E2A and mirrors EU GVP Module VI structure. Arabic narrative preferred, English accepted. Local Saudi MAH bears reporting obligation.'},
+      {label:'Serious ICSR — unexpected',reg:'SFDA Drug Pharmacovigilance Resolution 2020 Art.12',regFull:'Saudi SFDA Drug Pharmacovigilance Resolution — Serious unexpected ADR reporting',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R2 / CIOMS I',route:'SFDA national pharmacovigilance portal / NPC (National Pharmacovigilance Centre)',notes:'Arabic narrative preferred, English accepted. Saudi Arabia requires local MAH to hold reporting obligation.'},
+      {label:'Serious ICSR — expected',reg:'SFDA Resolution 2020',regFull:'SFDA — Expected serious ADR',condition:'mkt_expected_serious',tl:30,tlBasis:'calendar days',format:'E2B R2',route:'SFDA / NPC',notes:'30-day for expected serious. Include in PSUR.'},
+      {label:'PSUR',reg:'SFDA Resolution 2020',regFull:'SFDA — Periodic Safety Report',condition:'periodic',tl:null,tlBasis:'per SFDA schedule',format:'PSUR/PBRER',route:'SFDA eSub',notes:'Aligns with ICH E2C(R2) PBRER.'},
+    ]
+  },
+
+  MEDSAFE:{reg:'Medicines Act 1981 · Medsafe PV Requirements',report:'ICSR CARM',susar:'SAE CARM',fmt:'E2B R2',route:'CARM NZ',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'Serious ICSR — unexpected',reg:'Medicines Act 1981 S.29 · Medsafe Guidance',regFull:'Medsafe — Serious unexpected ADR reporting for consent holders',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R2 / CIOMS I',route:'CARM (Centre for Adverse Reactions Monitoring)',notes:'NZ consent holders must report to Medsafe. Medsafe aligns with TGA on many requirements.'},
+      {label:'PSUR',reg:'Medsafe Guidance',regFull:'Medsafe — Periodic Safety Report',condition:'periodic',tl:null,tlBasis:'per Medsafe schedule',format:'PSUR/PBRER',route:'Medsafe eSub',notes:'Typically aligned with TGA/EMA PSUR cycle.'},
+    ]
+  },
+
+  COFEPRIS:{reg:'Reglamento de Insumos para la Salud · NOM-257-SSA1-2014',report:'COFEPRIS ICSR',susar:'SAE Report',fmt:'National form / E2B R2',route:'COFEPRIS portal',tl7:15,tl15:15,tl90:90,
+    reports:[
+      {label:'Serious ICSR — unexpected',reg:'NOM-257-SSA1-2014 §8.4',regFull:'NOM-257-SSA1-2014 — Medicamentos biotecnológicos y farmacovigilancia: serious ADR reporting',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'COFEPRIS national form / E2B R2',route:'COFEPRIS pharmacovigilance portal (cofepris.gob.mx)',notes:'Mexico requires Spanish-language narratives. COFEPRIS National Pharmacovigilance Center coordination.'},
+      {label:'Periodic report',reg:'NOM-257-SSA1-2014',regFull:'COFEPRIS — Periodic pharmacovigilance report',condition:'periodic',tl:null,tlBasis:'per COFEPRIS schedule',format:'Mexican PSUR format',route:'COFEPRIS portal',notes:'Per registration anniversary.'},
+    ]
+  },
+
+  HSA:{reg:'Health Products Act · CT CT-03G · HSA PV Requirements',report:'CT SAE / PRISM ICSR',susar:'SAE Report',fmt:'E2B R3',route:'HSA PRISM / CT-03G',tl7:7,tl15:15,tl90:90,
+    reports:[
+      {label:'CT SAE — serious',reg:'Health Products (CT) Regulations · CT-03G Guidance',regFull:'HSA Clinical Trial Certificate requirements — adverse event reporting',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 / CIOMS I',route:'HSA PRISM (PRoduct Information Management System)',notes:'Singapore CTC holders must report. HSA aligns with ICH E2A requirements.'},
+      {label:'Post-mkt ICSR — serious unexpected',reg:'Health Products Act S.34 · HSA PV Guidelines',regFull:'HSA Post-marketing pharmacovigilance — serious unexpected ADR',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'HSA PRISM',notes:'15-day for serious unexpected. Product licence holders bear obligation.'},
+      {label:'PSUR',reg:'HSA PV Guidelines / ICH E2C(R2)',regFull:'HSA — Periodic Safety Update Report',condition:'periodic',tl:null,tlBasis:'per HSA schedule',format:'PSUR/PBRER ICH E2C(R2)',route:'HSA eSub',notes:'Per product registration anniversary.'},
+    ]
+  },
+
+  WHO:{reg:'WHO ADR Reporting Programme · ICH E2B R3',report:'ICSR VigiFlow',susar:'ICSR VigiFlow',fmt:'E2B R2/R3',route:'VigiFlow / National PV centre',tl7:30,tl15:30,tl90:90,
+    reports:[
+      {label:'ICSR to WHO VigiBase',reg:'WHO Programme for International Drug Monitoring',regFull:'WHO Programme for International Drug Monitoring — VigiBase ICSR reporting via national PV centre',condition:'always',tl:30,tlBasis:'calendar days',format:'E2B R2/R3 via national pharmacovigilance centre',route:'VigiFlow (WHO-UMC) via National Pharmacovigilance Centre',notes:'Submission is via the national PV centre of the country where the AE occurred — not direct to WHO. WHO VigiBase aggregates from 130+ member country PV centres. Used for global signal detection.'},
+    ]
+  },
+
 };
+
 
 function isCountryDomestic(ha, sponsor, countries){
   const c = (countries||'').toLowerCase();
