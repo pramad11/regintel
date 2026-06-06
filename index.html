@@ -1162,9 +1162,17 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
     const due = new Date(day0); due.setDate(due.getDate()+htl);
     const daysLeft = Math.ceil((due-new Date())/86400000);
     const isNonSerious = c.seriousness.includes('non_serious') && !isSerious;
+    const statusStr = daysLeft<0?'over':daysLeft<=2?'risk':'ok';
+    const statusTxt = daysLeft<0?`${Math.abs(daysLeft)}d OVERDUE`:daysLeft===0?'DUE TODAY':`${daysLeft}d left`;
+    const tlTag = htl<=7?'t7':htl<=15?'t15':htl<=30?'t30':htl<=90?'t90':'tper';
+    const tlLabel = htl===7?'7 calendar days':htl===15?'15 calendar days':htl===30?'30 days':htl===90?'90 days':'Periodic';
+    const stripeColor = daysLeft<0?'#E24B4A':daysLeft<=2?'#EF9F27':htl>30?'#7F77DD':'#1D9E75';
     return {
       cfg, htl, isDom, due, daysLeft, isNonSerious,
+      status: statusStr, statusTxt, tlTag, tlLabel, stripeColor,
       reportName: isSUSAR ? (cfg.susar||cfg.report) : cfg.report,
+    };
+  }
 
   // ── Summary header ──
   const allDue = c.has.map(ha=>{
@@ -1553,7 +1561,7 @@ const HA_CONFIG = {
   CDSCO:{reg:'Drugs & Cosmetics Act 1940 · New Drugs & CT Rules 2019 · CDSCO PV Guidelines',report:'SUGAM ICSR',susar:'SAE / SUSAR',fmt:'E2B R2 (R3 transitioning)',route:'CDSCO SUGAM portal',tl7:7,tl15:15,tl90:90,
     reports:[
       {label:'CT SAE — fatal/LT',reg:'New Drugs & CT Rules 2019 Rule 30(7)',regFull:'New Drugs and Clinical Trials Rules 2019 — SAE reporting in clinical trials',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R2 (R3 adoption in progress)',route:'CDSCO SUGAM portal',notes:'Indian regulatory framework. CDSCO and ethics committee notification required simultaneously.'},
-      {label:'PvPI Guidance — Pharmacovigilance Programme of India',reg:'PvPI Guidance (CDSCO/IPC) · Drugs & Cosmetics Act 1940',regFull:'Pharmacovigilance Programme of India (PvPI) Guidance — national pharmacovigilance framework operated by the Indian Pharmacopoeia Commission (IPC) on behalf of CDSCO',condition:'always',tl:null,tlBasis:'per event type',format:'E2B R2 (R3 in transition)',route:'PvPI National Coordination Centre (NCC) — IPC, Ghaziabad / CDSCO SUGAM portal',notes:'PvPI is India's national pharmacovigilance programme, coordinated by the Indian Pharmacopoeia Commission (IPC) under CDSCO. It operates a network of ~250 ADR Monitoring Centres (AMCs) across India. PvPI Guidance defines: ICSR collection and coding (MedDRA), reporting timelines (15-day serious unexpected, 90-day others), PSUR requirements, and signal detection methodology. Submissions are made to the PvPI NCC which feeds VigiBase (WHO).'},
+      {label:'PvPI Guidance — Pharmacovigilance Programme of India',reg:'PvPI Guidance (CDSCO/IPC) · Drugs & Cosmetics Act 1940',regFull:'Pharmacovigilance Programme of India (PvPI) Guidance — national pharmacovigilance framework operated by the Indian Pharmacopoeia Commission (IPC) on behalf of CDSCO',condition:'always',tl:null,tlBasis:'per event type',format:'E2B R2 (R3 in transition)',route:'PvPI National Coordination Centre (NCC) — IPC, Ghaziabad / CDSCO SUGAM portal',notes:'PvPI is India\'s national pharmacovigilance programme, coordinated by the Indian Pharmacopoeia Commission (IPC) under CDSCO. It operates a network of ~250 ADR Monitoring Centres (AMCs) across India. PvPI Guidance defines: ICSR collection and coding (MedDRA), reporting timelines (15-day serious unexpected, 90-day others), PSUR requirements, and signal detection methodology. Submissions are made to the PvPI NCC which feeds VigiBase (WHO).'},
       {label:'Post-mkt ICSR — serious',reg:'Drugs & Cosmetics Act · CDSCO PV Guidelines 2011',regFull:'CDSCO Pharmacovigilance Guidelines — Post-marketing serious ADR reporting',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R2',route:'CDSCO SUGAM / PvPI (Pharmacovigilance Programme of India)',notes:'India PvPI centre coordinates post-marketing safety. 15-day for serious unexpected.'},
       {label:'PSUR',reg:'CDSCO PV Guidelines / ICH E2C(R2)',regFull:'CDSCO — Periodic Safety Update Report requirements',condition:'periodic',tl:null,tlBasis:'per CDSCO schedule',format:'PSUR/PBRER ICH E2C(R2)',route:'CDSCO eSub',notes:'Per product approval anniversary.'},
     ]
