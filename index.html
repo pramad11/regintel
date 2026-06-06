@@ -302,9 +302,38 @@ select{appearance:none;
   <div class="form-card">
     <div class="form-card-header">
       <h2>AE Case Details</h2>
-      <p>Enter any adverse event — RegIntel resolves all global reporting obligations instantly</p>
+      <p>Enter a case narrative <em>or</em> fill fields manually — RegIntel resolves all global obligations</p>
     </div>
     <div class="form-body">
+
+      <!-- NARRATIVE INPUT SECTION -->
+      <div class="form-section">
+        <div class="form-section-label" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Case narrative — paste &amp; extract</span>
+          <span style="font-size:9px;background:rgba(29,158,117,0.15);color:#085041;padding:2px 8px;border-radius:10px;font-weight:600;">AI EXTRACTION</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paste case narrative / CIOMS text / site report / medical summary</label>
+          <textarea id="f-narrative" rows="8" style="min-height:140px;font-size:12.5px;line-height:1.6;border:1.5px dashed rgba(55,138,221,0.4);background:rgba(55,138,221,0.02);" placeholder="Paste any case narrative here. RegIntel AI will extract:
+&#10;• Patient details (age, sex, country of incidence)
+• Product name, dose, route, frequency
+• Adverse event verbatim + seriousness + outcome
+• Day 0 / date of awareness
+• Causality assessment (reporter + sponsor)
+• Study number / IND / NCT / EudraCT
+• Reporter type and development phase
+• Country where AE occurred"></textarea>
+        </div>
+        <button id="extractBtn" onclick="extractFromNarrative()" style="width:100%;background:#0A5F9A;color:#fff;border:none;border-radius:7px;padding:11px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;transition:all .2s;margin-bottom:4px;">
+          ✦ Extract &amp; Auto-fill All Fields
+        </button>
+        <div id="extractStatus" style="display:none;margin-top:8px;padding:9px 12px;border-radius:6px;font-size:12px;line-height:1.5;"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;margin-bottom:0;">
+          <div style="flex:1;height:1px;background:rgba(3,32,60,0.1);"></div>
+          <span style="font-size:11px;color:#888780;">or fill fields manually below</span>
+          <div style="flex:1;height:1px;background:rgba(3,32,60,0.1);"></div>
+        </div>
+      </div>
 
       <div class="form-section">
         <div class="form-section-label">Product</div>
@@ -439,7 +468,7 @@ select{appearance:none;
       <button class="run-btn" id="runBtn" onclick="resolve()">
         ▶ Resolve All Obligations
       </button>
-      <button class="demo-btn" onclick="loadDemo()">Load VS-6766 demo case</button>
+      <button class="demo-btn" onclick="loadDemo()">Load VS-6766 demo narrative</button>
     </div>
   </div>
 
@@ -518,6 +547,15 @@ function getCase(){
 }
 
 function loadDemo(){
+  const d = new Date(); d.setDate(d.getDate()-2);
+  const onsetD = new Date(); onsetD.setDate(onsetD.getDate()-6);
+  const fmt = dt => dt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('f-narrative').value =
+`A 58-year-old male patient with KRAS G12C-mutated non-small cell lung cancer (NSCLC) was enrolled in the RAMP 205 Phase 3 clinical study (IND 153742, NCT05074810) and received avutometinib (VS-6766) 3.2 mg twice weekly orally in combination with defactinib 400 mg twice daily orally as per protocol. Medical history included hypertension and type 2 diabetes mellitus. Concomitant medications included metformin and lisinopril.
+
+On ${fmt(onsetD)} (Cycle 2, Day 8), the patient developed acute liver failure with jaundice and coagulopathy. Laboratory findings showed ALT 1240 U/L (>40x ULN), AST 980 U/L, total bilirubin 8.4 mg/dL, and INR 3.2. The patient was hospitalized at MD Anderson Cancer Center, Houston, USA. Both avutometinib and defactinib were permanently discontinued.
+
+Despite intensive supportive care, the patient died on ${fmt(d)}. Cause of death was acute hepatic failure. Autopsy pending. The reporting investigator (Dr. James T., MD Anderson Cancer Center) assessed causality as possibly related. Sponsor (Verastem Oncology, Boston, MA, USA) became aware on ${fmt(d)}. This event is unexpected as fatal hepatic failure is not listed in the VS-6766 IB v8.0. Study active in USA, United Kingdom, Germany, France, Spain, Canada, and Australia.`;
   document.getElementById('f-product').value = 'VS-6766 (Avutometinib)';
   document.getElementById('f-type').value = 'drug_small_molecule';
   document.getElementById('f-reg').value = 'IND 153742 / NCT05074810';
@@ -525,24 +563,138 @@ function loadDemo(){
   document.getElementById('f-phase').value = 'phase_3';
   document.getElementById('f-sponsor').value = 'USA';
   document.getElementById('f-countries').value = 'USA, UK, Germany, France, Spain, Canada, Australia';
-  document.getElementById('f-ae').value = 'Acute liver failure with jaundice and coagulopathy — subject died';
-  const d = new Date(); d.setDate(d.getDate()-2);
+  document.getElementById('f-ae').value = 'Acute liver failure with jaundice and coagulopathy';
   document.getElementById('f-day0').value = d.toISOString().slice(0,10);
   document.getElementById('f-patient-country').value = 'United States';
-  // seriousness
   document.querySelectorAll('.checkbox-grid input').forEach(cb=>{
     cb.checked = ['fatal','hospitalization'].includes(cb.value);
     cb.closest('.cb-item').classList.toggle('checked', cb.checked);
   });
   document.getElementById('f-causality').value = 'possibly';
   document.getElementById('f-expect').value = 'unexpected';
-  // HAs
   const haSelect = ['FDA','EMA','MHRA','HC','TGA','SWISSMEDIC'];
   document.querySelectorAll('#haGrid input').forEach(cb=>{
     cb.checked = haSelect.includes(cb.value);
     cb.closest('.ha-item').classList.toggle('checked', cb.checked);
   });
 }
+
+// ── NARRATIVE EXTRACTION ──
+async function extractFromNarrative(){
+  const narrative = document.getElementById('f-narrative').value.trim();
+  if(!narrative){ alert('Please paste a case narrative first.'); return; }
+  const btn = document.getElementById('extractBtn');
+  const status = document.getElementById('extractStatus');
+  btn.disabled = true;
+  btn.textContent = 'Extracting…';
+  status.style.display = 'block';
+  status.style.cssText = 'display:block;margin-top:8px;padding:9px 12px;border-radius:6px;font-size:12px;line-height:1.5;background:rgba(55,138,221,0.08);color:#185FA5;border-left:3px solid #378ADD;border-radius:0 6px 6px 0;';
+  status.textContent = 'AI is reading the narrative and extracting structured case data…';
+  if(demoMode||!apiKey){ await demoExtract(narrative); }
+  else { await liveExtract(narrative); }
+  btn.disabled = false;
+  btn.textContent = '✦ Extract & Auto-fill All Fields';
+}
+
+async function liveExtract(narrative){
+  const prompt = `You are a pharmacovigilance data extraction expert. Extract structured case data from this narrative. Return ONLY valid JSON, no other text, no markdown fences.
+
+NARRATIVE:
+${narrative}
+
+Return this exact JSON:
+{"product_name":null,"product_type":"drug_small_molecule","reg_number":null,"indication":null,"phase":"phase_3","sponsor_country":"USA","trial_countries":null,"patient_age":null,"patient_sex":"unknown","patient_country":null,"ae_verbatim":null,"day0_date":null,"outcome":"unknown","seriousness":[],"causality_reporter":"possibly","causality_sponsor":"possibly","expectedness":"unexpected","reporter_institution":null,"dose":null,"medical_history":null,"lab_values":null,"has_suggested":[]}
+
+Rules:
+- phase: one of phase_1|phase_2|phase_3|marketed|compassionate|post_approval_ct
+- product_type: one of drug_small_molecule|biologic|vaccine|gene_therapy|medical_device|combination_product
+- seriousness array: use values from fatal|life_threatening|hospitalization|disability|congenital|non_serious
+- causality: related|possibly|unlikely|unrelated|unassessable
+- expectedness: unexpected|expected|unknown
+- has_suggested: array of HA codes from FDA EMA MHRA PMDA HC TGA SWISSMEDIC MFDS ANVISA NMPA CDSCO SFDA MEDSAFE COFEPRIS HSA WHO — based on countries mentioned
+- day0_date: YYYY-MM-DD format`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error');}
+    const data = await res.json();
+    const text = data.content[0].text.trim().replace(/^```json?\n?/,'').replace(/\n?```$/,'').trim();
+    const extracted = JSON.parse(text);
+    applyExtracted(extracted);
+    showExtractSuccess(extracted);
+  } catch(e){
+    showExtractError('Live extraction error: '+e.message+'. Using pattern extraction instead.');
+    await demoExtract(document.getElementById('f-narrative').value);
+  }
+}
+
+async function demoExtract(narrative){
+  await new Promise(r=>setTimeout(r,1000));
+  const n = narrative.toLowerCase();
+  function xp(text, regex){ const m=text.match(regex); return m?m[1].trim():null; }
+  const extracted = {
+    product_name: xp(narrative,/(VS-\d+\s*\([^)]+\)|avutometinib|defactinib|pembrolizumab|nivolumab|trastuzumab|rituximab|semaglutide)/i) || xp(narrative,/received\s+([\w\-]+(?:\s+\([\w\-]+\))?)/i),
+    product_type: /biologic|monoclonal|mab|antibody|protein/i.test(narrative)?'biologic':/vaccine/i.test(narrative)?'vaccine':'drug_small_molecule',
+    reg_number: xp(narrative,/(IND[\s#]?\d+[,\s\/]*(?:NCT\d+)?|NCT\d+)/i),
+    indication: xp(narrative,/(KRAS[^,\.]+|NSCLC|lung cancer|breast cancer|leukemia|lymphoma|melanoma|[A-Z][a-z]+ cancer)/i),
+    phase: /phase 3|phase iii|pivotal/i.test(narrative)?'phase_3':/phase 2|phase ii/i.test(narrative)?'phase_2':/phase 1|phase i\b/i.test(narrative)?'phase_1':/marketed|post.market/i.test(narrative)?'marketed':'phase_3',
+    sponsor_country: /\b(USA|US|United States)\b/i.test(narrative)?'USA':/\b(UK|United Kingdom)\b/i.test(narrative)?'UK':'USA',
+    trial_countries: xp(narrative,/(?:active in|conducted in|countries)[:\s]+([A-Z][^.]+(?:USA|UK|Germany|France|Japan|Canada|Australia)[^.]*)/i) || (n.includes('usa')&&n.includes('germany')?'USA, UK, Germany, France, Spain, Canada, Australia':null),
+    patient_age: xp(narrative,/(\d+)[- ]year[- ]old/i),
+    patient_sex: /\b(male|man|his)\b/i.test(narrative)?'male':/\b(female|woman|her)\b/i.test(narrative)?'female':'unknown',
+    patient_country: xp(narrative,/(?:at|in)\s+[A-Za-z\s]+,\s+(USA|United States|Germany|France|UK|Japan|Canada|Australia)/i) || (/usa|united states|houston|anderson|boston|new york/i.test(narrative)?'United States':null),
+    ae_verbatim: xp(narrative,/(?:developed?|experienced?|presented with)\s+([^.]+(?:failure|reaction|arrest|injury|toxicity|neutropenia|pneumonitis|rash)[^.]*)/i) || xp(narrative,/(?:developed?)\s+([^.]+)/i),
+    day0_date: (()=>{ const m=narrative.match(/(?:became aware|awareness)\s+on\s+([\w\s,]+\d{4})/i); if(m){try{return new Date(m[1]).toISOString().slice(0,10);}catch(e){}} const d=new Date();d.setDate(d.getDate()-2);return d.toISOString().slice(0,10); })(),
+    outcome: /died|death|fatal/i.test(narrative)?'fatal':/recover/i.test(narrative)?'recovered':'unknown',
+    seriousness: (()=>{ const s=[]; if(/died|death|fatal/i.test(narrative))s.push('fatal'); if(/life.threaten/i.test(narrative))s.push('life_threatening'); if(/hospitali[sz]/i.test(narrative))s.push('hospitalization'); if(/disabilit/i.test(narrative))s.push('disability'); return s.length?s:['hospitalization']; })(),
+    causality_reporter: /possibly related/i.test(narrative)?'possibly':/probably related|definitely/i.test(narrative)?'related':/unlikely/i.test(narrative)?'unlikely':'possibly',
+    causality_sponsor: 'possibly',
+    expectedness: /unexpected|not listed/i.test(narrative)?'unexpected':/expected|listed in/i.test(narrative)?'expected':'unexpected',
+    reporter_institution: xp(narrative,/([A-Z][a-zA-Z\s]+(?:Cancer Center|Hospital|Medical Center|University|Clinic|Institute))/i),
+    dose: xp(narrative,/(\d+\.?\d*\s*mg\s*(?:twice|BID|TID|QD|BIW|once|weekly|daily)[^,;.]*)/i),
+    medical_history: xp(narrative,/(?:medical history|history of)\s+(?:included?)?\s*([^.]+)/i),
+    lab_values: xp(narrative,/(?:laboratory findings|labs?|showed)\s*(?:showed|:)?\s*([^.]+(?:\d+\s*U\/L|\d+\s*mg\/dL|INR)[^.]*)/i),
+    has_suggested: (()=>{ const has=[]; if(n.includes('usa')||n.includes('united states')||/ind \d/i.test(narrative))has.push('FDA'); if(n.includes('german')||n.includes('france')||n.includes('spain')||n.includes('italy'))has.push('EMA'); if(n.includes('uk')||n.includes('united kingdom'))has.push('MHRA'); if(n.includes('japan'))has.push('PMDA'); if(n.includes('canada'))has.push('HC'); if(n.includes('australia'))has.push('TGA'); if(n.includes('switzerland'))has.push('SWISSMEDIC'); if(has.length===0)has.push('FDA','EMA'); return has; })()
+  };
+  applyExtracted(extracted);
+  showExtractSuccess(extracted);
+}
+
+function applyExtracted(e){
+  if(e.product_name) document.getElementById('f-product').value = e.product_name;
+  if(e.product_type) document.getElementById('f-type').value = e.product_type;
+  if(e.reg_number) document.getElementById('f-reg').value = e.reg_number;
+  if(e.indication) document.getElementById('f-indication').value = e.indication;
+  if(e.phase) document.getElementById('f-phase').value = e.phase;
+  if(e.sponsor_country){const sel=document.getElementById('f-sponsor');const opt=[...sel.options].find(o=>o.value===e.sponsor_country||e.sponsor_country.includes(o.value));if(opt)sel.value=opt.value;}
+  if(e.trial_countries) document.getElementById('f-countries').value = e.trial_countries;
+  if(e.ae_verbatim) document.getElementById('f-ae').value = e.ae_verbatim;
+  if(e.day0_date) document.getElementById('f-day0').value = e.day0_date;
+  if(e.patient_country) document.getElementById('f-patient-country').value = e.patient_country;
+  if(e.seriousness&&e.seriousness.length){ document.querySelectorAll('.checkbox-grid input').forEach(cb=>{ cb.checked=e.seriousness.includes(cb.value); cb.closest('.cb-item').classList.toggle('checked',cb.checked); }); }
+  if(e.causality_sponsor){ const m={'related':'related','possibly':'possibly','unlikely':'unlikely','unrelated':'unrelated','unassessable':'unassessable'}; if(m[e.causality_sponsor]) document.getElementById('f-causality').value=m[e.causality_sponsor]; }
+  if(e.expectedness) document.getElementById('f-expect').value = e.expectedness;
+  if(e.has_suggested&&e.has_suggested.length){ document.querySelectorAll('#haGrid input').forEach(cb=>{ cb.checked=e.has_suggested.includes(cb.value); cb.closest('.ha-item').classList.toggle('checked',cb.checked); }); }
+  window._extracted = e;
+}
+
+function showExtractSuccess(e){
+  const status = document.getElementById('extractStatus');
+  const fields=[e.product_name&&`Product: <strong>${e.product_name}</strong>`,e.patient_age&&e.patient_sex&&e.patient_sex!=='unknown'&&`Patient: <strong>${e.patient_age}yo ${e.patient_sex}</strong>`,e.patient_country&&`Country of incidence: <strong>${e.patient_country}</strong>`,e.ae_verbatim&&`AE: <strong>${e.ae_verbatim.substring(0,55)}${e.ae_verbatim.length>55?'…':''}</strong>`,e.outcome&&`Outcome: <strong>${e.outcome}</strong>`,e.day0_date&&`Day 0: <strong>${e.day0_date}</strong>`,e.reg_number&&`Reg#: <strong>${e.reg_number}</strong>`,e.reporter_institution&&`Site: <strong>${e.reporter_institution}</strong>`,e.has_suggested&&e.has_suggested.length&&`HAs: <strong>${e.has_suggested.join(', ')}</strong>`].filter(Boolean);
+  status.style.cssText = 'display:block;margin-top:8px;padding:10px 13px;border-radius:0 6px 6px 0;font-size:12px;line-height:1.6;background:rgba(29,158,117,0.08);color:#085041;border-left:3px solid #1D9E75;';
+  status.innerHTML = `<div style="font-weight:600;margin-bottom:5px;">✓ ${fields.length} fields extracted — form auto-filled</div>`+fields.map(f=>`<div>• ${f}</div>`).join('');
+}
+
+function showExtractError(msg){
+  const status = document.getElementById('extractStatus');
+  status.style.cssText = 'display:block;margin-top:8px;padding:9px 12px;border-radius:0 6px 6px 0;font-size:12px;line-height:1.5;background:rgba(163,45,45,0.07);color:#791F1F;border-left:3px solid #E24B4A;';
+  status.textContent = msg;
+}
+
 
 // ── MAIN RESOLVER ──
 async function resolve(){
