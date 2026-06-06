@@ -230,24 +230,26 @@ select{appearance:none;
 .loading-msg{font-size:13px;color:var(--muted);margin-top:8px;}
 
 /* modal */
-.modal-bg{
-  position:fixed;inset:0;background:rgba(3,32,60,0.65);
-  display:flex;align-items:center;justify-content:center;z-index:200;
-  backdrop-filter:blur(4px);
+.modal-bg{display:none;}
+/* Inline API key dropdown panel — no position:fixed (blocked in Workers/iframe) */
+.api-panel{
+  display:none;position:absolute;top:56px;right:16px;
+  background:#fff;border-radius:10px;border:1px solid rgba(3,32,60,0.15);
+  padding:20px 22px;width:380px;z-index:100;
+  box-shadow:0 8px 40px rgba(3,32,60,0.22);
 }
-.modal-bg.hidden{display:none;}
-.modal{background:#fff;border-radius:14px;padding:32px;width:420px;}
-.modal h2{font-family:var(--serif);font-size:24px;color:var(--navy);margin-bottom:8px;}
-.modal p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;}
-.modal input{margin-bottom:10px;}
-.modal-note{font-size:11px;color:var(--muted);background:rgba(55,138,221,0.07);
-  padding:9px 12px;border-radius:6px;border-left:3px solid var(--sky);margin-bottom:16px;line-height:1.6;}
-.modal-btns{display:flex;gap:8px;}
-.modal-btn{flex:1;padding:10px;border-radius:8px;border:none;
-  font-size:13px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;}
-.modal-btn.primary{background:var(--navy2);color:var(--skylt);}
-.modal-btn.primary:hover{background:var(--blue);}
-.modal-btn.secondary{background:var(--cream);color:var(--muted);}
+.api-panel.visible{display:block;}
+.api-panel h4{font-family:var(--serif);font-size:19px;color:var(--navy);margin-bottom:6px;}
+.api-panel p{font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
+.api-panel-note{font-size:11px;color:var(--muted);background:rgba(55,138,221,0.07);
+  padding:8px 11px;border-radius:5px;border-left:2px solid var(--sky);margin-bottom:14px;line-height:1.55;}
+.api-panel-row{display:flex;gap:8px;margin-top:0;}
+.api-panel-row button{flex:1;padding:9px;border-radius:7px;border:none;
+  font-size:12.5px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;}
+.apb-primary{background:var(--navy2);color:var(--skylt);}
+.apb-primary:hover{background:var(--blue);}
+.apb-secondary{background:var(--cream);color:var(--muted);}
+.apb-secondary:hover{background:#E5E1D8;}
 
 /* export bar */
 .export-bar{
@@ -381,9 +383,10 @@ select{appearance:none;
 </style>
 </head>
 <body>
+<div id="appRoot" style="position:relative;min-height:100vh;">
 
-<!-- API MODAL -->
-<div class="modal-bg" id="apiModal">
+<!-- API MODAL (legacy — now uses inline panel, kept for fallback) -->
+<div class="modal-bg" id="apiModal" style="display:none;">
   <div class="modal">
     <h2>Connect Claude API</h2>
     <p>RegIntel uses Claude AI to resolve global PV reporting obligations. Enter your Anthropic API key for live analysis, or use Demo Mode with realistic pre-computed results.</p>
@@ -402,8 +405,21 @@ select{appearance:none;
   <div class="header-tag">RegIntel · Global AE Obligation Resolver</div>
   <div class="header-right">
     <div class="header-badge" id="modeBadge">DEMO MODE</div>
-    <button class="api-btn" onclick="showModal()">⚙ API Key</button>
+    <button class="api-btn" id="apiToggleBtn" onclick="toggleApiPanel()">⚙ API Key</button>
   </div>
+</div>
+
+<!-- INLINE API PANEL (positioned under header) -->
+<div class="api-panel" id="apiPanel">
+  <h4>Connect Claude API</h4>
+  <p>Enter your Anthropic API key to activate live AI analysis across all 16 HAs and 73 report obligations.</p>
+  <div class="api-panel-note">Your key is stored in browser memory only — never sent to any server other than Anthropic's API directly.</div>
+  <input type="password" id="apiKeyInput2" placeholder="sk-ant-api03-…" style="width:100%;border:1px solid rgba(3,32,60,0.15);border-radius:6px;padding:8px 11px;font-size:13px;font-family:var(--sans);outline:none;margin-bottom:10px;"/>
+  <div class="api-panel-row">
+    <button class="apb-secondary" onclick="useDemoMode()">Demo Mode</button>
+    <button class="apb-primary" onclick="connectAPIPanel()">Connect Live API →</button>
+  </div>
+  <div id="apiPanelStatus" style="display:none;margin-top:10px;font-size:12px;padding:7px 10px;border-radius:5px;"></div>
 </div>
 
 <!-- MAIN -->
@@ -600,23 +616,68 @@ let apiKey = '';
 let demoMode = true;
 
 // ── INIT ──
-window.addEventListener('load', () => {
-  document.getElementById('f-day0').valueAsDate = new Date();
-  showModal();
+document.addEventListener('click', function(e){
+  const panel = document.getElementById('apiPanel');
+  const btn = document.getElementById('apiToggleBtn');
+  if(panel && panel.classList.contains('visible')){
+    if(!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)){
+      panel.classList.remove('visible');
+    }
+  }
 });
 
-function showModal(){ document.getElementById('apiModal').classList.remove('hidden'); }
-function connectAPI(){
-  const k = document.getElementById('apiKeyInput').value.trim();
-  if(!k.startsWith('sk-ant')){ alert('Enter a valid Anthropic API key (starts with sk-ant-)'); return; }
+window.addEventListener('load', () => {
+  document.getElementById('f-day0').valueAsDate = new Date();
+  // Show inline API panel on load (not fixed modal)
+  setTimeout(()=>{ document.getElementById('apiPanel').classList.add('visible'); }, 300);
+});
+
+// ── API KEY PANEL (inline, no fixed positioning) ──
+function toggleApiPanel(){
+  const panel = document.getElementById('apiPanel');
+  panel.classList.toggle('visible');
+}
+function closeApiPanel(){
+  document.getElementById('apiPanel').classList.remove('visible');
+}
+function connectAPIPanel(){
+  // Try inline panel input first, fall back to original modal input
+  const inp2 = document.getElementById('apiKeyInput2');
+  const inp1 = document.getElementById('apiKeyInput');
+  const k = (inp2 && inp2.value.trim()) || (inp1 && inp1.value.trim()) || '';
+  const statusEl = document.getElementById('apiPanelStatus');
+  if(!k || !k.startsWith('sk-ant')){
+    if(statusEl){
+      statusEl.style.display='block';
+      statusEl.style.background='rgba(163,45,45,0.08)';
+      statusEl.style.color='#A32D2D';
+      statusEl.textContent='Invalid key — must start with sk-ant-';
+    }
+    return;
+  }
   apiKey = k; demoMode = false;
   document.getElementById('modeBadge').textContent = 'LIVE · CLAUDE API';
   document.getElementById('modeBadge').style.background = 'rgba(29,158,117,0.25)';
-  document.getElementById('apiModal').classList.add('hidden');
+  document.getElementById('modeBadge').style.color = '#9FE1CB';
+  if(statusEl){
+    statusEl.style.display='block';
+    statusEl.style.background='rgba(29,158,117,0.1)';
+    statusEl.style.color='#085041';
+    statusEl.textContent='✓ Connected — live Claude API active';
+  }
+  setTimeout(()=>closeApiPanel(), 1200);
 }
+function connectAPI(){ connectAPIPanel(); } // alias for old modal button
+function showModal(){ toggleApiPanel(); }   // redirect old modal trigger to panel
 function useDemoMode(){
-  demoMode = true;
-  document.getElementById('apiModal').classList.add('hidden');
+  demoMode = true; apiKey = '';
+  document.getElementById('modeBadge').textContent = 'DEMO MODE';
+  document.getElementById('modeBadge').style.background = 'rgba(29,158,117,0.2)';
+  document.getElementById('modeBadge').style.color = '#9FE1CB';
+  // Close both modal and panel
+  const modal = document.getElementById('apiModal');
+  if(modal) modal.classList.remove('visible');
+  closeApiPanel();
 }
 
 function toggleCB(cb){
@@ -1780,5 +1841,6 @@ function copyObligations(){
 function printResults(){ window.print(); }
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
+</div><!-- /appRoot -->
 </body>
 </html>
