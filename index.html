@@ -267,6 +267,117 @@ select{appearance:none;
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(3,32,60,0.12);border-radius:10px;}
+
+/* ── TREE VIEW STYLES ── */
+.tree-shell{background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 20px rgba(3,32,60,0.04);}
+.tree-topbar{background:var(--navy);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.tree-topbar h3{font-family:var(--serif);font-size:18px;color:var(--white);}
+.tree-topbar .sub{font-size:12px;color:rgba(181,212,244,0.6);margin-left:auto;}
+.tree-legend{display:flex;gap:16px;padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(3,32,60,0.02);flex-wrap:wrap;}
+.tl-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+.tl-dot{width:9px;height:9px;border-radius:50%;}
+
+/* summary bar */
+.case-summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);}
+.csb-item{padding:12px 16px;border-right:1px solid var(--border);}
+.csb-item:last-child{border-right:none;}
+.csb-k{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:3px;font-family:var(--mono);}
+.csb-v{font-size:13px;font-weight:500;color:var(--text);}
+.csb-v.alert{color:#A32D2D;}
+.csb-v.ok{color:#085041;}
+.csb-v.warn{color:#854F0B;}
+
+/* tree nodes */
+.tree-body{padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
+
+.t-country{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.t-country-hdr{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;background:var(--cream);transition:background .15s;user-select:none;}
+.t-country-hdr:hover{background:#E5E1D8;}
+.t-country-flag{font-size:18px;line-height:1;}
+.t-country-name{font-size:13px;font-weight:600;color:var(--navy);}
+.t-country-ha{font-size:11px;color:var(--muted);margin-left:4px;}
+.t-country-caret{margin-left:auto;font-size:11px;color:var(--muted);transition:transform .2s;}
+.t-country-hdr.open .t-country-caret{transform:rotate(90deg);}
+.t-country-pills{margin-left:auto;display:flex;gap:5px;margin-right:8px;}
+.t-country-body{display:none;border-top:1px solid var(--border);}
+.t-country-body.open{display:block;}
+
+.t-ha{border-bottom:1px solid rgba(3,32,60,0.05);}
+.t-ha:last-child{border-bottom:none;}
+.t-ha-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px 10px 28px;cursor:pointer;transition:background .12s;}
+.t-ha-hdr:hover{background:rgba(3,32,60,0.03);}
+.t-ha-code{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.06em;padding:2px 8px;border-radius:10px;}
+.t-ha-name{font-size:12.5px;color:var(--text);font-weight:500;}
+.t-ha-reg{font-size:11px;color:var(--muted);}
+.t-ha-caret{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s;}
+.t-ha-hdr.open .t-ha-caret{transform:rotate(90deg);}
+.t-ha-body{display:none;border-top:1px solid rgba(3,32,60,0.06);background:rgba(3,32,60,0.01);}
+.t-ha-body.open{display:block;}
+
+.t-report{display:flex;align-items:stretch;border-bottom:1px solid rgba(3,32,60,0.05);transition:background .12s;}
+.t-report:last-child{border-bottom:none;}
+.t-report:hover{background:rgba(55,138,221,0.03);}
+.t-report-stripe{width:4px;flex-shrink:0;}
+.t-report-inner{flex:1;padding:10px 14px 10px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.t-report-type{font-size:12px;font-weight:600;color:var(--text);min-width:160px;}
+.t-report-tl{font-size:11px;color:var(--muted);}
+.t-report-due{font-size:12px;font-weight:500;color:var(--text);margin-left:auto;}
+.t-report-fmt{font-size:10.5px;color:var(--muted);font-family:var(--mono);}
+.t-report-detail{width:100%;margin-top:6px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.6;display:none;}
+.t-report:hover .t-report-detail{display:block;}
+
+/* periodic section */
+.t-periodic{margin-top:12px;border:1px solid rgba(52,125,221,0.15);border-radius:10px;overflow:hidden;}
+.t-periodic-hdr{padding:10px 14px;background:rgba(55,138,221,0.05);border-bottom:1px solid rgba(55,138,221,0.12);display:flex;align-items:center;gap:8px;cursor:pointer;}
+.t-periodic-hdr-title{font-size:12px;font-weight:600;color:#185FA5;}
+.t-periodic-hdr-caret{margin-left:auto;font-size:10px;color:#378ADD;transition:transform .2s;}
+.t-periodic-hdr.open .t-periodic-hdr-caret{transform:rotate(90deg);}
+.t-periodic-body{display:none;}
+.t-periodic-body.open{display:block;}
+.t-periodic-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(3,32,60,0.05);font-size:12px;}
+.t-periodic-row:last-child{border-bottom:none;}
+.t-periodic-report{font-weight:500;color:var(--text);min-width:140px;}
+.t-periodic-freq{color:var(--muted);font-size:11px;flex:1;}
+.t-periodic-ref{font-family:var(--mono);font-size:10px;color:#378ADD;}
+
+/* status dot colors */
+.dot-over{background:#E24B4A;}
+.dot-risk{background:#EF9F27;}
+.dot-ok{background:#1D9E75;}
+.dot-per{background:#7F77DD;}
+.dot-na{background:#B4B2A9;}
+
+/* action footer */
+.tree-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;background:rgba(3,32,60,0.02);flex-wrap:wrap;}
+.tf-btn{padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .15s;}
+.tf-btn:hover{background:var(--cream);}
+.tf-btn.primary{background:var(--navy2);color:var(--skylt);border-color:var(--navy2);}
+.tf-btn.primary:hover{background:var(--blue);}
+
+/* narrative in tree */
+.t-narrative{margin-top:12px;border:1px solid rgba(3,32,60,0.1);border-radius:10px;overflow:hidden;}
+.t-narrative-hdr{padding:10px 14px;background:rgba(209,83,126,0.05);border-bottom:1px solid rgba(209,83,126,0.12);display:flex;align-items:center;gap:8px;cursor:pointer;}
+.t-narrative-hdr-title{font-size:12px;font-weight:600;color:#72243E;}
+.t-narrative-body{display:none;padding:14px;font-size:12.5px;line-height:1.8;color:var(--text);}
+.t-narrative-body.open{display:block;}
+
+/* gap checklist */
+.t-gaps{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.t-gaps-hdr{padding:10px 14px;background:rgba(3,32,60,0.03);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;cursor:pointer;}
+.t-gaps-hdr-title{font-size:12px;font-weight:600;color:var(--navy);}
+.t-gaps-body{display:none;}
+.t-gaps-body.open{display:block;}
+.t-gap-row{display:flex;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(3,32,60,0.04);align-items:flex-start;}
+.t-gap-row:last-child{border-bottom:none;}
+.t-gap-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
+.t-gap-txt{font-size:12px;color:var(--text);line-height:1.5;}
+.t-gap-sub{font-size:11px;color:var(--muted);}
+
+@media print{
+  .form-card,.header{display:none;}
+  .main{grid-template-columns:1fr;}
+  .tree-shell{box-shadow:none;}
+}
 </style>
 </head>
 <body>
@@ -843,55 +954,43 @@ Numbered list: exactly what the PV team must do in the next 24–48 hours, in pr
 }
 
 function renderLiveResults(c, text, isSUSAR, isFatal, isSerious, isCT){
-  const panel = document.getElementById('resultsPanel');
-  panel.innerHTML = '';
+  const day0 = new Date(c.day0);
+  const tl = isFatal ? 7 : isSerious ? 15 : 90;
 
-  // extract sections
+  // parse sections from AI text for narrative
   function extractSection(heading){
     const re = new RegExp('## '+heading+'[\\s\\S]*?(?=## |$)');
     const m = text.match(re);
     return m ? m[0].replace(/^## [^\n]+\n/,'').trim() : '';
   }
 
-  const day0 = new Date(c.day0);
-  const tl = isFatal ? 7 : 15;
-  const dueDate = new Date(day0); dueDate.setDate(dueDate.getDate()+tl);
+  // override buildNarrative with AI narrative if available
+  const aiNarr = extractSection('CIOMS I NARRATIVE');
+  window._aiNarrative = aiNarr || null;
 
-  // SUSAR alert
-  if(isSUSAR){
-    const sCard = document.createElement('div');
-    sCard.className = 'susar-card';
-    sCard.innerHTML = `
-      <h3>⚠ SUSAR Confirmed — Expedited Reporting Active</h3>
-      <p>${extractSection('CASE SUMMARY').substring(0,300)}…</p>
-      <div class="susar-meta">
-        <div class="susar-meta-item"><span class="k">Day 0</span><span class="v alert">${c.day0}</span></div>
-        <div class="susar-meta-item"><span class="k">Clock expires</span><span class="v alert">${dueDate.toISOString().slice(0,10)}</span></div>
-        <div class="susar-meta-item"><span class="k">HAs in scope</span><span class="v">${c.has.length} authorities</span></div>
-        <div class="susar-meta-item"><span class="k">Timeline</span><span class="v alert">${tl}-calendar-day</span></div>
-      </div>`;
-    panel.appendChild(sCard);
-  }
+  renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl);
 
-  // Full AI text card
-  const mainCard = document.createElement('div');
-  mainCard.className = 'result-card';
-  mainCard.innerHTML = `
-    <div class="rc-header">
-      <div class="rc-icon" style="background:#E6F1FB;">🌐</div>
-      <div><div class="rc-title">Complete Global Obligation Analysis</div>
-      <div class="rc-sub">${c.product} · ${c.phase} · ${c.has.length} Health Authorities · Day 0: ${c.day0}</div></div>
-      <span class="rc-badge" style="background:#E1F5EE;color:#085041;">AI ANALYSIS</span>
+  // append raw AI analysis as collapsible below the tree
+  const panel = document.getElementById('resultsPanel');
+  const aiCard = document.createElement('div');
+  aiCard.style.cssText = 'background:#fff;border-radius:14px;border:1px solid rgba(3,32,60,0.1);overflow:hidden;box-shadow:0 2px 20px rgba(3,32,60,0.04);';
+  aiCard.innerHTML = `
+    <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;background:rgba(3,32,60,0.02);" onclick="toggleSection('ai-body','ai-hdr')" id="ai-hdr">
+      <span style="font-size:14px;">✦</span>
+      <span style="font-size:13px;font-weight:600;color:var(--navy);">Full AI regulatory analysis — click to expand</span>
+      <span style="margin-left:auto;font-size:10px;font-family:var(--mono);background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:10px;">CLAUDE SONNET</span>
+      <span class="t-periodic-hdr-caret">▶</span>
     </div>
-    <div style="padding:20px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:600px;overflow-y:auto;">${escHtml(text)}</div>
-    <div class="export-bar">
-      <button class="exp-btn primary" onclick="copyText(\`${escHtml(text).replace(/`/g,"'")}\`)">Copy full analysis</button>
-      <button class="exp-btn" onclick="printResults()">Print / Save PDF</button>
+    <div id="ai-body" class="t-gaps-body" style="">
+      <div style="padding:20px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:500px;overflow-y:auto;">${escHtml(text)}</div>
+      <div style="padding:10px 20px;border-top:1px solid var(--border);display:flex;gap:8px;">
+        <button class="tf-btn primary" onclick="copyText(\`${text.replace(/`/g,"'")}\`)">Copy full analysis</button>
+      </div>
     </div>`;
-  panel.appendChild(mainCard);
+  panel.appendChild(aiCard);
 }
 
-// ── DEMO MODE ──
+
 async function runDemo(c){
   const isFatal = c.seriousness.includes('fatal')||c.seriousness.includes('life_threatening');
   const isCT = !c.phase.includes('marketed')&&c.phase!=='post_approval_ct';
@@ -939,185 +1038,284 @@ async function runDemo(c){
 
   const panel = document.getElementById('resultsPanel');
   panel.innerHTML = '';
+  renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl);
+}
 
-  // 1. SUSAR ALERT
-  if(isSUSAR){
-    const dueDate = new Date(day0); dueDate.setDate(dueDate.getDate()+7);
-    const daysLeft = Math.ceil((dueDate-new Date())/86400000);
-    panel.insertAdjacentHTML('beforeend',`
-      <div class="susar-card">
-        <h3>⚠ SUSAR Confirmed — ${tl}-Day Clock Running</h3>
-        <p>This case meets all three SUSAR criteria under ICH E2A: (1) <strong>Serious</strong> — ${c.seriousness.join(', ')}, (2) <strong>Unexpected</strong> — AE not listed in current Reference Safety Information, (3) <strong>Causally related</strong> — investigator/sponsor assessed as ${c.causality}. Expedited ${tl}-calendar-day reporting obligation is active across all ${c.has.length} Health Authorities in scope.</p>
-        <div class="susar-meta">
-          <div class="susar-meta-item"><span class="k">Product</span><span class="v">${c.product}</span></div>
-          <div class="susar-meta-item"><span class="k">Day 0</span><span class="v alert">${c.day0}</span></div>
-          <div class="susar-meta-item"><span class="k">All reports due</span><span class="v alert">${dueDate.toISOString().slice(0,10)}</span></div>
-          <div class="susar-meta-item"><span class="k">Days remaining</span><span class="v ${daysLeft<=2?'alert':''}">${daysLeft>0?daysLeft+'d':Math.abs(daysLeft)+'d OVERDUE'}</span></div>
-          <div class="susar-meta-item"><span class="k">HAs in scope</span><span class="v">${c.has.length} authorities</span></div>
-          <div class="susar-meta-item"><span class="k">MedDRA PT</span><span class="v">${getPT(c.ae)}</span></div>
-        </div>
-      </div>`);
+// ── TREE RENDERER ──
+function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
+  const panel = document.getElementById('resultsPanel');
+
+  // ── Build country→HA map ──
+  const HA_META = {
+    FDA:      {name:'FDA',fullname:'Food & Drug Administration',flag:'🇺🇸',country:'United States',countryCode:'US',color:'#185FA5',bg:'#E6F1FB'},
+    EMA:      {name:'EMA',fullname:'European Medicines Agency',flag:'🇪🇺',country:'European Union',countryCode:'EU',color:'#3C3489',bg:'#EEEDFE'},
+    MHRA:     {name:'MHRA',fullname:'Medicines & Healthcare products Regulatory Agency',flag:'🇬🇧',country:'United Kingdom',countryCode:'GB',color:'#3C3489',bg:'#EEEDFE'},
+    PMDA:     {name:'PMDA',fullname:'Pharmaceuticals & Medical Devices Agency',flag:'🇯🇵',country:'Japan',countryCode:'JP',color:'#854F0B',bg:'#FAEEDA'},
+    HC:       {name:'Health Canada',fullname:'Health Canada — Santé Canada',flag:'🇨🇦',country:'Canada',countryCode:'CA',color:'#A32D2D',bg:'#FCEBEB'},
+    TGA:      {name:'TGA',fullname:'Therapeutic Goods Administration',flag:'🇦🇺',country:'Australia',countryCode:'AU',color:'#3B6D11',bg:'#EAF3DE'},
+    SWISSMEDIC:{name:'Swissmedic',fullname:'Swiss Agency for Therapeutic Products',flag:'🇨🇭',country:'Switzerland',countryCode:'CH',color:'#854F0B',bg:'#FAEEDA'},
+    MFDS:     {name:'MFDS',fullname:'Ministry of Food & Drug Safety',flag:'🇰🇷',country:'South Korea',countryCode:'KR',color:'#3C3489',bg:'#EEEDFE'},
+    ANVISA:   {name:'ANVISA',fullname:'Agência Nacional de Vigilância Sanitária',flag:'🇧🇷',country:'Brazil',countryCode:'BR',color:'#993C1D',bg:'#FAECE7'},
+    NMPA:     {name:'NMPA',fullname:'National Medical Products Administration',flag:'🇨🇳',country:'China',countryCode:'CN',color:'#854F0B',bg:'#FAEEDA'},
+    CDSCO:    {name:'CDSCO',fullname:'Central Drugs Standard Control Organisation',flag:'🇮🇳',country:'India',countryCode:'IN',color:'#993C1D',bg:'#FAECE7'},
+    SFDA:     {name:'SFDA',fullname:'Saudi Food & Drug Authority',flag:'🇸🇦',country:'Saudi Arabia',countryCode:'SA',color:'#3B6D11',bg:'#EAF3DE'},
+    MEDSAFE:  {name:'Medsafe',fullname:'New Zealand Medicines & Medical Devices Safety Authority',flag:'🇳🇿',country:'New Zealand',countryCode:'NZ',color:'#085041',bg:'#E1F5EE'},
+    COFEPRIS: {name:'COFEPRIS',fullname:'Comisión Federal para la Protección contra Riesgos Sanitarios',flag:'🇲🇽',country:'Mexico',countryCode:'MX',color:'#993C1D',bg:'#FAECE7'},
+    HSA:      {name:'HSA',fullname:'Health Sciences Authority',flag:'🇸🇬',country:'Singapore',countryCode:'SG',color:'#185FA5',bg:'#E6F1FB'},
+    WHO:      {name:'WHO/UMC',fullname:'World Health Organization — VigiBase',flag:'🌍',country:'Global / International',countryCode:'WW',color:'#5F5E5A',bg:'#F1EFE8'},
+  };
+
+  function getHAObligation(ha, c, isFatal, isSerious, isSUSAR, isCT, day0) {
+    const cfg = HA_CONFIG[ha] || {reg:'National regulation',report:'ICSR',susar:'SAE Report',fmt:'E2B R3',route:'National portal',tl7:7,tl15:15,tl90:90};
+    const htl = isFatal?(cfg.tl7||7):isSerious?(cfg.tl15||15):(cfg.tl90||90);
+    const isDom = isCountryDomestic(ha, c.sponsor, c.countries);
+    const due = new Date(day0); due.setDate(due.getDate()+htl);
+    const daysLeft = Math.ceil((due-new Date())/86400000);
+    const isNonSerious = c.seriousness.includes('non_serious') && !isSerious;
+    return {
+      cfg, htl, isDom, due, daysLeft, isNonSerious,
+      reportName: isSUSAR ? (cfg.susar||cfg.report) : cfg.report,
+      status: daysLeft<0?'over':daysLeft<=2?'risk':'ok',
+      statusTxt: daysLeft<0?`${Math.abs(daysLeft)}d OVERDUE`:daysLeft===0?'DUE TODAY':`${daysLeft}d left`,
+      tlTag: htl<=7?'t7':htl<=15?'t15':htl<=30?'t30':htl<=90?'t90':'tper',
+      tlLabel: htl===7?'7 calendar days':htl===15?'15 calendar days':htl===30?'30 days':htl===90?'90 days':'Periodic',
+      stripeColor: daysLeft<0?'#E24B4A':daysLeft<=2?'#EF9F27':htl>30?'#7F77DD':'#1D9E75',
+    };
   }
 
-  // 2. CASE SUMMARY
-  panel.insertAdjacentHTML('beforeend',`
-    <div class="result-card">
-      <div class="rc-header">
-        <div class="rc-icon" style="background:#E6F1FB;">📋</div>
-        <div><div class="rc-title">Case Classification Summary</div>
-        <div class="rc-sub">ICH E2A criteria applied · MedDRA v27.1</div></div>
-        <span class="rc-badge" style="background:#E1F5EE;color:#085041;">VALIDATED</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-        ${[
-          ['Product',c.product],
-          ['Product type',c.type.replace(/_/g,' ')],
-          ['Phase',c.phase.replace(/_/g,' ')],
-          ['AE verbatim',c.ae.substring(0,60)+(c.ae.length>60?'…':'')],
-          ['MedDRA PT',getPT(c.ae)+' ['+getPTCode(c.ae)+']'],
-          ['SOC',getSOC(c.ae)],
-          ['Day 0',c.day0+' (clock start)'],
-          ['Seriousness',c.seriousness.join(', ')],
-          ['Causality',c.causality],
-          ['Expectedness',c.expectedness],
-          ['SUSAR',isSUSAR?'✓ CONFIRMED':'Not a SUSAR'],
-          ['Reporting timeline',tl+'-calendar-day expedited'],
-        ].map(([k,v])=>`
-          <div style="padding:8px 16px;border-bottom:1px solid rgba(3,32,60,0.05);${['MedDRA PT','Day 0','SUSAR'].includes(k)?'background:rgba(3,32,60,0.01)':''}">
-            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">${k}</div>
-            <div style="font-size:12.5px;font-weight:500;color:${k==='SUSAR'&&isSUSAR?'var(--red)':k==='Day 0'?'var(--blue)':'var(--text)'};">${v}</div>
-          </div>`).join('')}
-      </div>
-    </div>`);
+  // ── Summary header ──
+  const allDue = c.has.map(ha=>{
+    const {daysLeft} = getHAObligation(ha,c,isFatal,isSerious,isSUSAR,isCT,day0);
+    return daysLeft;
+  });
+  const minDays = Math.min(...allDue);
+  const overdueCount = allDue.filter(d=>d<0).length;
+  const riskCount = allDue.filter(d=>d>=0&&d<=2).length;
 
-  // 3. GLOBAL OBLIGATIONS TABLE
-  panel.insertAdjacentHTML('beforeend',`
-    <div class="result-card">
-      <div class="rc-header">
-        <div class="rc-icon" style="background:#FAECE7;">🌐</div>
-        <div><div class="rc-title">Global Reporting Obligations</div>
-        <div class="rc-sub">${c.has.length} Health Authorities · All timelines from Day 0: ${c.day0}</div></div>
-        <span class="rc-badge" style="background:#FAECE7;color:#993C1D;">${c.has.length} HAs</span>
-      </div>
-      <div class="ob-wrap">
-        <table class="ob-table">
-          <thead><tr>
-            <th>HA</th><th>Regulation</th><th>Report type</th><th>Timeline</th>
-            <th>Due date</th><th>D/F</th><th>Format</th><th>Route</th><th>Status</th>
-          </tr></thead>
-          <tbody>${buildRows()}</tbody>
-        </table>
-      </div>
-      <div style="padding:10px 16px;background:rgba(3,32,60,0.02);border-top:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.6;">
-        D/F = Domestic / Foreign · DOM = case country matches HA jurisdiction · FOR = foreign case (still reportable) · Clock basis: calendar days (all HAs shown) · Follow-up report due 15 calendar days after new significant information
-      </div>
-      <div class="export-bar">
-        <button class="exp-btn primary" onclick="exportCSV()">Export CSV</button>
-        <button class="exp-btn" onclick="printResults()">Print / PDF</button>
-        <button class="exp-btn" onclick="copyObligations()">Copy table</button>
-      </div>
-    </div>`);
+  const alertColor = isSUSAR ? '#D85A30' : isSerious ? '#BA7517' : '#1D9E75';
+  const alertBg = isSUSAR ? '#FAECE7' : isSerious ? '#FAEEDA' : '#E1F5EE';
 
-  // 4. PERIODIC OBLIGATIONS
-  const periodics = buildPeriodics(c, isCT);
-  panel.insertAdjacentHTML('beforeend',`
-    <div class="result-card">
-      <div class="rc-header">
-        <div class="rc-icon" style="background:#EEEDFE;">📅</div>
-        <div><div class="rc-title">Periodic Reporting Obligations</div>
-        <div class="rc-sub">DSUR · PSUR/PBRER · PADER · Line listings</div></div>
+  let html = `
+  <div class="tree-shell">
+    <div class="tree-topbar" style="background:${isSUSAR?'#03203C':isSUSAR?'#03203C':'#042C53'}; ${isSUSAR?'border-bottom:2px solid #D85A30':''}">
+      <div>
+        <div style="font-family:var(--serif);font-size:19px;color:#F8F6F2;margin-bottom:2px;">${c.product} — Global Obligation Report</div>
+        <div style="font-size:11px;color:rgba(181,212,244,0.6);">Day 0: ${c.day0} &nbsp;·&nbsp; ${c.has.length} Health Authorities &nbsp;·&nbsp; MedDRA PT: ${getPT(c.ae)} [${getPTCode(c.ae)}]</div>
       </div>
-      <div class="ob-wrap">
-        <table class="ob-table">
-          <thead><tr><th>Report</th><th>Applicable HAs</th><th>Frequency</th><th>Reference date</th><th>Notes</th></tr></thead>
-          <tbody>${periodics}</tbody>
-        </table>
-      </div>
-    </div>`);
+      ${isSUSAR?`<div style="margin-left:auto;background:#D85A30;color:#fff;font-size:11px;font-weight:600;padding:5px 14px;border-radius:20px;">⚠ SUSAR — ${tl}-DAY CLOCK</div>`:''}
+    </div>
 
-  // 5. DOMESTIC/FOREIGN ANALYSIS
-  panel.insertAdjacentHTML('beforeend',`
-    <div class="result-card">
-      <div class="rc-header">
-        <div class="rc-icon" style="background:#EAF3DE;">⚖️</div>
-        <div><div class="rc-title">Domestic vs Foreign Case Analysis</div>
-        <div class="rc-sub">Per-HA classification with regulatory rationale</div></div>
+    <div class="case-summary-bar">
+      <div class="csb-item">
+        <div class="csb-k">Classification</div>
+        <div class="csb-v ${isSUSAR?'alert':''}">${isSUSAR?'SUSAR — Expedited':isSerious?'Serious SAR':'Non-serious'}</div>
       </div>
-      <div class="ob-wrap">
-        <table class="ob-table">
-          <thead><tr><th>HA</th><th>Classification</th><th>Regulation basis</th><th>Implication</th></tr></thead>
-          <tbody>${buildDomForTable(c)}</tbody>
-        </table>
+      <div class="csb-item">
+        <div class="csb-k">Reporting timeline</div>
+        <div class="csb-v ${isFatal?'alert':isSerious?'warn':''}">${tl}-calendar-day ${isSerious?'expedited':'periodic'}</div>
       </div>
-      <div style="padding:12px 16px;background:rgba(3,32,60,0.02);border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.65;">
-        <strong>Key rule:</strong> FDA (21 CFR 312.32) requires reporting of ALL IND study SAEs regardless of country of occurrence — foreign cases apply same 7/15-day timelines as domestic. EMA (EU CT Reg 536/2014) requires CTIS submission covering all participating EU member states centrally.
+      <div class="csb-item">
+        <div class="csb-k">Earliest deadline</div>
+        <div class="csb-v ${minDays<0?'alert':minDays<=2?'warn':''}">${minDays<0?Math.abs(minDays)+'d OVERDUE':minDays+'d remaining'}</div>
       </div>
-    </div>`);
+      <div class="csb-item">
+        <div class="csb-k">Status</div>
+        <div class="csb-v ${overdueCount>0?'alert':riskCount>0?'warn':'ok'}">${overdueCount>0?overdueCount+' OVERDUE':riskCount>0?riskCount+' AT RISK':'All on track'}</div>
+      </div>
+    </div>
 
-  // 6. TIMELINE
-  panel.insertAdjacentHTML('beforeend',`
-    <div class="result-card">
-      <div class="rc-header">
-        <div class="rc-icon" style="background:#E1F5EE;">⏱</div>
-        <div><div class="rc-title">All Due Dates — Chronological</div>
-        <div class="rc-sub">Sorted earliest to latest · Holiday-adjusted · Follow-up dates included</div></div>
-      </div>
-      <div class="ob-wrap">
-        <table class="ob-table">
-          <thead><tr><th>Due date</th><th>HA</th><th>Report</th><th>Days from today</th><th>Status</th><th>Action required</th></tr></thead>
-          <tbody>${buildTimeline(c,isFatal,isSerious,isSUSAR,isCT,day0)}</tbody>
-        </table>
-      </div>
-    </div>`);
+    <div class="tree-legend">
+      <div class="tl-item"><div class="tl-dot dot-over"></div> Overdue</div>
+      <div class="tl-item"><div class="tl-dot dot-risk"></div> Due ≤ 48h</div>
+      <div class="tl-item"><div class="tl-dot dot-ok"></div> On track</div>
+      <div class="tl-item"><div class="tl-dot dot-per"></div> Periodic</div>
+      <div class="tl-item" style="margin-left:auto;font-size:11px;color:var(--muted);">Click any country or HA to expand · hover a report row for details</div>
+    </div>
 
-  // 7. CIOMS NARRATIVE
-  panel.insertAdjacentHTML('beforeend',`
-    <div class="result-card">
-      <div class="rc-header">
-        <div class="rc-icon" style="background:#FBEAF0;">📝</div>
-        <div><div class="rc-title">CIOMS I Narrative Draft (H.1)</div>
-        <div class="rc-sub">ICH E2A Section 3 compliant · Third person past tense · Placeholders in orange</div></div>
-        <span class="rc-badge" style="background:#FBEAF0;color:#72243E;">DRAFT</span>
-      </div>
-      <div class="narrative-body">${buildNarrative(c, isSUSAR, isFatal)}</div>
-      <div style="padding:10px 16px;background:rgba(3,32,60,0.02);border-top:1px solid var(--border);font-size:11px;color:var(--muted);">
-        Placeholders require completion from source data before submission · Word count: ~${220+c.has.length*3} words · Target: 150–400 words (ICH E2A)
-      </div>
-      <div class="export-bar">
-        <button class="exp-btn primary" onclick="copyNarrative()">Copy narrative</button>
-        <button class="exp-btn" onclick="copyNarrativeE2B()">Copy as E2B H.1</button>
-      </div>
-    </div>`);
+    <div class="tree-body">`;
 
-  // 8. GAP ANALYSIS
-  panel.insertAdjacentHTML('beforeend',`
-    <div class="result-card">
-      <div class="rc-header">
-        <div class="rc-icon" style="background:#FCEBEB;">🔍</div>
-        <div><div class="rc-title">Gap Analysis — Missing Data Before Submission</div>
-        <div class="rc-sub">Fields required to complete E2B R3 submission</div></div>
-      </div>
-      <div class="gap-list">${buildGaps(c)}</div>
-    </div>`);
+  // ── Country grouping ──
+  const byCountry = {};
+  c.has.forEach(ha => {
+    const meta = HA_META[ha] || {country:'Other',flag:'🌐',countryCode:'ZZ'};
+    const key = meta.country;
+    if(!byCountry[key]) byCountry[key] = {flag:meta.flag, has:[]};
+    byCountry[key].has.push(ha);
+  });
 
-  // 9. IMMEDIATE ACTIONS
-  panel.insertAdjacentHTML('beforeend',`
-    <div class="result-card">
-      <div class="rc-header">
-        <div class="rc-icon" style="background:#FAEEDA;">⚡</div>
-        <div><div class="rc-title">Immediate Action Plan</div>
-        <div class="rc-sub">Priority-ordered actions for your PV team — next 24–48 hours</div></div>
+  let countryIdx = 0;
+  Object.entries(byCountry).forEach(([country, {flag, has: countryHAs}]) => {
+    const cid = 'c'+countryIdx++;
+
+    // count statuses for this country
+    const statuses = countryHAs.map(ha => getHAObligation(ha,c,isFatal,isSerious,isSUSAR,isCT,day0).status);
+    const hasOver = statuses.includes('over');
+    const hasRisk = statuses.includes('risk');
+    const dotCls = hasOver?'dot-over':hasRisk?'dot-risk':'dot-ok';
+
+    // country pills summary
+    const pills = countryHAs.map(ha=>{
+      const {daysLeft, htl} = getHAObligation(ha,c,isFatal,isSerious,isSUSAR,isCT,day0);
+      const tlCls = htl<=7?'t7':htl<=15?'t15':htl<=30?'t30':'t90';
+      return `<span class="tag ${tlCls}" style="font-size:9px;padding:1px 6px;">${htl}d</span>`;
+    }).join('');
+
+    html += `
+    <div class="t-country">
+      <div class="t-country-hdr" id="hdr-${cid}" onclick="toggleNode('${cid}')">
+        <div class="tl-dot ${dotCls}" style="flex-shrink:0;"></div>
+        <span class="t-country-flag">${flag}</span>
+        <span class="t-country-name">${country}</span>
+        <span class="t-country-ha">(${countryHAs.join(', ')})</span>
+        <div class="t-country-pills">${pills}</div>
+        <span class="t-country-caret">▶</span>
       </div>
-      <div style="padding:16px 20px;">
-        ${buildActions(c,isSUSAR,isFatal,tl,day0).map((a,i)=>`
-          <div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(3,32,60,0.05);">
-            <div style="width:24px;height:24px;border-radius:50%;background:var(--navy2);color:var(--skylt);
-              display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;">${i+1}</div>
-            <div style="font-size:13px;color:var(--text);line-height:1.6;padding-top:2px;">${a}</div>
-          </div>`).join('')}
+      <div class="t-country-body" id="body-${cid}">`;
+
+    countryHAs.forEach(ha => {
+      const meta = HA_META[ha] || {name:ha, fullname:ha, color:'#5F5E5A', bg:'#F1EFE8'};
+      const ob = getHAObligation(ha, c, isFatal, isSerious, isSUSAR, isCT, day0);
+      const hid = ha+cid;
+      const isDom = ob.isDom;
+
+      html += `
+        <div class="t-ha">
+          <div class="t-ha-hdr" id="hahdr-${hid}" onclick="toggleHA2('${hid}')">
+            <div class="tl-dot ${ob.status==='over'?'dot-over':ob.status==='risk'?'dot-risk':ob.htl>30?'dot-per':'dot-ok'}" style="flex-shrink:0;"></div>
+            <span class="t-ha-code" style="background:${meta.bg};color:${meta.color};">${meta.name}</span>
+            <span class="t-ha-name">${meta.fullname}</span>
+            <span class="tag ${isDom?'tdom':'tfor'}" style="font-size:9px;">${isDom?'DOM':'FOR'}</span>
+            <span style="margin-left:auto;font-size:11px;color:var(--muted);">${ob.cfg.reg.split(';')[0]}</span>
+            <span class="t-ha-caret">▶</span>
+          </div>
+          <div class="t-ha-body" id="habody-${hid}">`;
+
+      // ── Expedited report row ──
+      const reportTypeLabel = isSUSAR ? ob.reportName : (isSerious ? ob.reportName : 'Periodic ICSR');
+      html += `
+            <div class="t-report" style="cursor:default;" onmouseenter="showDetail('det-${hid}')" onmouseleave="hideDetail('det-${hid}')">
+              <div class="t-report-stripe" style="background:${ob.stripeColor};"></div>
+              <div class="t-report-inner">
+                <div style="display:flex;flex-direction:column;gap:2px;min-width:180px;">
+                  <span class="t-report-type">${reportTypeLabel}</span>
+                  <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">${ob.cfg.reg.split(';')[0]}</span>
+                </div>
+                <span class="tag ${ob.tlTag}">${ob.tlLabel}</span>
+                <span style="font-size:11px;color:var(--muted);">Due: <strong style="color:var(--text);">${ob.due.toISOString().slice(0,10)}</strong></span>
+                <span style="margin-left:auto;"><span class="tag ${ob.status==='over'?'tover':ob.status==='risk'?'trisk':'tok'}">${ob.statusTxt}</span></span>
+                <div id="det-${hid}" class="t-report-detail">
+                  <strong>Format:</strong> ${ob.cfg.fmt} &nbsp;·&nbsp; <strong>Route:</strong> ${ob.cfg.route}<br>
+                  <strong>Clock:</strong> Calendar days from Day 0 (${c.day0}) &nbsp;·&nbsp; <strong>Classification:</strong> ${isDom?'Domestic — case country matches HA jurisdiction':'Foreign — case from outside HA jurisdiction, still reportable'}<br>
+                  <strong>Follow-up:</strong> Due 15 calendar days after any new significant information received
+                </div>
+              </div>
+            </div>`;
+
+      // ── Periodic report row (always shown) ──
+      const periodicName = isCT ? 'DSUR (annual)' : 'PSUR / PBRER';
+      const periodicRef = isCT ? 'ICH E2F · 60 days after DIBD' : 'Per EURD / URD list';
+      html += `
+            <div class="t-report" style="background:rgba(127,119,221,0.02);cursor:default;">
+              <div class="t-report-stripe" style="background:#7F77DD;"></div>
+              <div class="t-report-inner">
+                <div style="display:flex;flex-direction:column;gap:2px;min-width:180px;">
+                  <span class="t-report-type" style="color:#3C3489;">${periodicName}</span>
+                  <span style="font-size:10px;color:var(--muted);font-family:var(--mono);">${periodicRef}</span>
+                </div>
+                <span class="tag tper">Periodic</span>
+                <span style="font-size:11px;color:var(--muted);">Per ${isCT?'DIBD anniversary':'product URD schedule'}</span>
+                <span style="margin-left:auto;"><span class="tag tper">Include in report</span></span>
+              </div>
+            </div>`;
+
+      html += `</div></div>`; // close ha-body, t-ha
+    });
+
+    html += `</div></div>`; // close country-body, t-country
+  });
+
+  // ── NARRATIVE (collapsible) ──
+  const narrativeText = buildNarrative(c, isSUSAR, isFatal);
+  html += `
+    <div class="t-narrative">
+      <div class="t-narrative-hdr" id="narr-hdr" onclick="toggleSection('narr-body','narr-hdr')">
+        <span style="font-size:14px;">📝</span>
+        <span class="t-narrative-hdr-title">CIOMS I Narrative Draft (H.1) — click to expand</span>
+        <span class="t-periodic-hdr-caret" id="narr-caret">▶</span>
       </div>
-    </div>`);
+      <div class="t-narrative-body" id="narr-body">
+        <div class="narrative-body" style="margin:0;border-left:none;border-top:1px solid rgba(209,83,126,0.12);">${narrativeText}</div>
+        <div style="padding:8px 14px;background:rgba(3,32,60,0.02);border-top:1px solid var(--border);font-size:11px;color:var(--muted);">
+          Placeholders in orange require completion from source data · ICH E2A Section 3 compliant · Third person past tense
+        </div>
+        <div style="padding:8px 14px;display:flex;gap:8px;">
+          <button class="tf-btn" onclick="copyNarrative()">Copy narrative</button>
+          <button class="tf-btn" onclick="copyNarrativeE2B()">Copy as E2B H.1 XML</button>
+        </div>
+      </div>
+    </div>`;
+
+  // ── GAP ANALYSIS (collapsible) ──
+  html += `
+    <div class="t-gaps">
+      <div class="t-gaps-hdr" id="gaps-hdr" onclick="toggleSection('gaps-body','gaps-hdr')">
+        <span style="font-size:14px;">🔍</span>
+        <span class="t-gaps-hdr-title">Gap Analysis — Missing data before submission · click to expand</span>
+        <span class="t-periodic-hdr-caret" id="gaps-caret">▶</span>
+      </div>
+      <div class="t-gaps-body" id="gaps-body">
+        ${buildGaps(c)}
+      </div>
+    </div>`;
+
+  html += `</div>`; // close tree-body
+
+  // ── Footer actions ──
+  html += `
+    <div class="tree-footer">
+      <button class="tf-btn primary" onclick="exportCSV()">Export CSV</button>
+      <button class="tf-btn" onclick="printResults()">Print / PDF</button>
+      <button class="tf-btn" onclick="copyObligations()">Copy obligations</button>
+      <span style="margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono);">Day 0: ${c.day0} · Generated: ${new Date().toISOString().slice(0,10)} · RegIntel v1.0</span>
+    </div>
+  </div>`;
+
+  panel.innerHTML = html;
+
+  // auto-expand first country if SUSAR
+  if(isSUSAR || c.has.length <= 3){
+    const firstCid = 'c0';
+    const hdr = document.getElementById('hdr-'+firstCid);
+    const body = document.getElementById('body-'+firstCid);
+    if(hdr && body){ hdr.classList.add('open'); body.classList.add('open'); }
+  }
 }
+
+function toggleNode(id){
+  const hdr = document.getElementById('hdr-'+id);
+  const body = document.getElementById('body-'+id);
+  if(!hdr||!body) return;
+  hdr.classList.toggle('open');
+  body.classList.toggle('open');
+}
+function toggleHA2(id){
+  const hdr = document.getElementById('hahdr-'+id);
+  const body = document.getElementById('habody-'+id);
+  if(!hdr||!body) return;
+  hdr.classList.toggle('open');
+  body.classList.toggle('open');
+}
+function toggleSection(bodyId, hdrId){
+  const body = document.getElementById(bodyId);
+  const hdr = document.getElementById(hdrId);
+  if(body) body.classList.toggle('open');
+  // rotate caret - find child with t-periodic-hdr-caret class
+  const caret = hdr ? hdr.querySelector('.t-periodic-hdr-caret') : null;
+  if(caret) caret.style.transform = body.classList.contains('open') ? 'rotate(90deg)' : '';
+}
+function showDetail(id){ const el=document.getElementById(id); if(el) el.style.display='block'; }
+function hideDetail(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
+
 
 // ── DATA HELPERS ──
 const HA_CONFIG = {
@@ -1301,26 +1499,25 @@ The reporting investigator at <span class="placeholder">[site name]</span> asses
 
 function buildGaps(c){
   const gaps = [
-    {col:'red',text:'Patient age and sex',sub:'Mandatory E2B R3 fields — patientonsetage + patientsex. FDA ESM will reject without these.'},
-    {col:'red',text:'Patient initials or subject ID',sub:'Required for patient identification in E2B — minimum for valid ICSR.'},
-    {col:'red',text:'Sponsor causality assessment finalized',sub:'drugcausalityassessment — must be confirmed by sponsor medical reviewer before submission.'},
-    {col:c.reg?'green':'amber',text:'Regulatory number (IND/EudraCT/NCT)',sub:c.reg?'Captured: '+c.reg:'Required for IND/CTA identification in E2B sender/receiver identification.'},
-    {col:'amber',text:'Laboratory values at time of AE',sub:'ALT, AST, bilirubin, INR (for liver events), or relevant labs for your AE — required in E2B test results section.'},
-    {col:'amber',text:'AE onset date',sub:'Exact date of AE onset — required for reaction start date in E2B and narrative.'},
-    {col:'amber',text:'Concomitant medications list',sub:'All concomitant drugs — required for drug interaction assessment and E2B drug section.'},
-    {col:'amber',text:'Reporter name and contact details',sub:'Primary reporter (investigator) name, institution, country — required for E2B primarysource section.'},
-    {col:c.ae?'green':'red',text:'AE verbatim term',sub:c.ae?'Captured: '+c.ae.substring(0,50)+'…':'Required — cannot code MedDRA or draft narrative without verbatim AE.'},
-    {col:'green',text:'MedDRA PT coding',sub:'Auto-coded: '+getPT(c.ae)+' ['+getPTCode(c.ae)+'] · SOC: '+getSOC(c.ae)},
-    {col:'green',text:'SUSAR determination',sub:`Confirmed — Serious + ${c.expectedness==='unexpected'?'Unexpected':'Expected'} + Causally related (${c.causality})`},
-    {col:'green',text:'All HA obligations resolved',sub:c.has.length+' Health Authorities resolved with regulation citations and due dates'},
-    {col:'green',text:'Day 0 confirmed',sub:'First sponsor awareness date: '+c.day0+' — all reporting clocks start from this date'},
+    {col:'red',icon:'🔴',text:'Patient age and sex',sub:'Mandatory E2B R3 fields — patientonsetage + patientsex. FDA ESM will reject without these.'},
+    {col:'red',icon:'🔴',text:'Patient initials or subject ID',sub:'Required for patient identification in E2B — minimum for valid ICSR.'},
+    {col:'red',icon:'🔴',text:'Sponsor causality assessment finalized',sub:'drugcausalityassessment — must be confirmed by sponsor medical reviewer before submission.'},
+    {col:c.reg?'green':'amber',icon:c.reg?'🟢':'🟡',text:'Regulatory number (IND/EudraCT/NCT)',sub:c.reg?'Captured: '+c.reg:'Required for IND/CTA identification in E2B.'},
+    {col:'amber',icon:'🟡',text:'Laboratory values at time of AE',sub:'ALT, AST, bilirubin, INR (liver events) or relevant labs — required in E2B test results section.'},
+    {col:'amber',icon:'🟡',text:'AE onset date',sub:'Exact date of AE onset — required for reaction start date in E2B and narrative.'},
+    {col:'amber',icon:'🟡',text:'Concomitant medications list',sub:'All concomitant drugs — required for E2B drug section and interaction assessment.'},
+    {col:'amber',icon:'🟡',text:'Reporter name and contact details',sub:'Primary reporter name, institution, country — required for E2B primarysource section.'},
+    {col:c.ae?'green':'red',icon:c.ae?'🟢':'🔴',text:'AE verbatim term',sub:c.ae?'Captured: '+c.ae.substring(0,50)+'…':'Required — cannot code MedDRA without verbatim.'},
+    {col:'green',icon:'🟢',text:'MedDRA PT coding',sub:'Auto-coded: '+getPT(c.ae)+' ['+getPTCode(c.ae)+'] · SOC: '+getSOC(c.ae)},
+    {col:'green',icon:'🟢',text:'All HA obligations resolved',sub:c.has.length+' Health Authorities resolved with regulation citations and due dates'},
+    {col:'green',icon:'🟢',text:'Day 0 confirmed',sub:'First sponsor awareness date: '+c.day0},
   ];
   return gaps.map(g=>`
-    <div class="gap-row">
-      <div class="gap-dot ${g.col}"></div>
+    <div class="t-gap-row">
+      <span class="t-gap-icon">${g.icon}</span>
       <div>
-        <div class="gap-text">${g.text}</div>
-        <div class="gap-sub">${g.sub}</div>
+        <div class="t-gap-txt">${g.text}</div>
+        <div class="t-gap-sub">${g.sub}</div>
       </div>
     </div>`).join('');
 }
