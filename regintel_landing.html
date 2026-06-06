@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RegIntel — Praxigent PV Regulatory Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --navy:    #03203C;
+  --navy2:   #042C53;
+  --blue:    #0A5F9A;
+  --sky:     #378ADD;
+  --skylt:   #B5D4F4;
+  --teal:    #1D9E75;
+  --teallt:  #9FE1CB;
+  --amber:   #BA7517;
+  --amberlt: #FAC775;
+  --coral:   #D85A30;
+  --white:   #F8F6F2;
+  --cream:   #EEE9E0;
+  --gray:    #888780;
+  --text:    #1A1A18;
+  --muted:   #5F5E5A;
+  --serif:   'DM Serif Display', Georgia, serif;
+  --sans:    'Figtree', sans-serif;
+  --mono:    'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--white);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ─── NAVIGATION ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: rgba(3,32,60,0.97);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(181,212,244,0.12);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 12px;
+}
+.nav-wordmark {
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--skylt);
+  letter-spacing: 0.01em;
+}
+.nav-product {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--teallt);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-left: 1px solid rgba(181,212,244,0.3);
+  padding-left: 12px;
+}
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a {
+  font-size: 13px; color: var(--skylt); text-decoration: none;
+  letter-spacing: 0.02em; opacity: 0.75; transition: opacity 0.2s;
+}
+.nav-links a:hover { opacity: 1; }
+.nav-cta {
+  background: var(--teal) !important;
+  color: var(--white) !important;
+  padding: 8px 20px !important;
+  border-radius: 6px !important;
+  opacity: 1 !important;
+  font-weight: 500 !important;
+  transition: background 0.2s !important;
+}
+.nav-cta:hover { background: #0F6E56 !important; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  background: var(--navy);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(55,138,221,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(55,138,221,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.hero-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(29,158,117,0.12) 0%, transparent 70%);
+  top: -100px; right: -100px;
+  pointer-events: none;
+}
+
+.hero-inner { max-width: 1100px; position: relative; z-index: 2; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--teallt); letter-spacing: 0.18em; text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.hero-eyebrow::before {
+  content: ''; width: 24px; height: 1px; background: var(--teal);
+}
+
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(42px, 5.5vw, 76px);
+  color: var(--white);
+  line-height: 1.08;
+  max-width: 820px;
+  margin-bottom: 28px;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--teallt);
+}
+
+.hero-sub {
+  font-size: 18px; color: var(--skylt); max-width: 580px;
+  line-height: 1.65; margin-bottom: 44px; font-weight: 300;
+}
+
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.btn-primary {
+  background: var(--teal);
+  color: var(--white);
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 15px; font-weight: 500;
+  text-decoration: none;
+  border: none; cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  display: inline-block;
+}
+.btn-primary:hover { background: #0F6E56; transform: translateY(-1px); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--skylt);
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  border: 1px solid rgba(181,212,244,0.3);
+  text-decoration: none; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  display: inline-block;
+}
+.btn-secondary:hover { border-color: var(--skylt); background: rgba(181,212,244,0.06); }
+
+.hero-stats {
+  display: flex; gap: 48px; margin-top: 72px;
+  border-top: 1px solid rgba(181,212,244,0.1);
+  padding-top: 36px;
+}
+.stat-item { }
+.stat-num {
+  font-family: var(--serif); font-size: 38px;
+  color: var(--teallt); display: block; line-height: 1;
+}
+.stat-label {
+  font-size: 12px; color: var(--gray);
+  letter-spacing: 0.06em; text-transform: uppercase; margin-top: 4px;
+}
+
+/* ─── TICKER ─── */
+.ticker {
+  background: var(--navy2);
+  border-top: 1px solid rgba(55,138,221,0.2);
+  border-bottom: 1px solid rgba(55,138,221,0.2);
+  padding: 12px 0; overflow: hidden;
+}
+.ticker-inner {
+  display: flex; gap: 0;
+  animation: ticker 35s linear infinite;
+  white-space: nowrap;
+}
+.ticker-item {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--skylt); padding: 0 40px;
+  letter-spacing: 0.08em;
+  border-right: 1px solid rgba(181,212,244,0.15);
+}
+.ticker-item span { color: var(--teallt); margin-right: 8px; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ─── SECTION SHELL ─── */
+section { padding: 100px 48px; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+
+.section-label {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--teal); letter-spacing: 0.16em;
+  text-transform: uppercase; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::before { content: ''; width: 20px; height: 1px; background: var(--teal); }
+
+.section-title {
+  font-family: var(--serif); font-size: clamp(30px, 3.5vw, 48px);
+  line-height: 1.12; margin-bottom: 20px; color: var(--text);
+}
+.section-body {
+  font-size: 17px; color: var(--muted);
+  max-width: 580px; line-height: 1.7; margin-bottom: 56px;
+}
+
+/* ─── AGENT ARCHITECTURE ─── */
+.agents-bg { background: var(--navy); }
+.agents-bg .section-title { color: var(--white); }
+.agents-bg .section-body { color: var(--skylt); }
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(181,212,244,0.1);
+  border: 1px solid rgba(181,212,244,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.agent-card {
+  background: rgba(4,44,83,0.85);
+  padding: 28px 24px;
+  transition: background 0.2s;
+}
+.agent-card:hover { background: rgba(10,95,154,0.3); }
+.agent-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(55,138,221,0.3);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.agent-num {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--teal); letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.agent-name {
+  font-weight: 600; font-size: 14px;
+  color: var(--skylt); margin-bottom: 10px;
+}
+.agent-desc {
+  font-size: 12.5px; color: rgba(181,212,244,0.65); line-height: 1.6;
+}
+.agent-tag {
+  display: inline-block; margin-top: 12px;
+  font-family: var(--mono); font-size: 10px;
+  background: rgba(29,158,117,0.15); color: var(--teallt);
+  padding: 3px 10px; border-radius: 20px;
+  letter-spacing: 0.08em;
+}
+
+/* ─── OBLIGATION MATRIX DEMO ─── */
+.matrix-section { background: var(--cream); }
+
+.matrix-demo {
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(3,32,60,0.12);
+  box-shadow: 0 4px 40px rgba(3,32,60,0.08);
+}
+.matrix-header {
+  background: var(--navy);
+  padding: 16px 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.matrix-title {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--skylt); letter-spacing: 0.12em;
+}
+.matrix-badge {
+  font-size: 10px; background: rgba(29,158,117,0.25);
+  color: var(--teallt); padding: 2px 10px;
+  border-radius: 20px; font-family: var(--mono);
+}
+.matrix-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.matrix-table th {
+  text-align: left; padding: 10px 16px;
+  background: rgba(3,32,60,0.04);
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--muted); border-bottom: 1px solid rgba(3,32,60,0.08);
+  font-family: var(--mono);
+}
+.matrix-table td {
+  padding: 11px 16px; border-bottom: 1px solid rgba(3,32,60,0.06);
+  color: var(--text); vertical-align: middle;
+}
+.matrix-table tr:last-child td { border-bottom: none; }
+.matrix-table tr:hover td { background: rgba(55,138,221,0.04); }
+
+.tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.tag-7 { background: #FCEBEB; color: #A32D2D; }
+.tag-15 { background: #FAEEDA; color: #854F0B; }
+.tag-90 { background: #E6F1FB; color: #185FA5; }
+.tag-dom { background: #EAF3DE; color: #3B6D11; }
+.tag-for { background: #EEEDFE; color: #3C3489; }
+.tag-susar { background: #FAECE7; color: #993C1D; border: 1px solid #F0997B; }
+
+/* ─── FEATURE GRID ─── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.feature-card {
+  border: 1px solid rgba(3,32,60,0.1);
+  border-radius: 12px; padding: 32px 28px;
+  background: var(--white);
+  transition: border-color 0.2s, transform 0.2s;
+}
+.feature-card:hover { border-color: var(--sky); transform: translateY(-2px); }
+.feature-icon {
+  width: 44px; height: 44px;
+  background: rgba(10,95,154,0.08);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px; font-size: 22px;
+}
+.feature-title {
+  font-family: var(--serif); font-size: 20px;
+  margin-bottom: 12px; color: var(--text);
+}
+.feature-body { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* ─── HA COVERAGE ─── */
+.coverage-bg { background: var(--navy2); }
+.coverage-bg .section-title { color: var(--white); }
+.coverage-bg .section-body { color: var(--skylt); }
+
+.ha-map-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.ha-pill {
+  background: rgba(181,212,244,0.07);
+  border: 1px solid rgba(181,212,244,0.15);
+  border-radius: 8px; padding: 12px 14px;
+  transition: background 0.2s, border-color 0.2s;
+  cursor: default;
+}
+.ha-pill:hover { background: rgba(55,138,221,0.15); border-color: rgba(55,138,221,0.4); }
+.ha-code { font-family: var(--mono); font-size: 10px; color: var(--teallt); letter-spacing: 0.1em; margin-bottom: 4px; }
+.ha-country { font-size: 12px; color: var(--skylt); }
+.ha-region { font-size: 10px; color: var(--gray); margin-top: 2px; }
+
+/* ─── ROD SCHEMA PREVIEW ─── */
+.schema-preview {
+  background: #0D1B2A;
+  border-radius: 12px; overflow: hidden;
+  border: 1px solid rgba(55,138,221,0.2);
+}
+.schema-tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid rgba(55,138,221,0.15);
+  padding: 0 20px;
+}
+.schema-tab {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--gray); padding: 12px 16px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer; letter-spacing: 0.06em;
+  transition: color 0.15s;
+}
+.schema-tab.active { color: var(--teallt); border-bottom-color: var(--teal); }
+.schema-body {
+  padding: 24px;
+  font-family: var(--mono); font-size: 12px;
+  color: #A8C7E8; line-height: 1.8;
+  overflow-x: auto;
+}
+.kw { color: #5DCAA5; }
+.ty { color: #FAC775; }
+.cm { color: #5F5E5A; font-style: italic; }
+.st { color: #F4C0D1; }
+
+/* ─── COMPARISON TABLE ─── */
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th {
+  padding: 14px 20px; text-align: left;
+  font-size: 13px; font-weight: 600;
+  background: var(--navy); color: var(--skylt);
+  font-family: var(--mono); letter-spacing: 0.06em;
+}
+.compare-table th:first-child { border-radius: 10px 0 0 0; }
+.compare-table th:last-child {
+  border-radius: 0 10px 0 0;
+  background: var(--teal); color: var(--white);
+}
+.compare-table td {
+  padding: 13px 20px; font-size: 13.5px;
+  border-bottom: 1px solid rgba(3,32,60,0.07);
+  color: var(--text);
+}
+.compare-table td:last-child { font-weight: 500; color: var(--teal); }
+.check { color: var(--teal); font-size: 16px; }
+.cross { color: var(--coral); }
+.partial { color: var(--amber); }
+
+/* ─── CTA SECTION ─── */
+.cta-section {
+  background: var(--navy);
+  text-align: center;
+  padding: 120px 48px;
+}
+.cta-section h2 {
+  font-family: var(--serif); font-size: clamp(36px, 4vw, 56px);
+  color: var(--white); margin-bottom: 20px; line-height: 1.1;
+}
+.cta-section p { font-size: 18px; color: var(--skylt); margin-bottom: 48px; font-weight: 300; }
+.cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* ─── FOOTER ─── */
+footer {
+  background: #020F1E;
+  padding: 48px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid rgba(181,212,244,0.08);
+}
+.footer-brand { font-family: var(--serif); font-size: 18px; color: var(--skylt); }
+.footer-meta { font-family: var(--mono); font-size: 11px; color: var(--gray); letter-spacing: 0.08em; }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 12px; color: var(--gray); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--skylt); }
+
+/* ─── ANIMATIONS ─── */
+.fade-up {
+  opacity: 0; transform: translateY(24px);
+  animation: fadeUp 0.6s forwards;
+}
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.22s; }
+.delay-3 { animation-delay: 0.34s; }
+.delay-4 { animation-delay: 0.46s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-wordmark">Praxigent</div>
+    <div class="nav-product">RegIntel</div>
+  </div>
+  <div class="nav-links">
+    <a href="#agents">Agents</a>
+    <a href="#coverage">Coverage</a>
+    <a href="#compare">vs. Alternatives</a>
+    <a href="#schema">Architecture</a>
+    <a href="#" class="nav-cta">Request Demo</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow fade-up">Praxigent RegIntel · Powered by Agentic AI</div>
+    <h1 class="fade-up delay-1">Your global PV reporting<br><em>intelligence engine.</em></h1>
+    <p class="hero-sub fade-up delay-2">
+      Every Health Authority. Every timeline. Every report type.
+      RegIntel resolves pharmacovigilance obligations across 187 jurisdictions —
+      from first awareness to E2B R3 submission, in seconds.
+    </p>
+    <div class="hero-actions fade-up delay-3">
+      <a href="#" class="btn-primary">Request Early Access</a>
+      <a href="#agents" class="btn-secondary">See how it works →</a>
+    </div>
+    <div class="hero-stats fade-up delay-4">
+      <div class="stat-item">
+        <span class="stat-num">187</span>
+        <div class="stat-label">Health Authorities</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">8</span>
+        <div class="stat-label">Specialist AI Agents</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">&lt;60s</span>
+        <div class="stat-label">Full Obligation Matrix</div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">E2B R3</span>
+        <div class="stat-label">Auto-generated XML</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span>FDA</span>21 CFR 312.32 · 7/15-day IND Safety Reports</span>
+    <span class="ticker-item"><span>EMA</span>EU CT Reg 536/2014 · SUSAR via CTIS + EVCTM</span>
+    <span class="ticker-item"><span>PMDA</span>GCP Ordinance Art. 20 · J-ICSR E2B R3</span>
+    <span class="ticker-item"><span>MHRA</span>SI 2004/1031 · Yellow Card API · Post-Brexit rules</span>
+    <span class="ticker-item"><span>HC</span>C.05.012 · MedEffect · 7/15-day SAE</span>
+    <span class="ticker-item"><span>TGA</span>CT SAE · DAEN · 15/90-day marketed</span>
+    <span class="ticker-item"><span>ANVISA</span>RDC 204/2017 · NOTIVISA · Portuguese narrative</span>
+    <span class="ticker-item"><span>NMPA</span>China ICSR · 7/15-day · Domestic priority</span>
+    <span class="ticker-item"><span>ICH</span>E2A · E2B R3 · E2C · E2D · E6 R3</span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item"><span>FDA</span>21 CFR 312.32 · 7/15-day IND Safety Reports</span>
+    <span class="ticker-item"><span>EMA</span>EU CT Reg 536/2014 · SUSAR via CTIS + EVCTM</span>
+    <span class="ticker-item"><span>PMDA</span>GCP Ordinance Art. 20 · J-ICSR E2B R3</span>
+    <span class="ticker-item"><span>MHRA</span>SI 2004/1031 · Yellow Card API · Post-Brexit rules</span>
+    <span class="ticker-item"><span>HC</span>C.05.012 · MedEffect · 7/15-day SAE</span>
+    <span class="ticker-item"><span>TGA</span>CT SAE · DAEN · 15/90-day marketed</span>
+    <span class="ticker-item"><span>ANVISA</span>RDC 204/2017 · NOTIVISA · Portuguese narrative</span>
+    <span class="ticker-item"><span>NMPA</span>China ICSR · 7/15-day · Domestic priority</span>
+    <span class="ticker-item"><span>ICH</span>E2A · E2B R3 · E2C · E2D · E6 R3</span>
+  </div>
+</div>
+
+<!-- AGENT ARCHITECTURE -->
+<section class="agents-bg" id="agents">
+  <div class="section-inner">
+    <div class="section-label">Multi-Agent Architecture</div>
+    <h2 class="section-title">Eight specialist agents.<br>One unified intelligence.</h2>
+    <p class="section-body">RegIntel orchestrates a pipeline of domain-expert AI agents, each mastering a distinct layer of the PV regulatory stack — from AE intake through E2B R3 XML generation.</p>
+
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-num">Agent 01</div>
+        <div class="agent-name">Intake Agent</div>
+        <div class="agent-desc">Structured elicitation of product identity, development phase, AE details, Day 0, and sponsor context through guided dialogue.</div>
+        <div class="agent-tag">→ classifier</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">Agent 02</div>
+        <div class="agent-name">Classifier Agent</div>
+        <div class="agent-desc">MedDRA PT/SOC coding of verbatim AE terms. ICH E2A seriousness assessment. SUSAR determination for CT cases.</div>
+        <div class="agent-tag">→ obligation</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">Agent 03</div>
+        <div class="agent-name">Geography Agent</div>
+        <div class="agent-desc">Maps trial countries to responsible HAs. Applies domestic vs. foreign reporter logic per jurisdiction. Flags local language requirements.</div>
+        <div class="agent-tag">→ expectedness</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">Agent 04</div>
+        <div class="agent-name">Expectedness Agent</div>
+        <div class="agent-desc">Compares MedDRA PT against uploaded IB, SmPC, or USPI. Determines listed vs. unlisted status. Confirms SUSAR trigger.</div>
+        <div class="agent-tag">→ obligation</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">Agent 05</div>
+        <div class="agent-name">Obligation Agent</div>
+        <div class="agent-desc">Queries the Regulatory Obligation Database across all selected HAs. Resolves expedited, periodic, and aggregate reporting requirements with full citation.</div>
+        <div class="agent-tag">→ timeline</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">Agent 06</div>
+        <div class="agent-name">Timeline Agent</div>
+        <div class="agent-desc">Calculates precise due dates from Day 0. Applies holiday calendars per HA. Generates follow-up report schedules and periodic report calendars.</div>
+        <div class="agent-tag">→ narrative</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">Agent 07</div>
+        <div class="agent-name">Narrative Agent</div>
+        <div class="agent-desc">Drafts ICH E2B R3-compliant case narratives (H.1/H.3/H.4). Generates CIOMS I text. Flags translation requirements for ANVISA, PMDA, NMPA.</div>
+        <div class="agent-tag">→ output</div>
+      </div>
+      <div class="agent-card">
+        <div class="agent-num">Agent 08</div>
+        <div class="agent-name">Output Agent</div>
+        <div class="agent-desc">Assembles the full obligation matrix. Generates E2B R3 XML. Produces submission calendar, gap analysis, and HA-specific cover letters.</div>
+        <div class="agent-tag">→ export</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OBLIGATION MATRIX DEMO -->
+<section class="matrix-section">
+  <div class="section-inner">
+    <div class="section-label">Live Demo Output</div>
+    <h2 class="section-title">From AE to obligation matrix<br>in under 60 seconds.</h2>
+    <p class="section-body">Sample output: Phase 3 biologic, fatal SUSAR, US + EU + Japan + Canada in scope.</p>
+
+    <div class="matrix-demo">
+      <div class="matrix-header">
+        <div class="matrix-title">OBLIGATION MATRIX — CASE #PRX-2025-00142</div>
+        <div class="matrix-badge">SUSAR ALERT</div>
+        <div style="margin-left:auto; font-family:var(--mono); font-size:10px; color:rgba(181,212,244,0.5);">Day 0: 2025-06-04 · Generated: 2025-06-06</div>
+      </div>
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>HA</th><th>Regulation</th><th>Report Type</th><th>Timeline</th>
+            <th>Due Date</th><th>Classification</th><th>Format</th><th>Route</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>FDA</strong></td>
+            <td style="font-size:11px;color:#888">21 CFR 312.32(c)(1)</td>
+            <td>IND Safety Report <span class="tag tag-susar">SUSAR</span></td>
+            <td><span class="tag tag-7">7 calendar days</span></td>
+            <td><strong>2025-06-11</strong></td>
+            <td><span class="tag tag-dom">Domestic</span></td>
+            <td style="font-size:11px">MedWatch / E2B R3</td>
+            <td style="font-size:11px">FDA ESM</td>
+          </tr>
+          <tr>
+            <td><strong>EMA</strong></td>
+            <td style="font-size:11px;color:#888">EU CT Reg 536/2014 Art.42</td>
+            <td>SUSAR <span class="tag tag-susar">EU-wide</span></td>
+            <td><span class="tag tag-7">7 calendar days</span></td>
+            <td><strong>2025-06-11</strong></td>
+            <td><span class="tag tag-dom">Domestic</span></td>
+            <td style="font-size:11px">E2B R3</td>
+            <td style="font-size:11px">CTIS + EVCTM</td>
+          </tr>
+          <tr>
+            <td><strong>MHRA</strong></td>
+            <td style="font-size:11px;color:#888">SI 2004/1031</td>
+            <td>SUSAR</td>
+            <td><span class="tag tag-7">7 calendar days</span></td>
+            <td><strong>2025-06-11</strong></td>
+            <td><span class="tag tag-for">Foreign</span></td>
+            <td style="font-size:11px">E2B R3</td>
+            <td style="font-size:11px">MHRA portal</td>
+          </tr>
+          <tr>
+            <td><strong>PMDA</strong></td>
+            <td style="font-size:11px;color:#888">GCP Ordinance Art.20</td>
+            <td>SAE Report</td>
+            <td><span class="tag tag-7">7 calendar days</span></td>
+            <td><strong>2025-06-11</strong></td>
+            <td><span class="tag tag-for">Foreign</span></td>
+            <td style="font-size:11px">J-ICSR E2B R3</td>
+            <td style="font-size:11px">PMDA Gateway</td>
+          </tr>
+          <tr>
+            <td><strong>Health Canada</strong></td>
+            <td style="font-size:11px;color:#888">C.05.012</td>
+            <td>CT SAE Report</td>
+            <td><span class="tag tag-7">7 calendar days</span></td>
+            <td><strong>2025-06-11</strong></td>
+            <td><span class="tag tag-dom">Domestic</span></td>
+            <td style="font-size:11px">E2B R3</td>
+            <td style="font-size:11px">MedEffect</td>
+          </tr>
+          <tr style="background:rgba(29,158,117,0.04)">
+            <td><strong>All HAs</strong></td>
+            <td style="font-size:11px;color:#888">ICH E2F</td>
+            <td>DSUR (Annual)</td>
+            <td><span class="tag tag-90">Annual · DIBD+60d</span></td>
+            <td>2026-03-01</td>
+            <td><span class="tag tag-dom">All regions</span></td>
+            <td style="font-size:11px">DSUR Report</td>
+            <td style="font-size:11px">Per HA</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section>
+  <div class="section-inner">
+    <div class="section-label">Core Capabilities</div>
+    <h2 class="section-title">Built for the complexity<br>of global PV.</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <div class="feature-title">Live HA Feed Engine</div>
+        <div class="feature-body">Automated scrapers monitor FDA, EMA, PMDA, MHRA, and 183 other HA portals for regulatory updates. Changes trigger instant ROD updates and user alerts.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧬</div>
+        <div class="feature-title">MedDRA Auto-coding</div>
+        <div class="feature-body">Fuzzy-match verbatim AE terms to current MedDRA PT/SOC hierarchy. Handles synonyms, abbreviations, and cross-language terms with confidence scoring.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚖️</div>
+        <div class="feature-title">Domestic/Foreign Logic</div>
+        <div class="feature-body">Automatically determines domestic vs. foreign case status per HA, applying jurisdiction-specific rules including FDA 21 CFR 312.32 foreign SAE requirements.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📄</div>
+        <div class="feature-title">E2B R3 XML Generation</div>
+        <div class="feature_body">ICH-compliant E2B R3 XML generated from case data. Pre-validated against EudraVigilance schema. HA-specific variants (J-ICSR, China E2B) supported.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <div class="feature-title">Submission Calendar</div>
+        <div class="feature-body">Gantt-style obligation calendar with real-time countdowns. Holiday-adjusted due dates per HA. Overdue and at-risk alerts via email or Slack.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <div class="feature-title">Argus Safety Integration</div>
+        <div class="feature-body">Push obligation data directly into Oracle Argus Safety workflow queues. Supports Argus 8.x API, case routing, and workflow state updates.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HA COVERAGE -->
+<section class="coverage-bg" id="coverage">
+  <div class="section-inner">
+    <div class="section-label">Global Coverage</div>
+    <h2 class="section-title">187 Health Authorities.<br>Every major market.</h2>
+    <p class="section-body">From ICH member states to emerging markets — RegIntel covers every jurisdiction where your product may be developed or marketed.</p>
+
+    <div class="ha-map-grid">
+      <div class="ha-pill"><div class="ha-code">FDA</div><div class="ha-country">United States</div><div class="ha-region">North America · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">EMA</div><div class="ha-country">European Union</div><div class="ha-region">Europe · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">MHRA</div><div class="ha-country">United Kingdom</div><div class="ha-region">Europe · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">PMDA</div><div class="ha-country">Japan</div><div class="ha-region">APAC · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">Health Canada</div><div class="ha-country">Canada</div><div class="ha-region">North America · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">TGA</div><div class="ha-country">Australia</div><div class="ha-region">APAC · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">NMPA</div><div class="ha-country">China</div><div class="ha-region">APAC · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">ANVISA</div><div class="ha-country">Brazil</div><div class="ha-region">Latin America</div></div>
+      <div class="ha-pill"><div class="ha-code">CDSCO</div><div class="ha-country">India</div><div class="ha-region">APAC</div></div>
+      <div class="ha-pill"><div class="ha-code">SFDA</div><div class="ha-country">Saudi Arabia</div><div class="ha-region">Middle East</div></div>
+      <div class="ha-pill"><div class="ha-code">Swissmedic</div><div class="ha-country">Switzerland</div><div class="ha-region">Europe · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">MFDS</div><div class="ha-country">South Korea</div><div class="ha-region">APAC · ICH</div></div>
+      <div class="ha-pill"><div class="ha-code">ANSM</div><div class="ha-country">France</div><div class="ha-region">Europe (NCA)</div></div>
+      <div class="ha-pill"><div class="ha-code">BfArM / PEI</div><div class="ha-country">Germany</div><div class="ha-region">Europe (NCA)</div></div>
+      <div class="ha-pill"><div class="ha-code">AIFA</div><div class="ha-country">Italy</div><div class="ha-region">Europe (NCA)</div></div>
+      <div class="ha-pill"><div class="ha-code">AEMPS</div><div class="ha-country">Spain</div><div class="ha-region">Europe (NCA)</div></div>
+      <div class="ha-pill"><div class="ha-code">Medsafe</div><div class="ha-country">New Zealand</div><div class="ha-region">APAC</div></div>
+      <div class="ha-pill"><div class="ha-code">COFEPRIS</div><div class="ha-country">Mexico</div><div class="ha-region">Latin America</div></div>
+      <div class="ha-pill"><div class="ha-code">HSA</div><div class="ha-country">Singapore</div><div class="ha-region">APAC</div></div>
+      <div class="ha-pill"><div class="ha-code">WHO / UMC</div><div class="ha-country">VigiBase Global</div><div class="ha-region">International</div></div>
+    </div>
+    <p style="margin-top:20px; font-family:var(--mono); font-size:11px; color:rgba(181,212,244,0.4); letter-spacing:0.06em;">+ 167 additional national authorities including all EU NCAs, ASEAN, African Union, GCC member states</p>
+  </div>
+</section>
+
+<!-- ROD SCHEMA PREVIEW -->
+<section id="schema">
+  <div class="section-inner">
+    <div class="section-label">Technical Architecture</div>
+    <h2 class="section-title">Regulatory Obligation Database.<br>Rules engine built for PV.</h2>
+    <p class="section-body">The ROD is a structured PostgreSQL rules engine normalizing reporting obligations from 187 HAs into a queryable, always-current dataset.</p>
+
+    <div class="schema-preview">
+      <div class="schema-tabs">
+        <div class="schema-tab active">reporting_obligation</div>
+        <div class="schema-tab">get_obligations()</div>
+        <div class="schema-tab">ha_feed_log</div>
+      </div>
+      <div class="schema-body">
+<span class="kw">CREATE TABLE</span> reporting_obligation (<br>
+&nbsp;&nbsp;obligation_id&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">UUID</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">-- primary key</span><br>
+&nbsp;&nbsp;ha_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">UUID</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">-- → health_authority</span><br>
+&nbsp;&nbsp;product_type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">product_type_enum[]</span><br>
+&nbsp;&nbsp;phase&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">development_phase_enum[]</span><br>
+&nbsp;&nbsp;seriousness&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">seriousness_criteria_enum[]</span><br>
+&nbsp;&nbsp;expectedness&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">expectedness_enum[]</span><br>
+&nbsp;&nbsp;domestic_foreign&nbsp;<span class="ty">domestic_foreign_enum</span><br>
+&nbsp;&nbsp;report_name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">VARCHAR(200)</span>&nbsp;&nbsp;<span class="cm">-- 'SUSAR', 'MedWatch 3500A'</span><br>
+&nbsp;&nbsp;report_type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">VARCHAR(50)</span>&nbsp;&nbsp;&nbsp;<span class="cm">-- '7-day', '15-day', 'DSUR'</span><br>
+&nbsp;&nbsp;timeline_days&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">INTEGER</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">-- NULL for periodic</span><br>
+&nbsp;&nbsp;timeline_basis&nbsp;&nbsp;&nbsp;<span class="ty">timeline_basis_enum</span><br>
+&nbsp;&nbsp;report_format&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">report_format_enum[]</span><br>
+&nbsp;&nbsp;submission_route&nbsp;<span class="ty">submission_route_enum[]</span><br>
+&nbsp;&nbsp;is_periodic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">BOOLEAN</span><br>
+&nbsp;&nbsp;periodic_report_ref&nbsp;<span class="ty">VARCHAR(100)</span>&nbsp;<span class="cm">-- 'DSUR', 'PSUR', 'PADER'</span><br>
+&nbsp;&nbsp;conditions_text&nbsp;&nbsp;<span class="ty">TEXT</span><br>
+&nbsp;&nbsp;active&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">BOOLEAN</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">-- live / sunset toggle</span><br>
+&nbsp;&nbsp;last_updated&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ty">TIMESTAMPTZ</span>&nbsp;&nbsp;&nbsp;<span class="cm">-- auto-updated by HA scraper</span><br>
+);
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section id="compare" style="background:var(--cream)">
+  <div class="section-inner">
+    <div class="section-label">Competitive Landscape</div>
+    <h2 class="section-title">What RegIntel does<br>that others don't.</h2>
+
+    <div style="overflow-x:auto; border-radius:12px; overflow:hidden; border:1px solid rgba(3,32,60,0.1);">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th>IQVIA Incite</th>
+          <th>Veeva RIM</th>
+          <th>ARISg / Oracle</th>
+          <th>Praxigent RegIntel</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Real-time HA regulatory feed</td><td class="check">✓</td><td class="partial">~</td><td class="cross">✗</td><td class="check">✓ Custom crawlers</td></tr>
+        <tr><td>Agentic AI dialogue interface</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓ 8-agent chain</td></tr>
+        <tr><td>E2B R3 XML auto-generation</td><td class="cross">✗</td><td class="partial">~</td><td class="partial">~</td><td class="check">✓ Full ICH schema</td></tr>
+        <tr><td>MedDRA auto-coding</td><td class="partial">~</td><td class="cross">✗</td><td class="partial">~</td><td class="check">✓ Fuzzy + AI</td></tr>
+        <tr><td>Domestic/foreign logic engine</td><td class="partial">~</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓ Per-HA rules</td></tr>
+        <tr><td>CIOMS I narrative drafting</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="check">✓ AI-generated</td></tr>
+        <tr><td>Argus Safety integration</td><td class="partial">~</td><td class="cross">✗</td><td class="check">✓</td><td class="check">✓ API + workflow</td></tr>
+        <tr><td>IB/SmPC expectedness check</td><td class="cross">✗</td><td class="partial">~</td><td class="cross">✗</td><td class="check">✓ Auto vs. RSI</td></tr>
+        <tr><td>187 HA coverage</td><td class="check">✓</td><td class="partial">~</td><td class="cross">✗</td><td class="check">✓ All jurisdictions</td></tr>
+        <tr><td>SaaS / per-query pricing</td><td class="cross">✗ $$$$</td><td class="cross">✗ $$$$</td><td class="cross">✗ $$$$</td><td class="check">✓ Transparent</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-inner" style="max-width:700px; margin:0 auto;">
+    <div class="section-label" style="justify-content:center; color:var(--teallt)">Early Access · Q3 2025</div>
+    <h2>Ready to transform your global PV reporting?</h2>
+    <p>Join the waitlist. RegIntel is in private beta with select pharma sponsors and CROs. Praxigent PV consultants get priority onboarding.</p>
+    <div class="cta-actions">
+      <a href="mailto:info@praxigent.com?subject=RegIntel Early Access" class="btn-primary">Request Early Access</a>
+      <a href="https://praxigent.com" class="btn-secondary">Visit Praxigent.com →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Praxigent</div>
+  <div class="footer-links">
+    <a href="https://praxigent.com">praxigent.com</a>
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="mailto:info@praxigent.com">Contact</a>
+  </div>
+  <div class="footer-meta">RegIntel v1.0 · © 2025 Praxigent · Vensar Technology Inc.</div>
+</footer>
+
+</body>
+</html>
