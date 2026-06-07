@@ -396,6 +396,36 @@ select{appearance:none;
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(3,32,60,0.12);border-radius:10px;}
 @media print{.sidebar,.topbar{display:none!important;}.workspace{display:block!important;}}
+
+/* ── WHODD / MEDDRA LOOKUP WIDGETS ── */
+.dict-wrap{position:relative;}
+.dict-input-row{display:flex;gap:6px;align-items:center;}
+.dict-input-row input,.dict-input-row textarea{flex:1;}
+.lookup-btn{
+  background:var(--navy2);color:var(--skylt);border:none;border-radius:5px;
+  padding:6px 10px;font-size:11px;font-family:var(--sans);cursor:pointer;
+  white-space:nowrap;flex-shrink:0;transition:background .15s;
+  display:flex;align-items:center;gap:4px;
+}
+.lookup-btn:hover:not(:disabled){background:var(--blue);}
+.lookup-btn:disabled{opacity:.5;cursor:not-allowed;}
+.lookup-btn svg{width:12px;height:12px;flex-shrink:0;}
+.dict-badge{
+  display:none;margin-top:5px;padding:7px 10px;border-radius:5px;
+  font-size:11px;line-height:1.55;border-left:3px solid;
+}
+.dict-badge.whodd{background:rgba(10,95,154,0.07);border-color:#0A5F9A;color:#042C53;}
+.dict-badge.meddra{background:rgba(52,125,221,.07);border-color:#378ADD;color:#03203C;}
+.dict-badge.error{background:rgba(163,45,45,0.07);border-color:#E24B4A;color:#791F1F;}
+.dict-badge strong{font-weight:600;}
+.dict-badge .dict-row{display:flex;gap:6px;align-items:center;margin-bottom:2px;flex-wrap:wrap;}
+.dict-badge .dict-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);min-width:60px;}
+.dict-badge .dict-val{font-weight:500;color:var(--text);}
+.dict-badge .dict-tag{font-size:9px;padding:1px 6px;border-radius:8px;
+  background:rgba(10,95,154,0.12);color:#0A5F9A;font-family:var(--mono);}
+.dict-badge .dict-tag.meddra-tag{background:rgba(52,125,221,.12);color:#185FA5;}
+.dict-loading{font-size:11px;color:var(--muted);margin-top:5px;display:none;}
+.dict-source{font-size:9px;color:var(--muted);margin-top:5px;font-family:var(--mono);}
 </style>
 </head>
 <body>
@@ -581,10 +611,35 @@ select{appearance:none;
               <div style="flex:1;height:1px;background:var(--border);"></div>
             </div>
 
-            <div class="form-sec-label">Product</div>
-            <div class="fg"><label class="fl">Name <span class="req">*</span></label><input type="text" id="f-product" placeholder="e.g. VS-6766 (Avutometinib)"/></div>
-            <div class="fg"><label class="fl">Type <span class="req">*</span></label>
-              <select id="f-type"><option value="">— Select —</option><option value="drug_small_molecule">Small molecule drug</option><option value="biologic">Biologic / mAb</option><option value="vaccine">Vaccine</option><option value="gene_therapy">Gene / Cell therapy</option><option value="medical_device">Medical device</option><option value="combination_product">Combination product</option></select>
+            <div class="form-sec-label" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>Product</span>
+              <span style="font-size:9px;background:rgba(10,95,154,0.12);color:#0A5F9A;padding:2px 7px;border-radius:8px;font-family:var(--mono);">WHO Drug Dictionary</span>
+            </div>
+            <div class="fg">
+              <label class="fl">Name <span class="req">*</span></label>
+              <div class="dict-wrap">
+                <div class="dict-input-row">
+                  <input type="text" id="f-product" placeholder="Type drug name or INN, e.g. avutometinib, apixaban…" oninput="whoddTypeahead(this.value)"/>
+                  <button class="lookup-btn" id="whoddBtn" onclick="whoddLookup()" title="Lookup in WHO Drug Dictionary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    WHODD
+                  </button>
+                </div>
+                <div class="dict-loading" id="whoddLoading">Looking up in WHO Drug Dictionary…</div>
+                <div class="dict-badge whodd" id="whoddBadge"></div>
+              </div>
+            </div>
+            <div class="fg">
+              <label class="fl">Product type <span class="req">*</span> <span style="font-size:9px;color:var(--tealdk);">← auto-populated from WHODD</span></label>
+              <select id="f-type">
+                <option value="">— Select or auto-fill via WHODD —</option>
+                <option value="drug_small_molecule">Small molecule drug</option>
+                <option value="biologic">Biologic / mAb / Protein</option>
+                <option value="vaccine">Vaccine</option>
+                <option value="gene_therapy">Gene / Cell therapy</option>
+                <option value="medical_device">Medical device</option>
+                <option value="combination_product">Combination product</option>
+              </select>
             </div>
             <div class="fg"><label class="fl">IND / NDA / EudraCT / NCT</label><input type="text" id="f-reg" placeholder="e.g. IND 153742 / NCT05074810"/></div>
             <div class="fg"><label class="fl">Indication</label><input type="text" id="f-indication" placeholder="e.g. KRAS G12C NSCLC"/></div>
@@ -598,8 +653,24 @@ select{appearance:none;
             </div>
             <div class="fg"><label class="fl">Trial / Marketing countries</label><input type="text" id="f-countries" placeholder="e.g. USA, UK, Germany, Japan, Canada"/></div>
 
-            <div class="form-sec-label">Adverse Event</div>
-            <div class="fg"><label class="fl">AE verbatim term <span class="req">*</span></label><textarea id="f-ae" rows="2" placeholder="Exact AE as reported, e.g. acute liver failure with jaundice"></textarea></div>
+            <div class="form-sec-label" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>Adverse Event</span>
+              <span style="font-size:9px;background:rgba(52,125,221,.12);color:#185FA5;padding:2px 7px;border-radius:8px;font-family:var(--mono);">MedDRA v27.1</span>
+            </div>
+            <div class="fg">
+              <label class="fl">AE verbatim term <span class="req">*</span></label>
+              <div class="dict-wrap">
+                <div class="dict-input-row">
+                  <textarea id="f-ae" rows="2" placeholder="Enter AE as reported, e.g. acute liver failure with jaundice and coagulopathy" oninput="meddraTypeahead(this.value)"></textarea>
+                  <button class="lookup-btn" id="meddraBtn" onclick="meddraLookup()" title="Code to MedDRA v27.1" style="align-self:flex-end;margin-bottom:1px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    MedDRA
+                  </button>
+                </div>
+                <div class="dict-loading" id="meddraLoading">Coding to MedDRA v27.1 hierarchy…</div>
+                <div class="dict-badge meddra" id="meddraBadge"></div>
+              </div>
+            </div>
             <div class="fg"><label class="fl">Day 0 — First awareness date <span class="req">*</span></label><input type="date" id="f-day0"/></div>
             <div class="fg"><label class="fl">Seriousness <span class="req">*</span></label>
               <div class="cb-grid">
@@ -1222,6 +1293,245 @@ async function runDemo(c){
   addToHistory(c,isSUSAR,tl);
 }
 
+
+
+// ══════════════════════════════════════════════════════════════════
+// WHO DRUG DICTIONARY (WHODD) LOOKUP
+// ══════════════════════════════════════════════════════════════════
+
+const WHODD_DEMO_DB = {
+  'avutometinib':  { inn:'Avutometinib',brand:'VS-6766',atc:'L01EE06',atcName:'RAF inhibitors',type:'drug_small_molecule',class:'Antineoplastic — RAF/MEK inhibitor (small molecule kinase inhibitor)',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational (IND 153742)'},
+  'vs-6766':       { inn:'Avutometinib',brand:'VS-6766',atc:'L01EE06',atcName:'RAF inhibitors',type:'drug_small_molecule',class:'Antineoplastic — RAF/MEK inhibitor (small molecule kinase inhibitor)',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational'},
+  'defactinib':    { inn:'Defactinib',brand:'VS-6063',atc:'L01EX',atcName:'Protein kinase inhibitors NEC',type:'drug_small_molecule',class:'Antineoplastic — FAK inhibitor (small molecule kinase inhibitor)',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational'},
+  'apixaban':      { inn:'Apixaban',brand:'Eliquis',atc:'B01AF02',atcName:'Direct factor Xa inhibitors',type:'drug_small_molecule',class:'Anticoagulant — direct oral factor Xa inhibitor (small molecule)',form:'Oral tablet',company:'Bristol Myers Squibb / Pfizer',status:'Approved (NDA 202155, EMA EU/1/11/691)'},
+  'eliquis':       { inn:'Apixaban',brand:'Eliquis',atc:'B01AF02',atcName:'Direct factor Xa inhibitors',type:'drug_small_molecule',class:'Anticoagulant — direct oral factor Xa inhibitor',form:'Oral tablet',company:'BMS / Pfizer',status:'Approved'},
+  'pembrolizumab': { inn:'Pembrolizumab',brand:'Keytruda',atc:'L01FF02',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-1 monoclonal antibody (IgG4 humanized mAb)',form:'IV infusion',company:'Merck & Co.',status:'Approved (BLA 125514)'},
+  'keytruda':      { inn:'Pembrolizumab',brand:'Keytruda',atc:'L01FF02',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Anti-PD-1 monoclonal antibody',form:'IV infusion',company:'Merck & Co.',status:'Approved'},
+  'nivolumab':     { inn:'Nivolumab',brand:'Opdivo',atc:'L01FF01',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-1 monoclonal antibody (IgG4 human mAb)',form:'IV infusion',company:'Bristol Myers Squibb',status:'Approved (BLA 125554)'},
+  'trastuzumab':   { inn:'Trastuzumab',brand:'Herceptin',atc:'L01FD01',atcName:'HER2 inhibitors',type:'biologic',class:'Antineoplastic — anti-HER2 monoclonal antibody (IgG1 humanized mAb)',form:'IV infusion / SC injection',company:'Roche / Genentech',status:'Approved'},
+  'rituximab':     { inn:'Rituximab',brand:'Rituxan / MabThera',atc:'L01FA01',atcName:'Anti-CD20 monoclonal antibodies',type:'biologic',class:'Antineoplastic/Immunomodulator — anti-CD20 monoclonal antibody (IgG1 chimeric mAb)',form:'IV infusion',company:'Roche / Biogen',status:'Approved'},
+  'semaglutide':   { inn:'Semaglutide',brand:'Ozempic / Wegovy / Rybelsus',atc:'A10BJ06',atcName:'GLP-1 receptor agonists',type:'biologic',class:'Antidiabetic / Anti-obesity — GLP-1 receptor agonist (peptide analogue)',form:'SC injection / Oral tablet',company:'Novo Nordisk',status:'Approved'},
+  'atezolizumab':  { inn:'Atezolizumab',brand:'Tecentriq',atc:'L01FF05',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-L1 monoclonal antibody (IgG1 humanized mAb)',form:'IV infusion',company:'Roche / Genentech',status:'Approved'},
+  'osimertinib':   { inn:'Osimertinib',brand:'Tagrisso',atc:'L01EB04',atcName:'EGFR inhibitors',type:'drug_small_molecule',class:'Antineoplastic — 3rd gen EGFR TKI (small molecule kinase inhibitor)',form:'Oral tablet',company:'AstraZeneca',status:'Approved (NDA 208065)'},
+  'durvalumab':    { inn:'Durvalumab',brand:'Imfinzi',atc:'L01FF06',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-L1 monoclonal antibody (IgG1 human mAb)',form:'IV infusion',company:'AstraZeneca',status:'Approved'},
+  'ixazomib':      { inn:'Ixazomib',brand:'Ninlaro',atc:'L01XG02',atcName:'Proteasome inhibitors',type:'drug_small_molecule',class:'Antineoplastic — oral proteasome inhibitor (small molecule)',form:'Oral capsule',company:'Takeda',status:'Approved'},
+  'lenalidomide':  { inn:'Lenalidomide',brand:'Revlimid',atc:'L04AX04',atcName:'Immunosuppressants NEC',type:'drug_small_molecule',class:'Immunomodulatory agent / Antineoplastic — thalidomide analogue (IMiD)',form:'Oral capsule',company:'Bristol Myers Squibb / Celgene',status:'Approved'},
+  'venetoclax':    { inn:'Venetoclax',brand:'Venclexta',atc:'L01XX52',atcName:'Other antineoplastic agents',type:'drug_small_molecule',class:'Antineoplastic — BCL-2 inhibitor (small molecule)',form:'Oral tablet',company:'AbbVie / Roche',status:'Approved'},
+  'infliximab':    { inn:'Infliximab',brand:'Remicade',atc:'L04AB02',atcName:'TNF-alpha inhibitors',type:'biologic',class:'Immunosuppressant — anti-TNF-α monoclonal antibody (IgG1 chimeric mAb)',form:'IV infusion',company:'Janssen / Merck & Co.',status:'Approved'},
+};
+
+let whoddDebounce = null;
+function whoddTypeahead(val){ clearTimeout(whoddDebounce); if(val.length<3) return; whoddDebounce = setTimeout(()=>{ if(!demoMode&&apiKey) return; const key=val.toLowerCase().trim(); const match = WHODD_DEMO_DB[key]; if(match){ showWHODDResult(match, true); } },600); }
+
+async function whoddLookup(){
+  const val = document.getElementById('f-product').value.trim();
+  if(!val){ alert('Enter a drug name first.'); return; }
+  const btn=document.getElementById('whoddBtn');
+  const loading=document.getElementById('whoddLoading');
+  const badge=document.getElementById('whoddBadge');
+  btn.disabled=true; btn.textContent='Looking up…';
+  loading.style.display='block'; badge.style.display='none';
+
+  if(demoMode||!apiKey){
+    await new Promise(r=>setTimeout(r,800));
+    const key=val.toLowerCase().trim();
+    const exact = WHODD_DEMO_DB[key];
+    const fuzzy = !exact && Object.entries(WHODD_DEMO_DB).find(([k,v])=>k.includes(key)||key.includes(k)||v.inn.toLowerCase().includes(key)||v.brand.toLowerCase().includes(key));
+    const result = exact || (fuzzy&&fuzzy[1]) || null;
+    if(result){ showWHODDResult(result, false); }
+    else { showWHODDDemo(val); }
+  } else {
+    await whoddLiveCall(val);
+  }
+  btn.disabled=false; btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> WHODD';
+  loading.style.display='none';
+}
+
+async function whoddLiveCall(drugName){
+  const prompt=`You are a WHO Drug Dictionary (WHODD) resolver. For the drug "${drugName}", provide structured dictionary data as ONLY a JSON object with no other text:
+{"inn":"INN/generic name","brand":"brand name(s)","atc_code":"ATC code (e.g. L01EE06)","atc_name":"ATC class name","product_type":"one of: drug_small_molecule|biologic|vaccine|gene_therapy|medical_device|combination_product","drug_class":"pharmacological class description","dosage_form":"e.g. Oral tablet, IV infusion","company":"marketing authorization holder","approval_status":"e.g. Approved (NDA 202155) or Investigational (IND 123456)","mechanism":"brief mechanism of action","not_found": false}
+If drug not found: return {"not_found": true, "message": "reason"}.
+Base answers on real WHODD data. Be precise with ATC codes.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error');}
+    const data=await res.json();
+    const text=data.content[0].text.trim().replace(/^```json?\n?/,'').replace(/\n?```$/,'').trim();
+    const d=JSON.parse(text);
+    if(d.not_found){ showWHODDNotFound(document.getElementById('f-product').value, d.message); return; }
+    // Map to display format
+    showWHODDResult({
+      inn:d.inn, brand:d.brand, atc:d.atc_code, atcName:d.atc_name,
+      type:d.product_type, class:d.drug_class+' | '+d.mechanism,
+      form:d.dosage_form, company:d.company, status:d.approval_status
+    }, false);
+  }catch(e){
+    showWHODDError('API error: '+e.message);
+  }
+}
+
+function showWHODDResult(d, isTypeahead){
+  const badge=document.getElementById('whoddBadge');
+  // Auto-populate INN if not already set
+  if(d.inn) document.getElementById('f-product').value = d.inn + (d.brand?' ('+d.brand+')':'');
+  // Auto-populate product type
+  if(d.type) document.getElementById('f-type').value = d.type;
+  badge.className='dict-badge whodd';
+  badge.style.display='block';
+  badge.innerHTML=`
+    <div class="dict-row"><span class="dict-label">INN</span><span class="dict-val">${d.inn||'—'}</span><span class="dict-tag">${d.atc||'—'}</span></div>
+    <div class="dict-row"><span class="dict-label">Brand</span><span class="dict-val">${d.brand||'—'}</span></div>
+    <div class="dict-row"><span class="dict-label">ATC class</span><span class="dict-val">${d.atcName||'—'}</span></div>
+    <div class="dict-row"><span class="dict-label">Drug class</span><span class="dict-val">${d.class||'—'}</span></div>
+    <div class="dict-row"><span class="dict-label">Form</span><span class="dict-val">${d.form||'—'}</span></div>
+    <div class="dict-row"><span class="dict-label">Company</span><span class="dict-val">${d.company||'—'}</span></div>
+    <div class="dict-row"><span class="dict-label">Status</span><span class="dict-val">${d.status||'—'}</span></div>
+    <div class="dict-source">Source: WHO Drug Dictionary (WHODD) · ATC classification · ${isTypeahead?'Demo lookup':'Live resolution'}</div>`;
+}
+
+function showWHODDDemo(val){
+  const badge=document.getElementById('whoddBadge');
+  badge.className='dict-badge whodd';
+  badge.style.display='block';
+  // Generate plausible demo result for unknown drug
+  const isLikelyBiologic = /mab|umab|zumab|ximab|kinase|nib\b/i.test(val);
+  const guessedType = isLikelyBiologic&&/mab$/i.test(val)?'biologic':'drug_small_molecule';
+  document.getElementById('f-type').value = guessedType;
+  badge.innerHTML=`
+    <div class="dict-row"><span class="dict-label">INN</span><span class="dict-val">${val}</span><span class="dict-tag">WHODD lookup</span></div>
+    <div class="dict-row"><span class="dict-label">Type</span><span class="dict-val">${guessedType==='biologic'?'Biologic / mAb':'Small molecule drug'} <span style="font-size:10px;color:var(--amber);">(inferred from INN stem)</span></span></div>
+    <div class="dict-row"><span class="dict-label">ATC code</span><span class="dict-val" style="color:var(--amber);">Not in demo DB — connect Claude API for full WHODD resolution</span></div>
+    <div class="dict-source">Demo mode · Connect live API for full WHO Drug Dictionary lookup</div>`;
+}
+function showWHODDNotFound(val, msg){
+  const badge=document.getElementById('whoddBadge');
+  badge.className='dict-badge error'; badge.style.display='block';
+  badge.innerHTML=`<strong>Not found in WHODD:</strong> ${val}<br><span style="font-size:11px;">${msg||'Check spelling or try the INN name.'}</span>`;
+}
+function showWHODDError(msg){
+  const badge=document.getElementById('whoddBadge');
+  badge.className='dict-badge error'; badge.style.display='block';
+  badge.innerHTML=`<strong>Error:</strong> ${msg}`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MEDDRA v27.1 LOOKUP
+// ══════════════════════════════════════════════════════════════════
+
+const MEDDRA_DEMO_DB = {
+  'acute liver failure':          {pt:'Acute hepatic failure',ptCode:'10000804',llt:'Acute liver failure',soc:'Hepatobiliary disorders',socCode:'10019805',hlgt:'Hepatic failure, fibrosis and cirrhosis and other liver damage-related conditions',hlt:'Hepatic failure and associated disorders',severity:'fatal/life-threatening',susar_risk:'HIGH'},
+  'hepatic failure':              {pt:'Hepatic failure',ptCode:'10019663',llt:'Hepatic failure',soc:'Hepatobiliary disorders',socCode:'10019805',hlgt:'Hepatic failure, fibrosis and cirrhosis',hlt:'Hepatic failure and associated disorders',severity:'serious',susar_risk:'HIGH'},
+  'jaundice':                     {pt:'Jaundice',ptCode:'10023126',llt:'Jaundice',soc:'Hepatobiliary disorders',socCode:'10019805',hlgt:'Hepatic and hepatobiliary disorders',hlt:'Jaundice (excl neonatal)',severity:'serious',susar_risk:'MEDIUM'},
+  'anaphylaxis':                  {pt:'Anaphylactic reaction',ptCode:'10002198',llt:'Anaphylaxis',soc:'Immune system disorders',socCode:'10021428',hlgt:'Allergic conditions',hlt:'Anaphylactic reactions',severity:'life-threatening',susar_risk:'HIGH'},
+  'anaphylactic reaction':        {pt:'Anaphylactic reaction',ptCode:'10002198',llt:'Anaphylactic reaction',soc:'Immune system disorders',socCode:'10021428',hlgt:'Allergic conditions',hlt:'Anaphylactic reactions',severity:'life-threatening',susar_risk:'HIGH'},
+  'cardiac arrest':               {pt:'Cardiac arrest',ptCode:'10007515',llt:'Cardiac arrest',soc:'Cardiac disorders',socCode:'10007541',hlgt:'Heart failures',hlt:'Cardiac arrest and death',severity:'fatal/life-threatening',susar_risk:'HIGH'},
+  'myocardial infarction':        {pt:'Myocardial infarction',ptCode:'10028596',llt:'Heart attack',soc:'Cardiac disorders',socCode:'10007541',hlgt:'Ischaemic coronary artery disorders',hlt:'Myocardial infarction and associated disorders',severity:'serious',susar_risk:'HIGH'},
+  'neutropenia':                  {pt:'Neutropenia',ptCode:'10029354',llt:'Neutropenia',soc:'Blood and lymphatic system disorders',socCode:'10005329',hlgt:'White blood cell disorders NEC',hlt:'Decreased white blood cell counts NEC',severity:'serious',susar_risk:'MEDIUM'},
+  'febrile neutropenia':          {pt:'Febrile neutropenia',ptCode:'10016288',llt:'Febrile neutropenia',soc:'Blood and lymphatic system disorders',socCode:'10005329',hlgt:'White blood cell disorders NEC',hlt:'Febrile disorders',severity:'serious/life-threatening',susar_risk:'HIGH'},
+  'thrombocytopenia':             {pt:'Thrombocytopenia',ptCode:'10043554',llt:'Low platelets',soc:'Blood and lymphatic system disorders',socCode:'10005329',hlgt:'Platelet disorders',hlt:'Decreased platelet counts',severity:'serious',susar_risk:'MEDIUM'},
+  'pneumonitis':                  {pt:'Pneumonitis',ptCode:'10035664',llt:'Pneumonitis',soc:'Respiratory, thoracic and mediastinal disorders',socCode:'10038738',hlgt:'Respiratory tract infections NEC',hlt:'Lung inflammation and pneumonitis NEC',severity:'serious',susar_risk:'HIGH'},
+  'interstitial lung disease':    {pt:'Interstitial lung disease',ptCode:'10022611',llt:'ILD',soc:'Respiratory, thoracic and mediastinal disorders',socCode:'10038738',hlgt:'Lower respiratory tract disorders NEC',hlt:'Lung diseases (excl obstruction and infection)',severity:'serious',susar_risk:'HIGH'},
+  'pulmonary embolism':           {pt:'Pulmonary embolism',ptCode:'10037377',llt:'PE',soc:'Vascular disorders',socCode:'10047065',hlgt:'Embolism and thrombosis',hlt:'Pulmonary thromboses',severity:'life-threatening',susar_risk:'HIGH'},
+  'rash':                         {pt:'Rash',ptCode:'10037844',llt:'Rash',soc:'Skin and subcutaneous tissue disorders',socCode:'10040785',hlgt:'Epidermal and dermal conditions',hlt:'Rashes, eruptions and exanthems NEC',severity:'non-serious/serious',susar_risk:'LOW'},
+  'stevens-johnson syndrome':     {pt:'Stevens-Johnson syndrome',ptCode:'10042033',llt:'SJS',soc:'Skin and subcutaneous tissue disorders',socCode:'10040785',hlgt:'Epidermal and dermal conditions',hlt:'Severe cutaneous adverse reactions',severity:'life-threatening',susar_risk:'HIGH'},
+  'toxic epidermal necrolysis':   {pt:'Toxic epidermal necrolysis',ptCode:'10044223',llt:'TEN / Lyell syndrome',soc:'Skin and subcutaneous tissue disorders',socCode:'10040785',hlgt:'Epidermal and dermal conditions',hlt:'Severe cutaneous adverse reactions',severity:'fatal/life-threatening',susar_risk:'HIGH'},
+  'nausea':                       {pt:'Nausea',ptCode:'10028813',llt:'Nausea',soc:'Gastrointestinal disorders',socCode:'10017947',hlgt:'Nausea and vomiting symptoms',hlt:'Nausea and vomiting symptoms NEC',severity:'non-serious',susar_risk:'LOW'},
+  'vomiting':                     {pt:'Vomiting',ptCode:'10047700',llt:'Vomiting',soc:'Gastrointestinal disorders',socCode:'10017947',hlgt:'Nausea and vomiting symptoms',hlt:'Nausea and vomiting symptoms NEC',severity:'non-serious',susar_risk:'LOW'},
+  'diarrhoea':                    {pt:'Diarrhoea',ptCode:'10012735',llt:'Diarrhea',soc:'Gastrointestinal disorders',socCode:'10017947',hlgt:'Gastrointestinal motility and defaecation conditions',hlt:'Diarrhoea (excl infective)',severity:'non-serious/serious',susar_risk:'LOW'},
+  'fatigue':                      {pt:'Fatigue',ptCode:'10016256',llt:'Fatigue',soc:'General disorders and administration site conditions',socCode:'10018065',hlgt:'General system disorders NEC',hlt:'Asthenic conditions',severity:'non-serious',susar_risk:'LOW'},
+  'coagulopathy':                 {pt:'Coagulopathy',ptCode:'10010541',llt:'Clotting disorder',soc:'Blood and lymphatic system disorders',socCode:'10005329',hlgt:'Coagulopathies and bleeding diatheses (excl thrombocytopenic)',hlt:'Coagulopathies NEC',severity:'serious',susar_risk:'HIGH'},
+  'seizure':                      {pt:'Seizure',ptCode:'10039906',llt:'Seizure',soc:'Nervous system disorders',socCode:'10029205',hlgt:'Neurological disorders NEC',hlt:'Seizures (incl subtypes)',severity:'serious',susar_risk:'HIGH'},
+  'stroke':                       {pt:'Cerebrovascular accident',ptCode:'10008190',llt:'Stroke',soc:'Nervous system disorders',socCode:'10029205',hlgt:'Central nervous system vascular disorders',hlt:'Haemorrhagic and ischaemic cerebrovascular conditions NEC',severity:'serious/fatal',susar_risk:'HIGH'},
+  'death':                        {pt:'Death',ptCode:'10011906',llt:'Death',soc:'General disorders and administration site conditions',socCode:'10018065',hlgt:'Death and sudden death',hlt:'Death and sudden death',severity:'fatal',susar_risk:'HIGH'},
+  'elevated liver enzymes':       {pt:'Alanine aminotransferase increased',ptCode:'10001551',llt:'Elevated liver enzymes',soc:'Investigations',socCode:'10022891',hlgt:'Liver function analyses',hlt:'Hepatic enzyme increased',severity:'non-serious/serious',susar_risk:'MEDIUM'},
+  'peripheral neuropathy':        {pt:'Peripheral neuropathy',ptCode:'10034620',llt:'Peripheral neuropathy',soc:'Nervous system disorders',socCode:'10029205',hlgt:'Peripheral neuropathies',hlt:'Peripheral neuropathies NEC',severity:'serious',susar_risk:'MEDIUM'},
+  'hypertension':                 {pt:'Hypertension',ptCode:'10020772',llt:'High blood pressure',soc:'Vascular disorders',socCode:'10047065',hlgt:'Vascular hypertensive disorders',hlt:'Hypertensive conditions',severity:'serious',susar_risk:'MEDIUM'},
+};
+
+let meddraDebounce = null;
+function meddraTypeahead(val){ clearTimeout(meddraDebounce); if(val.length<4) return; meddraDebounce=setTimeout(()=>{ if(!demoMode&&apiKey) return; const key=val.toLowerCase().trim(); const match=MEDDRA_DEMO_DB[key]||Object.entries(MEDDRA_DEMO_DB).find(([k])=>key.includes(k)||k.includes(key.split(' ')[0]))?.[1]; if(match){ showMedDRAResult(match,val,true); }},700); }
+
+async function meddraLookup(){
+  const val=document.getElementById('f-ae').value.trim();
+  if(!val){ alert('Enter an AE term first.'); return; }
+  const btn=document.getElementById('meddraBtn');
+  const loading=document.getElementById('meddraLoading');
+  const badge=document.getElementById('meddraBadge');
+  btn.disabled=true; btn.textContent='Coding…';
+  loading.style.display='block'; badge.style.display='none';
+
+  if(demoMode||!apiKey){
+    await new Promise(r=>setTimeout(r,700));
+    const key=val.toLowerCase().trim();
+    const exact=MEDDRA_DEMO_DB[key];
+    const fuzzy=!exact&&Object.entries(MEDDRA_DEMO_DB).find(([k])=>key.includes(k)||k.split(' ').some(w=>w.length>4&&key.includes(w)));
+    const result=exact||(fuzzy&&fuzzy[1])||null;
+    if(result){ showMedDRAResult(result,val,false); }
+    else { showMedDRADemo(val); }
+  } else {
+    await meddraLiveCall(val);
+  }
+  btn.disabled=false; btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> MedDRA';
+  loading.style.display='none';
+}
+
+async function meddraLiveCall(verbatim){
+  const prompt=`You are a MedDRA coding expert (version 27.1). Code this verbatim adverse event term to the MedDRA hierarchy. Return ONLY a JSON object with no other text:
+Verbatim: "${verbatim}"
+Return: {"pt":"Preferred Term name","pt_code":"8-digit code","llt":"Lowest Level Term","soc":"System Organ Class name","soc_code":"8-digit SOC code","hlgt":"High Level Group Term","hlt":"High Level Term","coding_rationale":"brief explanation of coding decision","severity_category":"fatal|life-threatening|serious|non-serious","susar_risk":"HIGH|MEDIUM|LOW","associated_pts":["additional PTs if multiple findings"],"not_codeable":false}
+Rules: Use MedDRA v27.1. Provide the most specific PT. If verbatim maps to multiple PTs list in associated_pts. PT codes are 8 digits. SOC is primary SOC only.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error');}
+    const data=await res.json();
+    const text=data.content[0].text.trim().replace(/^```json?\n?/,'').replace(/\n?```$/,'').trim();
+    const d=JSON.parse(text);
+    showMedDRAResult({
+      pt:d.pt,ptCode:d.pt_code,llt:d.llt,
+      soc:d.soc,socCode:d.soc_code,hlgt:d.hlgt,hlt:d.hlt,
+      severity:d.severity_category,susar_risk:d.susar_risk,
+      rationale:d.coding_rationale,associated:d.associated_pts
+    }, verbatim, false);
+  }catch(e){
+    const badge=document.getElementById('meddraBadge');
+    badge.className='dict-badge error'; badge.style.display='block';
+    badge.innerHTML=`<strong>Error:</strong> ${e.message}`;
+  }
+}
+
+function showMedDRAResult(d, verbatim, isTypeahead){
+  const badge=document.getElementById('meddraBadge');
+  badge.className='dict-badge meddra'; badge.style.display='block';
+  const riskColor=d.susar_risk==='HIGH'?'#A32D2D':d.susar_risk==='MEDIUM'?'#854F0B':'#3B6D11';
+  const riskBg=d.susar_risk==='HIGH'?'#FCEBEB':d.susar_risk==='MEDIUM'?'#FAEEDA':'#EAF3DE';
+  badge.innerHTML=`
+    <div class="dict-row">
+      <span class="dict-label">PT</span>
+      <span class="dict-val" style="font-weight:600;">${d.pt}</span>
+      <span class="dict-tag meddra-tag">${d.ptCode||'—'}</span>
+    </div>
+    <div class="dict-row"><span class="dict-label">LLT</span><span class="dict-val">${d.llt||d.pt}</span></div>
+    <div class="dict-row"><span class="dict-label">SOC</span><span class="dict-val">${d.soc}</span><span class="dict-tag meddra-tag">${d.socCode||'—'}</span></div>
+    <div class="dict-row"><span class="dict-label">HLGT</span><span class="dict-val" style="font-size:10.5px;">${d.hlgt||'—'}</span></div>
+    <div class="dict-row"><span class="dict-label">HLT</span><span class="dict-val" style="font-size:10.5px;">${d.hlt||'—'}</span></div>
+    <div class="dict-row">
+      <span class="dict-label">Severity</span><span class="dict-val">${d.severity||'—'}</span>
+      <span style="font-size:9px;padding:1px 6px;border-radius:8px;background:${riskBg};color:${riskColor};font-family:var(--mono);font-weight:600;">SUSAR risk: ${d.susar_risk||'—'}</span>
+    </div>
+    ${d.rationale?`<div class="dict-row"><span class="dict-label">Rationale</span><span style="font-size:10.5px;color:var(--muted);">${d.rationale}</span></div>`:''}
+    ${d.associated&&d.associated.length?`<div class="dict-row"><span class="dict-label">Also code</span><span style="font-size:10.5px;color:var(--muted);">${d.associated.join(' · ')}</span></div>`:''}
+    <div class="dict-source">MedDRA v27.1 · ICH E2A coding standard · ${isTypeahead?'Demo':'Live resolution'}</div>`;
+}
+
+function showMedDRADemo(verbatim){
+  const badge=document.getElementById('meddraBadge');
+  badge.className='dict-badge meddra'; badge.style.display='block';
+  badge.innerHTML=`
+    <div class="dict-row"><span class="dict-label">Verbatim</span><span class="dict-val">${verbatim}</span></div>
+    <div class="dict-row"><span class="dict-label">PT</span><span class="dict-val" style="color:var(--amber);">Not in demo DB — connect Claude API for full MedDRA v27.1 coding</span></div>
+    <div class="dict-row"><span class="dict-label">SOC</span><span class="dict-val" style="color:var(--amber);">Requires live API for precise hierarchy mapping</span></div>
+    <div class="dict-source">Demo mode · Connect Claude API for full MedDRA v27.1 coding with PT/SOC/HLGT/HLT/LLT</div>`;
+}
 
 // ── TREE RENDERER ──
 // ── TREE RENDERER ──
