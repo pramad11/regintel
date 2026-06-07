@@ -1247,31 +1247,108 @@ async function runLive(c){
   const isSUSAR=isCT&&c.seriousness.some(s=>s!=='non_serious')&&isUnexpected&&isRelated;
   const isSerious=c.seriousness.some(s=>s!=='non_serious');
   const tl=isFatal?7:isSerious?15:90;
-  const steps=['classify','geo','expect','oblig','timeline','narr','output'];
-  const msgs=['Coding MedDRA PT/SOC…','Resolving geography…','Checking expectedness…','Querying obligation database…','Calculating due dates…','Drafting CIOMS narrative…','Assembling output…'];
-  const prompt=`You are RegIntel PV Regulatory Intelligence. Analyze this AE case and resolve all global reporting obligations.
-Product: ${c.product} (${c.type}) | Phase: ${c.phase} | Reg#: ${c.reg||'N/A'} | Indication: ${c.indication||'N/A'}
-AE: ${c.ae} | Day 0: ${c.day0} | Seriousness: ${c.seriousness.join(',')} | Causality: ${c.causality} | Expectedness: ${c.expectedness}
-Sponsor: ${c.sponsor} | Trial countries: ${c.countries||'N/A'} | HAs in scope: ${c.has.join(',')}
-SUSAR: ${isSUSAR?'YES':'NO'} | Timeline: ${tl}-day
-Provide: 1) Case summary 2) MedDRA coding 3) Obligation table per HA with exact regulation article, timeline, due date from ${c.day0}, domestic/foreign, format, route 4) Periodic obligations 5) Timeline all due dates 6) CIOMS narrative draft 7) Gap analysis 8) Action plan. Be precise with regulation citations.`;
+  const day0=new Date(c.day0);
+
+  // Show tree immediately using local ROD — no API wait needed for obligations
+  sPS('intake','done'); sPS('classify','run'); sMsg('Coding MedDRA PT/SOC…'); await delay(300);
+  sPS('classify','done'); sPS('geo','run'); sMsg('Resolving geography & domestic/foreign…'); await delay(300);
+  sPS('geo','done'); sPS('expect','run'); sMsg('Checking expectedness vs RSI…'); await delay(250);
+  sPS('expect','done'); sPS('oblig','run'); sMsg('Querying 73-row obligation database…'); await delay(300);
+  sPS('oblig','done'); sPS('timeline','run'); sMsg('Calculating all due dates…'); await delay(250);
+  sPS('timeline','done');
+
+  // Render the obligation tree immediately from local ROD (no API needed)
+  renderTree(c,isSUSAR,isFatal,isSerious,isCT,day0,tl);
+  addToHistory(c,isSUSAR,tl);
+
+  // Now fire TWO smaller, fast API calls in parallel for narrative + gap analysis
+  sPS('narr','run'); sMsg('AI drafting CIOMS narrative & action plan…');
+
+  // Focused prompt 1: narrative + MedDRA (max_tokens 1200, fast)
+  const narrativePrompt=`You are a PV regulatory expert. For this case, provide:
+
+1. CIOMS I NARRATIVE: Write a complete ICH E2A-compliant narrative in third person past tense. Use [BRACKET] for missing data. ~150-200 words.
+2. MEDDRA CODING: Code "${c.ae}" to MedDRA v27.1 — list PT name, PT code, SOC, HLT.
+3. KEY ACTIONS: Numbered list of 4-5 immediate actions the PV team must take.
+
+Case: ${c.product} | ${c.phase} | AE: ${c.ae} | Day 0: ${c.day0} | Seriousness: ${c.seriousness.join(',')} | Causality: ${c.causality} | ${isSUSAR?'SUSAR CONFIRMED':'Not a SUSAR'} | HAs: ${c.has.join(',')} | Countries: ${c.countries||'N/A'}
+
+Be concise and precise.`;
+
+  // Focused prompt 2: regulatory citations (max_tokens 1200, fast)
+  const citationsPrompt=`You are a PV regulatory expert. For this case, list the EXACT regulation article that applies for EACH HA below. One line per HA. Format: HA: Regulation | Report type | Timeline | Special conditions.
+
+Case: ${c.product} | ${c.phase} | ${isSUSAR?'SUSAR':'SAR'} | ${c.seriousness.join(',')} | Expectedness: ${c.expectedness} | Day 0: ${c.day0}
+HAs: ${c.has.join(', ')}
+
+Cite exact articles (e.g. "21 CFR 312.32(c)(1)"). Be precise and brief.`;
+
   try{
-    sPS('intake','done'); for(let i=0;i<steps.length;i++){sPS(steps[i-1]||'intake','done');sPS(steps[i],'run');sMsg(msgs[i]);await delay(280);}
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:6000,messages:[{role:'user',content:prompt}]})});
-    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API '+res.status);}
-    const data=await res.json();
+    // Run both calls with a 25s timeout guard
+    const timeout = (ms) => new Promise((_,reject)=>setTimeout(()=>reject(new Error('Request timed out after '+ms/1000+'s — results shown from local database')),ms));
+
+    const [narRes, citRes] = await Promise.allSettled([
+      Promise.race([
+        fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:narrativePrompt}]})}),
+        timeout(25000)
+      ]),
+      Promise.race([
+        fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:citationsPrompt}]})}),
+        timeout(25000)
+      ])
+    ]);
+
+    sPS('narr','done'); sPS('output','run'); sMsg('Assembling AI analysis…'); await delay(200);
+
+    const rs = document.getElementById('resultsScroll');
+
+    // Add AI narrative + actions card
+    if(narRes.status==='fulfilled'&&narRes.value.ok){
+      const narData = await narRes.value.json();
+      const narText = narData.content?.[0]?.text||'';
+      if(narText){
+        const aiCard=document.createElement('div');
+        aiCard.className='tree-shell'; aiCard.style.marginTop='0';
+        aiCard.innerHTML=`
+          <div class="coll-hdr open" onclick="toggleColl(this)" style="background:rgba(3,32,60,0.02);">
+            <span style="font-size:13px;">📝</span>
+            <span class="coll-title">AI Analysis — CIOMS Narrative · MedDRA · Action Plan</span>
+            <span style="margin-left:auto;font-size:9px;font-family:var(--mono);background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:8px;margin-right:8px;">CLAUDE SONNET</span>
+            <span class="coll-caret" style="transform:rotate(90deg);">▶</span>
+          </div>
+          <div class="coll-body open" style="padding:16px 18px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;">${escHtml(narText)}</div>`;
+        rs.appendChild(aiCard);
+      }
+    }
+
+    // Add regulatory citations card
+    if(citRes.status==='fulfilled'&&citRes.value.ok){
+      const citData = await citRes.value.json();
+      const citText = citData.content?.[0]?.text||'';
+      if(citText){
+        const citCard=document.createElement('div');
+        citCard.className='tree-shell'; citCard.style.marginTop='0';
+        citCard.innerHTML=`
+          <div class="coll-hdr" onclick="toggleColl(this)" style="background:rgba(3,32,60,0.02);">
+            <span style="font-size:13px;">📋</span>
+            <span class="coll-title">AI Regulatory Citations — per HA</span>
+            <span class="coll-caret">▶</span>
+          </div>
+          <div class="coll-body" style="padding:16px 18px;font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap;">${escHtml(citText)}</div>`;
+        rs.appendChild(citCard);
+      }
+    }
+
     sPS('output','done');
-    const day0=new Date(c.day0);
-    renderTree(c,isSUSAR,isFatal,isSerious,isCT,day0,tl);
-    // Append AI analysis
-    const rs=document.getElementById('resultsScroll');
-    const aiCard=document.createElement('div');
-    aiCard.className='tree-shell';
-    aiCard.innerHTML=`<div class="coll-hdr" onclick="toggleColl(this)"><span style="font-size:14px;">✦</span><span class="coll-title">Full AI Analysis — Claude Sonnet</span><span class="coll-caret">▶</span></div><div class="coll-body"><div style="padding:16px 18px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:500px;overflow-y:auto;">${escHtml(data.content[0].text)}</div></div>`;
-    rs.appendChild(aiCard);
-    addToHistory(c,isSUSAR,tl);
+
   }catch(e){
-    document.getElementById('resultsScroll').innerHTML=`<div class="empty-state"><div class="ei">⚠</div><h3>API Error</h3><p>${e.message}</p></div>`;
+    // Tree already rendered — just show a soft warning, not a full failure
+    sPS('narr','done'); sPS('output','done');
+    const rs=document.getElementById('resultsScroll');
+    const warn=document.createElement('div');
+    warn.style.cssText='background:#FAEEDA;border:1px solid rgba(186,117,23,0.3);border-radius:8px;padding:12px 16px;font-size:12.5px;color:#854F0B;';
+    warn.innerHTML=`<strong>AI narrative unavailable:</strong> ${e.message}<br><span style="font-size:11px;">The obligation tree above was generated from the local ROD database and is complete. Connect a faster API connection for AI narrative.</span>`;
+    rs.appendChild(warn);
   }
 }
 
@@ -1536,7 +1613,7 @@ function showMedDRADemo(verbatim){
 // ── TREE RENDERER ──
 // ── TREE RENDERER ──
 function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
-  const panel = document.getElementById('resultsPanel');
+  const panel = document.getElementById('resultsScroll');
 
   // ── Build country→HA map ──
   const HA_META = {
@@ -1825,6 +1902,7 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
     </div>
   </div>`;
 
+  if(!panel){ console.error('resultsScroll not found'); return; }
   panel.innerHTML = html;
 
   // auto-expand first country if SUSAR
@@ -1836,6 +1914,13 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
   }
 }
 
+function toggleColl(hdr){
+  hdr.classList.toggle('open');
+  const body=hdr.nextElementSibling;
+  if(body){body.classList.toggle('open');}
+  const caret=hdr.querySelector('.coll-caret');
+  if(caret){caret.style.transform=hdr.classList.contains('open')?'rotate(90deg)':'';}
+}
 function toggleNode(id){
   const hdr = document.getElementById('hdr-'+id);
   const body = document.getElementById('body-'+id);
