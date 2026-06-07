@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Praxigent RegIntel Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-/* ── DESIGN TOKENS ── */
 :root{
   --c-navy:#0A1628;--c-navy2:#122040;--c-navy3:#1A3055;
   --c-blue:#1D6FCC;--c-blue2:#2580E4;--c-blue-lt:#EBF4FF;
@@ -20,11 +18,9 @@
   --c-gray-50:#F8F9FA;--c-gray-100:#F0F2F5;--c-gray-200:#E4E8EE;
   --c-gray-300:#CBD2DC;--c-gray-400:#9AAAB8;--c-gray-500:#6B7E95;
   --c-gray-600:#4A5D72;--c-gray-700:#2E3D52;--c-gray-900:#0F1A28;
-  --c-white:#FFFFFF;
-  --c-text:#1A2940;--c-text-2:#4A5D72;--c-text-3:#7A8FA6;
+  --c-white:#FFFFFF;--c-text:#1A2940;--c-text-2:#4A5D72;--c-text-3:#7A8FA6;
   --c-border:#DCE2EC;--c-border2:#C8D1DF;
-  --f-sans:'Inter',system-ui,sans-serif;
-  --f-mono:'DM Mono',monospace;
+  --f-sans:'Inter',system-ui,sans-serif;--f-mono:'DM Mono',monospace;
   --sidebar-w:220px;--topbar-h:52px;
   --shadow-sm:0 1px 3px rgba(10,22,40,.08),0 1px 2px rgba(10,22,40,.04);
   --shadow-md:0 4px 12px rgba(10,22,40,.10),0 2px 4px rgba(10,22,40,.06);
@@ -34,92 +30,53 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;}
 body{font-family:var(--f-sans);font-size:13px;color:var(--c-text);background:var(--c-gray-100);display:flex;flex-direction:column;}
-
-/* ── TOPBAR ── */
-.topbar{height:var(--topbar-h);background:var(--c-navy);display:flex;align-items:center;
-  padding:0 16px 0 0;flex-shrink:0;z-index:100;box-shadow:0 1px 0 rgba(255,255,255,.08);}
+.topbar{height:var(--topbar-h);background:var(--c-navy);display:flex;align-items:center;padding:0 16px 0 0;flex-shrink:0;z-index:100;box-shadow:0 1px 0 rgba(255,255,255,.08);}
 .topbar-logo{width:var(--sidebar-w);padding:0 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.topbar-logo-mark{width:28px;height:28px;border-radius:6px;background:var(--c-blue2);
-  display:flex;align-items:center;justify-content:center;}
-.topbar-logo-mark span{font-size:13px;font-weight:600;color:#fff;letter-spacing:-.5px;}
-.topbar-logo-text{display:flex;flex-direction:column;}
-.topbar-logo-text .brand{font-size:13px;font-weight:600;color:#fff;letter-spacing:-.2px;}
-.topbar-logo-text .product{font-size:9.5px;font-weight:500;color:rgba(255,255,255,.45);
-  letter-spacing:.12em;text-transform:uppercase;}
+.topbar-logo-mark{width:28px;height:28px;border-radius:6px;background:var(--c-blue2);display:flex;align-items:center;justify-content:center;}
+.topbar-logo-mark span{font-size:13px;font-weight:600;color:#fff;}
+.topbar-logo-text .brand{font-size:13px;font-weight:600;color:#fff;}
+.topbar-logo-text .product{font-size:9.5px;font-weight:500;color:rgba(255,255,255,.45);letter-spacing:.12em;text-transform:uppercase;}
 .topbar-divider{width:1px;height:28px;background:rgba(255,255,255,.1);margin:0 12px;}
-.topbar-breadcrumb{font-size:13px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:6px;}
-.topbar-breadcrumb .current{color:rgba(255,255,255,.9);font-weight:500;}
+.topbar-breadcrumb{font-size:13px;color:rgba(255,255,255,.9);font-weight:500;}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:4px;}
-.topbar-icon-btn{width:32px;height:32px;border-radius:var(--radius);border:none;background:transparent;
-  color:rgba(255,255,255,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:15px;transition:all .15s;}
+.topbar-icon-btn{width:32px;height:32px;border-radius:var(--radius);border:none;background:transparent;color:rgba(255,255,255,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;}
 .topbar-icon-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
-.topbar-notif{position:relative;}
-.notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;
-  background:#E74C3C;border:1.5px solid var(--c-navy);}
-.topbar-avatar{width:30px;height:30px;border-radius:50%;
-  background:linear-gradient(135deg,var(--c-blue2),var(--c-teal));
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:600;color:#fff;cursor:pointer;margin-left:4px;}
+.notif-wrap{position:relative;}
+.notif-dot{position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:#E74C3C;border:1.5px solid var(--c-navy);}
+.topbar-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--c-blue2),var(--c-teal));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;cursor:pointer;margin-left:4px;}
 .topbar-user-info{text-align:right;margin-right:8px;}
 .topbar-user-info .name{font-size:12px;font-weight:500;color:#fff;}
 .topbar-user-info .role{font-size:10px;color:rgba(255,255,255,.45);}
-
-/* ── SHELL ── */
 .shell{display:flex;flex:1;overflow:hidden;}
-
-/* ── SIDEBAR ── */
-.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--c-navy2);
-  display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid rgba(255,255,255,.06);}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--c-navy2);display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid rgba(255,255,255,.06);}
 .sidebar-section{padding:16px 8px 4px;}
-.sidebar-section-label{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.28);
-  letter-spacing:.14em;text-transform:uppercase;padding:0 8px;margin-bottom:4px;}
-.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius);
-  cursor:pointer;color:rgba(255,255,255,.58);font-size:12.5px;font-weight:400;
-  transition:all .12s;margin-bottom:1px;border:1px solid transparent;}
+.sidebar-section-label{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.28);letter-spacing:.14em;text-transform:uppercase;padding:0 8px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;color:rgba(255,255,255,.58);font-size:12.5px;font-weight:400;transition:all .12s;margin-bottom:1px;border:1px solid transparent;}
 .nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85);}
-.nav-item.active{background:rgba(29,111,204,.22);color:#fff;font-weight:500;
-  border-color:rgba(29,111,204,.35);}
+.nav-item.active{background:rgba(29,111,204,.22);color:#fff;font-weight:500;border-color:rgba(29,111,204,.35);}
 .nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.8;}
-.nav-item.active svg{opacity:1;}
-.nav-badge{margin-left:auto;font-family:var(--f-mono);font-size:10px;
-  background:rgba(199,56,44,.22);color:#F1948A;padding:1px 6px;border-radius:10px;}
+.nav-badge{margin-left:auto;font-family:var(--f-mono);font-size:10px;background:rgba(199,56,44,.22);color:#F1948A;padding:1px 6px;border-radius:10px;}
 .nav-badge.blue{background:rgba(29,111,204,.2);color:#7DB9F4;}
 .sidebar-footer{margin-top:auto;padding:12px 8px;border-top:1px solid rgba(255,255,255,.07);}
-.sidebar-footer-item{display:flex;align-items:center;gap:8px;padding:7px 10px;
-  border-radius:var(--radius);cursor:pointer;color:rgba(255,255,255,.4);font-size:12px;transition:all .12s;}
+.sidebar-footer-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius);cursor:pointer;color:rgba(255,255,255,.4);font-size:12px;transition:all .12s;}
 .sidebar-footer-item:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.05);}
-
-/* ── MAIN ── */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 .view{display:none;flex:1;flex-direction:column;overflow:hidden;}
 .view.active{display:flex;}
-
-/* ── PAGE HEADER ── */
 .page-hdr{padding:16px 24px 0;flex-shrink:0;}
 .page-hdr-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
 .page-title{font-size:18px;font-weight:600;color:var(--c-text);letter-spacing:-.3px;}
 .page-subtitle{font-size:12.5px;color:var(--c-text-3);margin-top:2px;}
 .page-hdr-right{margin-left:auto;display:flex;gap:8px;}
-
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);
-  font-size:12.5px;font-weight:500;font-family:var(--f-sans);cursor:pointer;
-  border:1px solid transparent;transition:all .15s;white-space:nowrap;}
-.btn svg{width:14px;height:14px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius);font-size:12.5px;font-weight:500;font-family:var(--f-sans);cursor:pointer;border:1px solid transparent;transition:all .15s;white-space:nowrap;}
 .btn-primary{background:var(--c-blue2);color:#fff;border-color:var(--c-blue);}
 .btn-primary:hover{background:#1A70D4;}
 .btn-secondary{background:#fff;color:var(--c-text);border-color:var(--c-border2);}
-.btn-secondary:hover{background:var(--c-gray-50);border-color:var(--c-gray-300);}
+.btn-secondary:hover{background:var(--c-gray-50);}
 .btn-ghost{background:transparent;color:var(--c-text-2);border-color:transparent;}
 .btn-ghost:hover{background:var(--c-gray-100);}
-.btn-danger{background:var(--c-red-lt);color:var(--c-red);border-color:rgba(192,57,43,.2);}
 .btn-sm{padding:5px 10px;font-size:11.5px;}
-.btn-icon{padding:7px;gap:0;}
-
-/* ── STATUS CHIPS ── */
-.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;
-  font-size:11px;font-weight:500;letter-spacing:.01em;white-space:nowrap;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
 .chip::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 .chip-red{background:var(--c-red-lt);color:var(--c-red);}
 .chip-red::before{background:var(--c-red);}
@@ -133,173 +90,84 @@ body{font-family:var(--f-sans);font-size:13px;color:var(--c-text);background:var
 .chip-purple::before{background:var(--c-purple);}
 .chip-gray{background:var(--c-gray-100);color:var(--c-gray-600);}
 .chip-gray::before{background:var(--c-gray-400);}
-
-/* ── CARDS ── */
 .card{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--c-border);box-shadow:var(--shadow-sm);}
 .card-hdr{padding:14px 16px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:8px;}
 .card-hdr-title{font-size:13px;font-weight:600;color:var(--c-text);}
 .card-hdr-sub{font-size:11.5px;color:var(--c-text-3);margin-top:1px;}
 .card-hdr-right{margin-left:auto;display:flex;gap:6px;}
-
-/* ── KPI TILES ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 24px;margin-bottom:16px;}
-.kpi-tile{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--c-border);
-  padding:16px 18px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px;}
-.kpi-tile .kpi-label{font-size:11px;font-weight:500;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;}
-.kpi-tile .kpi-val{font-size:28px;font-weight:600;color:var(--c-text);line-height:1.1;}
-.kpi-tile .kpi-delta{font-size:11.5px;display:flex;align-items:center;gap:4px;}
-.kpi-tile .kpi-icon{width:36px;height:36px;border-radius:var(--radius);
-  display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:4px;}
-
-/* ── TABLE ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.kpi-tile{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--c-border);padding:16px 18px;box-shadow:var(--shadow-sm);}
+.kpi-icon{width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:6px;}
+.kpi-label{font-size:11px;font-weight:500;color:var(--c-text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.kpi-val{font-size:28px;font-weight:600;color:var(--c-text);line-height:1.1;}
+.kpi-delta{font-size:11.5px;margin-top:3px;}
 .data-table-wrap{overflow:auto;flex:1;}
 .data-table{width:100%;border-collapse:collapse;}
-.data-table th{text-align:left;padding:9px 14px;font-size:10.5px;font-weight:600;
-  text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);
-  border-bottom:1px solid var(--c-border);background:var(--c-gray-50);
-  white-space:nowrap;position:sticky;top:0;z-index:2;}
-.data-table td{padding:10px 14px;border-bottom:1px solid var(--c-gray-100);
-  font-size:12.5px;color:var(--c-text);vertical-align:middle;}
+.data-table th{text-align:left;padding:9px 14px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);border-bottom:1px solid var(--c-border);background:var(--c-gray-50);white-space:nowrap;position:sticky;top:0;z-index:2;}
+.data-table td{padding:10px 14px;border-bottom:1px solid var(--c-gray-100);font-size:12.5px;color:var(--c-text);vertical-align:middle;}
 .data-table tr:last-child td{border-bottom:none;}
 .data-table tbody tr{cursor:pointer;transition:background .1s;}
 .data-table tbody tr:hover td{background:var(--c-blue-lt);}
-.data-table tbody tr.selected td{background:rgba(29,111,204,.06);}
-
-/* ── FILTERS BAR ── */
-.filters-bar{display:flex;gap:8px;padding:12px 24px;align-items:center;
-  border-bottom:1px solid var(--c-border);background:#fff;flex-shrink:0;}
-.search-box{display:flex;align-items:center;gap:6px;background:var(--c-gray-50);
-  border:1px solid var(--c-border);border-radius:var(--radius);padding:6px 10px;min-width:240px;}
-.search-box input{border:none;background:transparent;font-size:12.5px;color:var(--c-text);
-  outline:none;width:100%;}
+.filters-bar{display:flex;gap:8px;padding:12px 24px;align-items:center;border-bottom:1px solid var(--c-border);background:#fff;flex-shrink:0;flex-wrap:wrap;}
+.search-box{display:flex;align-items:center;gap:6px;background:var(--c-gray-50);border:1px solid var(--c-border);border-radius:var(--radius);padding:6px 10px;min-width:220px;}
+.search-box input{border:none;background:transparent;font-size:12.5px;color:var(--c-text);outline:none;width:100%;}
 .search-box input::placeholder{color:var(--c-text-3);}
-.filter-select{border:1px solid var(--c-border);border-radius:var(--radius);padding:6px 28px 6px 10px;
-  font-size:12.5px;color:var(--c-text);background:var(--c-gray-50);cursor:pointer;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7E95' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center;outline:none;}
-.filter-select:focus{border-color:var(--c-blue2);}
-.filter-tag{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:var(--radius);
-  background:var(--c-blue-lt);color:var(--c-blue);font-size:12px;font-weight:500;border:1px solid rgba(29,111,204,.2);}
-
-/* ── SLIDE-OUT PANEL ── */
+.filter-select{border:1px solid var(--c-border);border-radius:var(--radius);padding:6px 28px 6px 10px;font-size:12.5px;color:var(--c-text);background:var(--c-gray-50);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7E95' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;outline:none;}
 .panel-overlay{position:fixed;inset:0;background:rgba(10,22,40,.4);z-index:200;display:none;}
 .panel-overlay.open{display:block;}
-.slide-panel{position:fixed;top:0;right:0;bottom:0;width:520px;background:#fff;
-  z-index:201;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;
-  transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
+.slide-panel{position:fixed;top:0;right:0;bottom:0;width:520px;background:#fff;z-index:201;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);}
 .slide-panel.open{transform:translateX(0);}
 .sp-hdr{padding:16px 20px;border-bottom:1px solid var(--c-border);display:flex;align-items:flex-start;gap:10px;flex-shrink:0;}
 .sp-hdr-info{flex:1;}
 .sp-hdr-title{font-size:15px;font-weight:600;color:var(--c-text);margin-bottom:3px;}
-.sp-hdr-meta{font-size:11.5px;color:var(--c-text-3);display:flex;align-items:center;gap:8px;}
-.sp-close{width:30px;height:30px;border-radius:var(--radius);border:none;background:var(--c-gray-100);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--c-text-2);flex-shrink:0;}
+.sp-hdr-meta{font-size:11.5px;color:var(--c-text-3);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sp-close{width:30px;height:30px;border-radius:var(--radius);border:none;background:var(--c-gray-100);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--c-text-2);}
 .sp-close:hover{background:var(--c-gray-200);}
 .sp-body{flex:1;overflow-y:auto;padding:20px;}
 .sp-section{margin-bottom:20px;}
-.sp-section-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--c-text-3);margin-bottom:8px;}
-.sp-section-content{font-size:12.5px;color:var(--c-text-2);line-height:1.65;}
+.sp-section-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--c-text-3);margin-bottom:8px;}
 .sp-footer{padding:14px 20px;border-top:1px solid var(--c-border);display:flex;gap:8px;flex-shrink:0;}
-
-/* ── AI SUMMARY BOX ── */
-.ai-summary{background:linear-gradient(135deg,#EBF4FF,#E8F7F4);border:1px solid rgba(29,111,204,.15);
-  border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:16px;}
-.ai-summary-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;
-  color:var(--c-blue);display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.ai-summary{background:linear-gradient(135deg,#EBF4FF,#E8F7F4);border:1px solid rgba(29,111,204,.15);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:16px;}
+.ai-summary-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--c-blue);display:flex;align-items:center;gap:6px;margin-bottom:6px;}
 .ai-summary-label::before{content:'✦';font-size:12px;}
 .ai-summary-text{font-size:12.5px;color:var(--c-text);line-height:1.65;}
-
-/* ── IMPACT BADGE ── */
-.impact-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;
-  border-radius:var(--radius);font-size:12px;font-weight:600;}
+.impact-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--radius);font-size:12px;font-weight:600;}
 .impact-high{background:#FEF0EE;color:#C0392B;border:1px solid rgba(192,57,43,.2);}
 .impact-medium{background:#FEF6E8;color:#B7720A;border:1px solid rgba(183,114,10,.2);}
 .impact-low{background:#EBF7EF;color:#1A7A3E;border:1px solid rgba(26,122,62,.2);}
-
-/* ── PROGRESS ── */
 .progress-bar{height:6px;background:var(--c-gray-200);border-radius:10px;overflow:hidden;}
 .progress-fill{height:100%;border-radius:10px;transition:width .4s;}
 .progress-blue{background:var(--c-blue2);}
 .progress-green{background:var(--c-teal);}
 .progress-red{background:var(--c-red);}
 .progress-amber{background:#E8A217;}
-
-/* ── WORLD MAP PLACEHOLDER ── */
-.world-map{background:linear-gradient(135deg,var(--c-gray-50),#EBF4FF);
-  border:1px solid var(--c-border);border-radius:var(--radius-lg);
-  height:220px;display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;}
-.world-map .map-dots{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-
-/* ── KNOWLEDGE GRAPH ── */
-.kg-canvas{width:100%;height:100%;position:relative;overflow:hidden;
-  background:radial-gradient(ellipse at 50% 50%,#EBF4FF 0%,var(--c-gray-50) 70%);}
-
-/* ── AUDIT TRAIL ── */
-.audit-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--c-gray-100);align-items:flex-start;}
-.audit-row:last-child{border-bottom:none;}
-.audit-icon{width:28px;height:28px;border-radius:50%;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:12px;}
-.audit-content{flex:1;font-size:12.5px;color:var(--c-text);line-height:1.5;}
-.audit-time{font-size:11px;color:var(--c-text-3);font-family:var(--f-mono);flex-shrink:0;}
-
-/* ── TABS ── */
-.tabs-bar{display:flex;gap:0;border-bottom:1px solid var(--c-border);padding:0;flex-shrink:0;}
-.tab-item{padding:10px 16px;font-size:12.5px;font-weight:500;cursor:pointer;
-  border-bottom:2px solid transparent;color:var(--c-text-3);transition:all .15s;white-space:nowrap;}
+.tabs-bar{display:flex;gap:0;border-bottom:1px solid var(--c-border);flex-shrink:0;}
+.tab-item{padding:10px 16px;font-size:12.5px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--c-text-3);transition:all .15s;white-space:nowrap;}
 .tab-item:hover{color:var(--c-text);}
 .tab-item.active{color:var(--c-blue2);border-bottom-color:var(--c-blue2);}
 .tab-panel{display:none;flex:1;overflow:hidden;flex-direction:column;}
 .tab-panel.active{display:flex;}
-
-/* ── FORM ELEMENTS ── */
-.form-group{margin-bottom:14px;}
-.form-label{font-size:11.5px;font-weight:500;color:var(--c-text-2);display:block;margin-bottom:5px;}
-.form-input,.form-select,.form-textarea{width:100%;border:1px solid var(--c-border);
-  border-radius:var(--radius);padding:8px 10px;font-size:12.5px;color:var(--c-text);
-  background:#fff;outline:none;font-family:var(--f-sans);transition:border-color .15s;}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--c-blue2);
-  box-shadow:0 0 0 3px rgba(29,111,204,.08);}
-.form-textarea{resize:vertical;min-height:80px;line-height:1.55;}
-.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7E95' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.req{color:var(--c-red);}
-
-/* ── SECTION ── */
 .content-area{flex:1;overflow-y:auto;padding:0 24px 24px;}
 .two-col{display:grid;grid-template-columns:1fr 340px;gap:16px;}
 .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
 .section-gap{display:flex;flex-direction:column;gap:16px;}
-
-/* ── TASK KANBAN ── */
 .kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start;}
 .kanban-col{background:var(--c-gray-50);border-radius:var(--radius-lg);border:1px solid var(--c-border);overflow:hidden;}
 .kanban-col-hdr{padding:10px 12px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:6px;}
 .kanban-col-title{font-size:12px;font-weight:600;color:var(--c-text);}
-.kanban-count{font-family:var(--f-mono);font-size:10px;background:var(--c-gray-200);
-  color:var(--c-text-3);padding:1px 6px;border-radius:8px;margin-left:auto;}
+.kanban-count{font-family:var(--f-mono);font-size:10px;background:var(--c-gray-200);color:var(--c-text-3);padding:1px 6px;border-radius:8px;margin-left:auto;}
 .kanban-cards{padding:8px;display:flex;flex-direction:column;gap:6px;}
-.kanban-card{background:#fff;border-radius:var(--radius);border:1px solid var(--c-border);
-  padding:10px 12px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm);}
+.kanban-card{background:#fff;border-radius:var(--radius);border:1px solid var(--c-border);padding:10px 12px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm);}
 .kanban-card:hover{border-color:var(--c-blue2);box-shadow:0 0 0 2px rgba(29,111,204,.1);}
 .kanban-card-title{font-size:12px;font-weight:500;color:var(--c-text);margin-bottom:5px;line-height:1.4;}
-.kanban-card-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.kanban-card-system{font-size:10px;color:var(--c-text-3);font-family:var(--f-mono);}
-
-/* ── ESIG ── */
-.esig-box{background:var(--c-green-lt);border:1px solid rgba(26,122,62,.2);
-  border-radius:var(--radius-lg);padding:14px 16px;}
-.esig-box.pending{background:var(--c-amber-lt);border-color:rgba(183,114,10,.2);}
-
-/* ── SCROLLBAR ── */
+.audit-row{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--c-gray-100);align-items:flex-start;}
+.audit-row:last-child{border-bottom:none;}
+.audit-icon{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.audit-time{font-size:11px;color:var(--c-text-3);font-family:var(--f-mono);flex-shrink:0;}
+.kg-canvas{width:100%;height:100%;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#EBF4FF 0%,var(--c-gray-50) 70%);}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--c-gray-300);border-radius:10px;}
-::-webkit-scrollbar-thumb:hover{background:var(--c-gray-400);}
-
-/* ── SVG ICON UTIL ── */
-.icon{display:inline-block;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -314,15 +182,14 @@ body{font-family:var(--f-sans);font-size:13px;color:var(--c-text);background:var
     </div>
   </div>
   <div class="topbar-divider"></div>
-  <div class="topbar-breadcrumb">
-    <span id="tb-section">Dashboard</span>
-  </div>
+  <div class="topbar-breadcrumb" id="tb-section">Dashboard</div>
   <div class="topbar-right">
-    <button class="topbar-icon-btn topbar-notif" title="Notifications">
-      🔔<div class="notif-dot"></div>
-    </button>
-    <button class="topbar-icon-btn" title="Help">❓</button>
-    <button class="topbar-icon-btn" title="Settings">⚙️</button>
+    <div class="notif-wrap">
+      <button class="topbar-icon-btn">🔔</button>
+      <div class="notif-dot"></div>
+    </div>
+    <button class="topbar-icon-btn">❓</button>
+    <button class="topbar-icon-btn">⚙️</button>
     <div class="topbar-user-info">
       <div class="name">Pramod K.</div>
       <div class="role">PV Consultant · Admin</div>
@@ -331,7 +198,6 @@ body{font-family:var(--f-sans);font-size:13px;color:var(--c-text);background:var
   </div>
 </div>
 
-<!-- SHELL -->
 <div class="shell">
 
 <!-- SIDEBAR -->
@@ -364,12 +230,12 @@ body{font-family:var(--f-sans);font-size:13px;color:var(--c-text);background:var
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">Reporting</div>
-    <div class="nav-item" id="nav-reports" onclick="showView('reports',this,'Reports & Audit')">
+    <div class="nav-item" id="nav-reports" onclick="showView('reports',this,'Reports &amp; Audit')">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2h10a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>
-      Reports & Audit
+      Reports &amp; Audit
     </div>
-    <div class="nav-item" id="nav-case" onclick="window.location.href='index.html'">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2L3 7v11h14V7L10 2z"/><path d="M8 18V12h4v6"/></svg>
+    <div class="nav-item" onclick="window.location.href='index.html'">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2L3 7v11h14V7L10 2z"/></svg>
       Case Resolver ↗
     </div>
   </div>
@@ -382,187 +248,136 @@ body{font-family:var(--f-sans);font-size:13px;color:var(--c-text);background:var
   </div>
   <div class="sidebar-footer">
     <div class="sidebar-footer-item">
-      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4M7 2H3a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V8l-6-6H7z"/></svg>
+      <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4M7 2H3a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V8l-6-6H7z"/></svg>
       Documentation
     </div>
-    <div class="sidebar-footer-item" style="color:rgba(255,255,255,.25);font-size:10px;padding:4px 10px;letter-spacing:.04em;">
-      RegIntel v1.0 · Praxigent
-    </div>
+    <div class="sidebar-footer-item" style="color:rgba(255,255,255,.2);font-size:10px;padding:4px 10px;">RegIntel v1.0 &middot; Praxigent</div>
   </div>
 </div>
 
-<!-- WORKSPACE -->
+<!-- MAIN WORKSPACE -->
 <div class="main">
 
-<!-- ════════════════════════════════════════════ -->
-<!-- VIEW: DASHBOARD                             -->
-<!-- ════════════════════════════════════════════ -->
+<!-- ── DASHBOARD ── -->
 <div class="view active" id="view-dashboard">
   <div class="page-hdr">
     <div class="page-hdr-row">
       <div>
         <div class="page-title">Global Regulatory Overview</div>
-        <div class="page-subtitle">Last updated June 7, 2026 · 08:42 UTC · Monitoring 187 Health Authorities</div>
+        <div class="page-subtitle">Last updated June 7, 2026 &middot; 08:42 UTC &middot; Monitoring 187 Health Authorities</div>
       </div>
       <div class="page-hdr-right">
-        <button class="btn btn-secondary btn-sm">📥 Export</button>
-        <button class="btn btn-primary btn-sm">🔄 Refresh feed</button>
+        <button class="btn btn-secondary btn-sm">&#8595; Export</button>
+        <button class="btn btn-primary btn-sm">&#8635; Refresh feed</button>
       </div>
     </div>
   </div>
-
   <div class="content-area section-gap" style="padding-top:16px;">
-    <!-- KPIs -->
-    <div class="kpi-grid" style="padding:0;">
+    <!-- KPI tiles - static HTML -->
+    <div class="kpi-grid">
       <div class="kpi-tile">
-        <div class="kpi-icon" style="background:var(--c-blue-lt);">📡</div>
+        <div class="kpi-icon" style="background:var(--c-blue-lt);">&#128225;</div>
         <div class="kpi-label">New updates</div>
         <div class="kpi-val">24</div>
-        <div class="kpi-delta" style="color:var(--c-amber);">↑ 6 since yesterday</div>
+        <div class="kpi-delta" style="color:var(--c-amber);">&#8593; 6 since yesterday</div>
       </div>
       <div class="kpi-tile">
-        <div class="kpi-icon" style="background:var(--c-red-lt);">⚠️</div>
+        <div class="kpi-icon" style="background:var(--c-red-lt);">&#9888;&#65039;</div>
         <div class="kpi-label">High impact</div>
         <div class="kpi-val" style="color:var(--c-red);">5</div>
         <div class="kpi-delta" style="color:var(--c-red);">Requires immediate review</div>
       </div>
       <div class="kpi-tile">
-        <div class="kpi-icon" style="background:var(--c-amber-lt);">⏰</div>
+        <div class="kpi-icon" style="background:var(--c-amber-lt);">&#9200;&#65039;</div>
         <div class="kpi-label">Overdue tasks</div>
         <div class="kpi-val" style="color:var(--c-amber);">3</div>
         <div class="kpi-delta" style="color:var(--c-amber);">2 escalated to QA</div>
       </div>
       <div class="kpi-tile">
-        <div class="kpi-icon" style="background:var(--c-green-lt);">✅</div>
+        <div class="kpi-icon" style="background:var(--c-green-lt);">&#9989;</div>
         <div class="kpi-label">Compliance score</div>
         <div class="kpi-val" style="color:var(--c-teal);">87%</div>
-        <div class="kpi-delta" style="color:var(--c-green);">↑ 4% this month</div>
+        <div class="kpi-delta" style="color:var(--c-green);">&#8593; 4% this month</div>
       </div>
     </div>
 
     <div class="two-col">
-      <!-- World Map -->
+      <!-- World heatmap - static SVG -->
       <div class="card">
         <div class="card-hdr">
           <div>
-            <div class="card-hdr-title">🌍 Regulatory Activity Heatmap</div>
-            <div class="card-hdr-sub">Color intensity = active changes · Click region to filter</div>
+            <div class="card-hdr-title">&#127758; Regulatory Activity Heatmap</div>
+            <div class="card-hdr-sub">Color intensity = active changes &middot; Click region to filter</div>
           </div>
-          <div class="card-hdr-right">
-            <button class="btn btn-ghost btn-sm">View all →</button>
-          </div>
+          <div class="card-hdr-right"><button class="btn btn-ghost btn-sm">View all &rarr;</button></div>
         </div>
         <div style="padding:12px;">
-          <div class="world-map">
-            <svg width="100%" viewBox="0 0 700 220" style="opacity:.85;">
-              <!-- Simplified world regions -->
-              <!-- North America -->
-              <ellipse cx="160" cy="100" rx="95" ry="60" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1"/>
-              <text x="160" y="103" text-anchor="middle" fill="#1D6FCC" font-size="11" font-weight="600">North America</text>
-              <text x="160" y="117" text-anchor="middle" fill="#1D6FCC" font-size="9">FDA · HC · 8 updates</text>
-              <circle cx="185" cy="80" r="7" fill="#C0392B" opacity=".8"/>
-              <text x="185" y="83" text-anchor="middle" fill="white" font-size="8" font-weight="700">5</text>
-              <!-- Europe -->
-              <ellipse cx="370" cy="80" rx="75" ry="50" fill="#FEF6E8" stroke="#FCD34D" stroke-width="1"/>
-              <text x="370" y="83" text-anchor="middle" fill="#B7720A" font-size="11" font-weight="600">Europe</text>
-              <text x="370" y="97" text-anchor="middle" fill="#B7720A" font-size="9">EMA · MHRA · 11 updates</text>
-              <circle cx="395" cy="65" r="8" fill="#E8A217" opacity=".9"/>
-              <text x="395" y="68" text-anchor="middle" fill="white" font-size="8" font-weight="700">11</text>
-              <!-- APAC -->
-              <ellipse cx="570" cy="110" rx="85" ry="55" fill="#EBF7EF" stroke="#6EE7B7" stroke-width="1"/>
-              <text x="570" y="113" text-anchor="middle" fill="#1A7A3E" font-size="11" font-weight="600">APAC</text>
-              <text x="570" y="127" text-anchor="middle" fill="#1A7A3E" font-size="9">PMDA · TGA · NMPA · 5 updates</text>
-              <circle cx="595" cy="93" r="6" fill="#1A7A3E" opacity=".8"/>
-              <text x="595" y="96" text-anchor="middle" fill="white" font-size="8" font-weight="700">5</text>
-              <!-- LATAM -->
-              <ellipse cx="200" cy="175" rx="55" ry="35" fill="#F0EEFF" stroke="#C4B5FD" stroke-width="1"/>
-              <text x="200" y="176" text-anchor="middle" fill="#5C4DB1" font-size="10" font-weight="500">LATAM</text>
-              <text x="200" y="189" text-anchor="middle" fill="#5C4DB1" font-size="8">ANVISA · COFEPRIS</text>
-              <!-- Middle East -->
-              <ellipse cx="440" cy="165" rx="45" ry="28" fill="#FEF0EE" stroke="#FCA5A5" stroke-width="1"/>
-              <text x="440" y="166" text-anchor="middle" fill="#C0392B" font-size="10" font-weight="500">Middle East</text>
-              <text x="440" y="179" text-anchor="middle" fill="#C0392B" font-size="8">SFDA · 3 updates</text>
-              <!-- Legend -->
-              <rect x="12" y="190" width="8" height="8" rx="2" fill="#C0392B"/>
-              <text x="24" y="199" fill="#4A5D72" font-size="9">High</text>
-              <rect x="50" y="190" width="8" height="8" rx="2" fill="#E8A217"/>
-              <text x="62" y="199" fill="#4A5D72" font-size="9">Medium</text>
-              <rect x="98" y="190" width="8" height="8" rx="2" fill="#1A7A3E"/>
-              <text x="110" y="199" fill="#4A5D72" font-size="9">Low</text>
+          <div style="background:linear-gradient(135deg,var(--c-gray-50),#EBF4FF);border:1px solid var(--c-border);border-radius:var(--radius-lg);overflow:hidden;">
+            <svg width="100%" viewBox="0 0 700 230">
+              <ellipse cx="160" cy="105" rx="95" ry="60" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1"/>
+              <text x="160" y="108" text-anchor="middle" fill="#1D6FCC" font-size="11" font-weight="600" font-family="Inter,sans-serif">North America</text>
+              <text x="160" y="122" text-anchor="middle" fill="#1D6FCC" font-size="9" font-family="Inter,sans-serif">FDA &middot; HC &middot; 8 updates</text>
+              <circle cx="185" cy="83" r="8" fill="#C0392B" opacity=".85"/>
+              <text x="185" y="87" text-anchor="middle" fill="white" font-size="9" font-weight="700" font-family="Inter,sans-serif">5</text>
+
+              <ellipse cx="370" cy="85" rx="80" ry="52" fill="#FEF6E8" stroke="#FCD34D" stroke-width="1"/>
+              <text x="370" y="88" text-anchor="middle" fill="#B7720A" font-size="11" font-weight="600" font-family="Inter,sans-serif">Europe</text>
+              <text x="370" y="102" text-anchor="middle" fill="#B7720A" font-size="9" font-family="Inter,sans-serif">EMA &middot; MHRA &middot; 11 updates</text>
+              <circle cx="396" cy="66" r="9" fill="#E8A217" opacity=".9"/>
+              <text x="396" y="70" text-anchor="middle" fill="white" font-size="9" font-weight="700" font-family="Inter,sans-serif">11</text>
+
+              <ellipse cx="570" cy="115" rx="88" ry="57" fill="#EBF7EF" stroke="#6EE7B7" stroke-width="1"/>
+              <text x="570" y="118" text-anchor="middle" fill="#1A7A3E" font-size="11" font-weight="600" font-family="Inter,sans-serif">APAC</text>
+              <text x="570" y="132" text-anchor="middle" fill="#1A7A3E" font-size="9" font-family="Inter,sans-serif">PMDA &middot; TGA &middot; NMPA &middot; 5 updates</text>
+              <circle cx="596" cy="96" r="7" fill="#1A7A3E" opacity=".8"/>
+              <text x="596" y="100" text-anchor="middle" fill="white" font-size="9" font-weight="700" font-family="Inter,sans-serif">5</text>
+
+              <ellipse cx="200" cy="185" rx="55" ry="33" fill="#F0EEFF" stroke="#C4B5FD" stroke-width="1"/>
+              <text x="200" y="186" text-anchor="middle" fill="#5C4DB1" font-size="10" font-weight="500" font-family="Inter,sans-serif">LATAM</text>
+              <text x="200" y="199" text-anchor="middle" fill="#5C4DB1" font-size="8" font-family="Inter,sans-serif">ANVISA &middot; COFEPRIS</text>
+
+              <ellipse cx="445" cy="170" rx="46" ry="28" fill="#FEF0EE" stroke="#FCA5A5" stroke-width="1"/>
+              <text x="445" y="171" text-anchor="middle" fill="#C0392B" font-size="10" font-weight="500" font-family="Inter,sans-serif">Middle East</text>
+              <text x="445" y="184" text-anchor="middle" fill="#C0392B" font-size="8" font-family="Inter,sans-serif">SFDA &middot; 3 updates</text>
+
+              <rect x="12" y="200" width="8" height="8" rx="2" fill="#C0392B"/>
+              <text x="24" y="209" fill="#4A5D72" font-size="9" font-family="Inter,sans-serif">High</text>
+              <rect x="52" y="200" width="8" height="8" rx="2" fill="#E8A217"/>
+              <text x="64" y="209" fill="#4A5D72" font-size="9" font-family="Inter,sans-serif">Medium</text>
+              <rect x="102" y="200" width="8" height="8" rx="2" fill="#1A7A3E"/>
+              <text x="114" y="209" fill="#4A5D72" font-size="9" font-family="Inter,sans-serif">Low</text>
             </svg>
           </div>
         </div>
       </div>
 
-      <!-- Recent updates feed -->
+      <!-- Recent updates - rendered by JS -->
       <div class="card">
         <div class="card-hdr">
-          <div class="card-hdr-title">📋 Recent Updates</div>
-          <div class="card-hdr-right"><button class="btn btn-ghost btn-sm">View all →</button></div>
+          <div class="card-hdr-title">&#128203; Recent Updates</div>
+          <div class="card-hdr-right"><button class="btn btn-ghost btn-sm" onclick="showView('intelligence',document.getElementById('nav-intelligence'),'Regulatory Intelligence')">View all &rarr;</button></div>
         </div>
-        <div style="padding:8px 12px;">
-          ${[
-            {ha:'EMA',title:'GVP Module VI Rev 3 — ICSR timelines',impact:'high',time:'2h ago',type:'PhV'},
-            {ha:'FDA',title:'21 CFR 312.32 E2B R3 mandate 2027',impact:'medium',time:'5h ago',type:'CT'},
-            {ha:'PMDA',title:'J-ICSR v3.1 schema effective Q4 2026',impact:'medium',time:'1d ago',type:'Format'},
-            {ha:'MHRA',title:'UK GVP Module IX signal update',impact:'low',time:'2d ago',type:'Signal'},
-            {ha:'TGA',title:'Pharmacovigilance guidelines update',impact:'low',time:'3d ago',type:'PhV'},
-          ].map(u=>`
-            <div onclick="showView('intelligence',document.getElementById('nav-intelligence'),'Regulatory Intelligence')" style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--c-gray-100);cursor:pointer;" class="feed-row">
-              <div style="width:34px;height:34px;border-radius:6px;background:${u.impact==='high'?'var(--c-red-lt)':u.impact==='medium'?'var(--c-amber-lt)':'var(--c-green-lt)'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${u.impact==='high'?'var(--c-red)':u.impact==='medium'?'var(--c-amber)':'var(--c-green)'};flex-shrink:0;">${u.ha}</div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:12px;font-weight:500;color:var(--c-text);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${u.title}</div>
-                <div style="display:flex;gap:6px;margin-top:3px;">
-                  <span style="font-size:10px;color:var(--c-text-3);">${u.type}</span>
-                  <span style="font-size:10px;color:var(--c-text-3);">·</span>
-                  <span style="font-size:10px;color:var(--c-text-3);">${u.time}</span>
-                </div>
-              </div>
-              <span class="chip chip-${u.impact==='high'?'red':u.impact==='medium'?'amber':'green'}" style="align-self:center;">${u.impact}</span>
-            </div>`).join('')}
-        </div>
+        <div id="dash-recent-feed" style="padding:8px 12px;"></div>
       </div>
     </div>
 
-    <!-- Compliance status -->
+    <!-- Compliance status - rendered by JS -->
     <div class="card">
       <div class="card-hdr">
-        <div class="card-hdr-title">📊 Compliance Status by Region / System</div>
-        <div class="card-hdr-right">
-          <button class="btn btn-ghost btn-sm">Details →</button>
-        </div>
+        <div class="card-hdr-title">&#128202; Compliance Status by Region / System</div>
+        <div class="card-hdr-right"><button class="btn btn-ghost btn-sm">Details &rarr;</button></div>
       </div>
-      <div style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
-        ${[
-          {label:'FDA (USA)',pct:92,color:'progress-green'},
-          {label:'EMA (EU)',pct:78,color:'progress-amber'},
-          {label:'PMDA (Japan)',pct:88,color:'progress-green'},
-          {label:'MHRA (UK)',pct:95,color:'progress-green'},
-          {label:'Oracle Argus Safety',pct:74,color:'progress-amber'},
-          {label:'EudraVigilance',pct:81,color:'progress-green'},
-          {label:'SOP / QMS',pct:69,color:'progress-red'},
-          {label:'RegIntel ROD',pct:96,color:'progress-green'},
-        ].map(r=>`
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
-              <span style="font-size:12px;color:var(--c-text-2);">${r.label}</span>
-              <span style="font-size:12px;font-weight:600;color:var(--c-text);">${r.pct}%</span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill ${r.color}" style="width:${r.pct}%;"></div></div>
-          </div>`).join('')}
-      </div>
+      <div id="dash-compliance-grid" style="padding:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;"></div>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
-<!-- VIEW: REGULATORY INTELLIGENCE              -->
-<!-- ════════════════════════════════════════════ -->
+<!-- ── REGULATORY INTELLIGENCE ── -->
 <div class="view" id="view-intelligence">
   <div class="filters-bar">
     <div class="search-box">
       <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#9AAAB8" stroke-width="1.5"><circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/></svg>
-      <input type="text" placeholder="Search regulations, guidelines, authorities…"/>
+      <input type="text" placeholder="Search regulations, guidelines, authorities&hellip;"/>
     </div>
     <select class="filter-select"><option>All Authorities</option><option>FDA</option><option>EMA</option><option>PMDA</option><option>MHRA</option></select>
     <select class="filter-select"><option>All Regions</option><option>North America</option><option>Europe</option><option>APAC</option></select>
@@ -570,407 +385,182 @@ body{font-family:var(--f-sans);font-size:13px;color:var(--c-text);background:var
     <select class="filter-select"><option>All Impact</option><option>High</option><option>Medium</option><option>Low</option></select>
     <select class="filter-select"><option>Last 30 days</option><option>Last 7 days</option><option>Last 90 days</option></select>
     <div style="margin-left:auto;display:flex;gap:6px;">
-      <span class="filter-tag">EMA ×</span>
-      <button class="btn btn-ghost btn-sm">Clear all</button>
+      <button class="btn btn-secondary btn-sm">&#8595; Export</button>
+      <button class="btn btn-primary btn-sm" onclick="openPanel()">+ Create action</button>
     </div>
   </div>
-
-  <div style="flex:1;display:flex;overflow:hidden;">
-    <div class="data-table-wrap">
-      <div style="padding:0 24px;display:flex;align-items:center;gap:8px;height:44px;border-bottom:1px solid var(--c-border);flex-shrink:0;">
-        <span style="font-size:12px;color:var(--c-text-3);">24 regulatory updates</span>
-        <div style="margin-left:auto;display:flex;gap:6px;">
-          <button class="btn btn-secondary btn-sm">📥 Export</button>
-          <button class="btn btn-primary btn-sm" onclick="openPanel()">+ Create action</button>
-        </div>
-      </div>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th style="width:40px;"><input type="checkbox"/></th>
-            <th>Date ↕</th><th>Authority</th><th>Title</th><th>Category</th>
-            <th>Impact</th><th>Status</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="intel-tbody"></tbody>
-      </table>
-    </div>
+  <div style="padding:0 24px;display:flex;align-items:center;gap:8px;height:44px;border-bottom:1px solid var(--c-border);flex-shrink:0;background:#fff;">
+    <span style="font-size:12px;color:var(--c-text-3);">24 regulatory updates</span>
+  </div>
+  <div class="data-table-wrap">
+    <table class="data-table">
+      <thead><tr>
+        <th style="width:36px;"><input type="checkbox"/></th>
+        <th>Date</th><th>Authority</th><th>Title</th><th>Category</th><th>Impact</th><th>Status</th><th>Action</th>
+      </tr></thead>
+      <tbody id="intel-tbody"></tbody>
+    </table>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
-<!-- VIEW: IMPACT ASSESSMENT                    -->
-<!-- ════════════════════════════════════════════ -->
+<!-- ── IMPACT ASSESSMENT ── -->
 <div class="view" id="view-impact">
   <div class="filters-bar">
-    <div class="search-box"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#9AAAB8" stroke-width="1.5"><circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/></svg><input type="text" placeholder="Search impact assessments…"/></div>
+    <div class="search-box"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#9AAAB8" stroke-width="1.5"><circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/></svg><input type="text" placeholder="Search impact assessments&hellip;"/></div>
     <select class="filter-select"><option>All Impact</option><option>High</option><option>Medium</option><option>Low</option></select>
     <select class="filter-select"><option>All Systems</option><option>Argus Safety</option><option>EudraVigilance</option><option>SOP/QMS</option></select>
     <div style="margin-left:auto;"><button class="btn btn-primary btn-sm">+ New assessment</button></div>
   </div>
-
   <div class="content-area section-gap" style="padding-top:16px;">
     <div class="card">
       <div class="card-hdr">
-        <div><div class="card-hdr-title">⚠️ Impact Assessments</div><div class="card-hdr-sub">5 pending review · 2 approved · 1 overdue</div></div>
+        <div><div class="card-hdr-title">&#9888;&#65039; Impact Assessments</div><div class="card-hdr-sub">5 pending review &middot; 2 approved &middot; 1 overdue</div></div>
       </div>
       <table class="data-table">
-        <thead><tr>
-          <th>Regulation</th><th>Authority</th><th>Impact score</th><th>Systems affected</th>
-          <th>Processes</th><th>Compliance risk</th><th>Status</th><th>Actions</th>
-        </tr></thead>
+        <thead><tr><th>Regulation</th><th>Authority</th><th>Impact</th><th>Systems affected</th><th>Processes</th><th>Compliance risk</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="impact-tbody"></tbody>
       </table>
     </div>
-
-    <!-- Selected impact detail -->
     <div class="card" id="impact-detail-card" style="display:none;">
       <div class="card-hdr">
-        <div>
-          <div class="card-hdr-title" id="impact-detail-title">EMA GVP Module VI Rev 3</div>
-          <div class="card-hdr-sub">Impact Assessment · Ref: IA-2026-047</div>
-        </div>
+        <div><div class="card-hdr-title">EMA GVP Module VI Rev 3 &mdash; Impact Assessment IA-2026-047</div></div>
         <div class="card-hdr-right">
-          <button class="btn btn-secondary btn-sm">🖨️ Print</button>
-          <button class="btn btn-primary btn-sm" onclick="showView('actions',document.getElementById('nav-actions'),'Action Center')">Send to Action Center →</button>
+          <button class="btn btn-secondary btn-sm">&#128438; Print</button>
+          <button class="btn btn-primary btn-sm" onclick="showView('actions',document.getElementById('nav-actions'),'Action Center')">Send to Action Center &rarr;</button>
         </div>
       </div>
-      <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
-        <div>
-          <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:10px;">Impact Score</div>
-          <div class="impact-badge impact-high" style="font-size:16px;padding:8px 16px;margin-bottom:12px;">🔴 HIGH</div>
-          <div style="font-size:12px;color:var(--c-text-2);line-height:1.6;">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Compliance risk</span><span class="chip chip-red">High</span></div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Operational risk</span><span class="chip chip-amber">Medium</span></div>
-            <div style="display:flex;justify-content:space-between;"><span>Patient safety</span><span class="chip chip-amber">Medium</span></div>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:10px;">Affected Systems</div>
-          ${['Oracle Argus Safety','EudraVigilance EVWEB','RegIntel ROD','SOP / QMS'].map(s=>`
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-              <div style="width:6px;height:6px;border-radius:50%;background:var(--c-red);flex-shrink:0;"></div>
-              <span style="font-size:12.5px;color:var(--c-text);">${s}</span>
-            </div>`).join('')}
-        </div>
-        <div>
-          <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:10px;">Affected Processes</div>
-          ${['ICSR Reporting (non-serious)','Case Processing (EEA)','E2B Batch Submission','Periodic Reporting (PSUR)'].map(p=>`
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-              <div style="width:6px;height:6px;border-radius:50%;background:var(--c-amber);flex-shrink:0;"></div>
-              <span style="font-size:12.5px;color:var(--c-text);">${p}</span>
-            </div>`).join('')}
-        </div>
-      </div>
-      <div style="padding:0 20px 20px;">
-        <div class="ai-summary">
-          <div class="ai-summary-label">AI Recommendation</div>
-          <div class="ai-summary-text">Immediate review of non-serious ICSR reporting timelines required. EMA GVP Module VI Rev 3 §VI.B.6.2 reduces EEA-sourced non-serious ADR reporting from 90 to 45 calendar days effective 2026-09-05. Argus Safety rule <strong>EMA_NONSER_POST_MKT</strong> must be updated and re-validated. SOP-PV-004 §4.2 requires amendment. Estimated implementation: 4–6 weeks. 4 compliance tasks generated.</div>
-        </div>
-      </div>
+      <div id="impact-detail-body" style="padding:20px;"></div>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
-<!-- VIEW: ACTION CENTER                        -->
-<!-- ════════════════════════════════════════════ -->
+<!-- ── ACTION CENTER ── -->
 <div class="view" id="view-actions">
   <div class="filters-bar">
-    <div class="search-box"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#9AAAB8" stroke-width="1.5"><circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/></svg><input type="text" placeholder="Search tasks…"/></div>
+    <div class="search-box"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#9AAAB8" stroke-width="1.5"><circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/></svg><input type="text" placeholder="Search tasks&hellip;"/></div>
     <select class="filter-select"><option>All owners</option><option>PV Operations</option><option>IT Systems</option><option>Regulatory Affairs</option><option>QA</option></select>
-    <select class="filter-select"><option>All systems</option><option>Argus Safety</option><option>EudraVigilance</option><option>SOP/QMS</option></select>
     <select class="filter-select"><option>All priorities</option><option>P1</option><option>P2</option><option>P3</option></select>
     <div style="margin-left:auto;display:flex;gap:6px;">
-      <div class="tabs-bar" style="border:none;gap:0;">
+      <div class="tabs-bar" style="border:none;">
         <div class="tab-item active" onclick="switchActionsView('kanban',this)" style="padding:6px 12px;font-size:12px;">Kanban</div>
         <div class="tab-item" onclick="switchActionsView('list',this)" style="padding:6px 12px;font-size:12px;">List</div>
       </div>
       <button class="btn btn-primary btn-sm">+ New task</button>
     </div>
   </div>
-
-  <!-- Kanban view -->
   <div style="flex:1;overflow-y:auto;padding:16px 24px;" id="actions-kanban">
     <div class="kanban" id="kanban-board"></div>
   </div>
-
-  <!-- List view (hidden) -->
   <div style="flex:1;display:none;flex-direction:column;overflow:hidden;" id="actions-list">
     <table class="data-table">
-      <thead><tr>
-        <th>Task</th><th>Regulation</th><th>System</th><th>Owner</th><th>Due date</th><th>Priority</th><th>Status</th><th>GxP</th>
-      </tr></thead>
+      <thead><tr><th>Task</th><th>Regulation</th><th>System</th><th>Owner</th><th>Due date</th><th>Priority</th><th>Status</th><th>GxP</th></tr></thead>
       <tbody id="actions-tbody"></tbody>
     </table>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
-<!-- VIEW: KNOWLEDGE GRAPH                      -->
-<!-- ════════════════════════════════════════════ -->
+<!-- ── KNOWLEDGE GRAPH ── -->
 <div class="view" id="view-knowledge">
   <div class="filters-bar">
-    <div class="search-box"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#9AAAB8" stroke-width="1.5"><circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/></svg><input type="text" placeholder="Search nodes…" id="kg-search"/></div>
-    <select class="filter-select" id="kg-filter"><option>All relationships</option><option>HA → Regulation</option><option>Regulation → System</option><option>System → Action</option></select>
-    <div style="margin-left:auto;font-size:12px;color:var(--c-text-3);">Click a node to explore · Drag to pan</div>
+    <div class="search-box"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#9AAAB8" stroke-width="1.5"><circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/></svg><input type="text" placeholder="Search nodes&hellip;"/></div>
+    <select class="filter-select"><option>All relationships</option><option>HA &rarr; Regulation</option><option>Regulation &rarr; System</option><option>System &rarr; Action</option></select>
+    <div style="margin-left:auto;font-size:12px;color:var(--c-text-3);">Click a node to explore</div>
   </div>
   <div style="flex:1;position:relative;overflow:hidden;">
-    <div class="kg-canvas" id="kg-canvas">
-      <svg width="100%" height="100%" id="kg-svg"></svg>
-    </div>
+    <div class="kg-canvas"><svg width="100%" height="100%" id="kg-svg"></svg></div>
     <div id="kg-tooltip" style="display:none;position:absolute;background:#fff;border:1px solid var(--c-border);border-radius:var(--radius-lg);padding:12px 14px;font-size:12px;max-width:240px;box-shadow:var(--shadow-md);z-index:10;"></div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
-<!-- VIEW: REPORTS & AUDIT                      -->
-<!-- ════════════════════════════════════════════ -->
+<!-- ── REPORTS & AUDIT ── -->
 <div class="view" id="view-reports">
   <div class="filters-bar">
-    <select class="filter-select"><option>All report types</option><option>Compliance</option><option>Audit trail</option><option>Task summary</option></select>
+    <select class="filter-select"><option>All report types</option><option>Compliance</option><option>Audit trail</option></select>
     <select class="filter-select"><option>Last 30 days</option><option>Last 90 days</option><option>This year</option></select>
     <div style="margin-left:auto;display:flex;gap:6px;">
-      <button class="btn btn-secondary btn-sm">📄 Export PDF</button>
-      <button class="btn btn-secondary btn-sm">📊 Export Excel</button>
+      <button class="btn btn-secondary btn-sm">&#128196; Export PDF</button>
+      <button class="btn btn-secondary btn-sm">&#128202; Export Excel</button>
     </div>
   </div>
   <div class="content-area section-gap" style="padding-top:16px;">
-    <div class="three-col">
-      <div class="card">
-        <div class="card-hdr"><div class="card-hdr-title">Task Status</div></div>
-        <div style="padding:16px;display:flex;flex-direction:column;gap:8px;">
-          ${[['Open','8','chip-blue'],['In Progress','5','chip-amber'],['Completed','14','chip-green'],['Overdue','3','chip-red']].map(([l,v,c])=>`
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-size:12.5px;color:var(--c-text-2);">${l}</span>
-              <span class="chip ${c}">${v}</span>
-            </div>`).join('')}
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-hdr"><div class="card-hdr-title">By Authority</div></div>
-        <div style="padding:16px;display:flex;flex-direction:column;gap:6px;">
-          ${[['EMA',11],['FDA',8],['PMDA',3],['MHRA',2]].map(([ha,n])=>`
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px;"><span>${ha}</span><span style="font-weight:500;">${n}</span></div>
-              <div class="progress-bar"><div class="progress-fill progress-blue" style="width:${n/11*100}%;"></div></div>
-            </div>`).join('')}
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-hdr"><div class="card-hdr-title">Compliance trend</div></div>
-        <div style="padding:16px;display:flex;flex-direction:column;gap:8px;">
-          ${[['Q1 2026','91%','progress-green'],['Q4 2025','87%','progress-green'],['Q3 2025','79%','progress-amber'],['Q2 2025','73%','progress-amber']].map(([q,v,c])=>`
-            <div><div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px;"><span>${q}</span><span>${v}</span></div>
-            <div class="progress-bar"><div class="progress-fill ${c}" style="width:${v};"></div></div></div>`).join('')}
-        </div>
-      </div>
-    </div>
-
-    <!-- Audit trail -->
+    <div class="three-col" id="reports-summary-cards"></div>
     <div class="card">
       <div class="card-hdr">
-        <div><div class="card-hdr-title">🔍 Audit Trail</div><div class="card-hdr-sub">21 CFR Part 11 compliant · Electronic signature records</div></div>
+        <div><div class="card-hdr-title">&#128269; Audit Trail</div><div class="card-hdr-sub">21 CFR Part 11 compliant &middot; Electronic signature records</div></div>
         <div class="card-hdr-right"><button class="btn btn-secondary btn-sm">Export log</button></div>
       </div>
-      <div style="padding:12px 16px;">
-        ${[
-          {user:'Pramod K.',action:'Approved impact assessment IA-2026-047',time:'2026-06-07 08:31',icon:'✅',color:'var(--c-green-lt)'},
-          {user:'Sarah M.',action:'Submitted task TASK-GAP-CHG-EMA-001-01 for review',time:'2026-06-07 07:52',icon:'📤',color:'var(--c-blue-lt)'},
-          {user:'IT Admin',action:'Updated Argus Safety rule EMA_NONSER_POST_MKT (timeline: 90d → pending)',time:'2026-06-06 16:44',icon:'⚙️',color:'var(--c-amber-lt)'},
-          {user:'QA Manager',action:'Electronic signature applied — Change Control CCR-CHG-EMA-001',time:'2026-06-06 14:20',icon:'🖊️',color:'var(--c-purple-lt)'},
-          {user:'RegIntel AI',action:'Generated 4 compliance tasks for CHG-20260607-EMA-001',time:'2026-06-06 09:05',icon:'🤖',color:'var(--c-gray-50)'},
-        ].map(a=>`
-          <div class="audit-row">
-            <div class="audit-icon" style="background:${a.color};">${a.icon}</div>
-            <div class="audit-content"><strong>${a.user}</strong> — ${a.action}</div>
-            <div class="audit-time">${a.time}</div>
-          </div>`).join('')}
-      </div>
+      <div id="audit-trail-body" style="padding:12px 16px;"></div>
     </div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════════ -->
-<!-- VIEW: ADMIN                                -->
-<!-- ════════════════════════════════════════════ -->
+<!-- ── ADMIN ── -->
 <div class="view" id="view-admin">
   <div style="flex:1;overflow-y:auto;">
     <div class="tabs-bar" style="padding:0 24px;">
-      <div class="tab-item active" onclick="switchAdminTab('users',this)">Users & Roles</div>
+      <div class="tab-item active" onclick="switchAdminTab('users',this)">Users &amp; Roles</div>
       <div class="tab-item" onclick="switchAdminTab('config',this)">System Config</div>
       <div class="tab-item" onclick="switchAdminTab('integrations',this)">Integrations</div>
     </div>
-    <!-- Users -->
-    <div class="tab-panel active" id="admin-users">
-      <div style="padding:20px 24px;" class="section-gap">
-        <div class="card">
-          <div class="card-hdr">
-            <div class="card-hdr-title">Users & Roles</div>
-            <div class="card-hdr-right"><button class="btn btn-primary btn-sm">+ Invite user</button></div>
-          </div>
-          <table class="data-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last login</th><th>Actions</th></tr></thead>
-            <tbody>
-              ${[
-                {name:'Pramod Kumar',email:'pramod@praxigent.com',role:'Admin / PV Consultant',status:'Active',last:'Today 08:31'},
-                {name:'Sarah Mitchell',email:'sarah.m@verastem.com',role:'PV Operations',status:'Active',last:'Today 07:52'},
-                {name:'IT Admin',email:'it@verastem.com',role:'Systems Administrator',status:'Active',last:'Yesterday'},
-                {name:'QA Manager',email:'qa@verastem.com',role:'QA Reviewer',status:'Active',last:'Jun 6'},
-              ].map(u=>`<tr>
-                <td><div style="font-weight:500;">${u.name}</div></td>
-                <td style="color:var(--c-text-3);font-family:var(--f-mono);font-size:11.5px;">${u.email}</td>
-                <td><span class="chip chip-blue">${u.role}</span></td>
-                <td><span class="chip chip-green">${u.status}</span></td>
-                <td style="color:var(--c-text-3);font-size:12px;">${u.last}</td>
-                <td><button class="btn btn-ghost btn-sm">Edit</button></td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <!-- Config -->
-    <div class="tab-panel" id="admin-config">
-      <div style="padding:20px 24px;" class="section-gap">
-        <div class="card">
-          <div class="card-hdr"><div class="card-hdr-title">Health Authorities</div><div class="card-hdr-right"><button class="btn btn-primary btn-sm">+ Add HA</button></div></div>
-          <div style="padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-            ${['FDA','EMA','PMDA','MHRA','Health Canada','TGA','Swissmedic','MFDS','ANVISA','NMPA','CDSCO','SFDA'].map(ha=>`
-              <div style="display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-gray-50);">
-                <div style="width:6px;height:6px;border-radius:50%;background:var(--c-teal);"></div>
-                <span style="font-size:12px;font-weight:500;">${ha}</span>
-                <button class="btn btn-ghost btn-sm" style="margin-left:auto;padding:2px 6px;font-size:10px;">Edit</button>
-              </div>`).join('')}
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-hdr"><div class="card-hdr-title">Feed Schedule</div></div>
-          <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
-            ${[['HA website scraping','Every 24 hours','Active'],['Change classification','On detection','Active'],['Gap analysis','On classification','Active'],['Task generation','Manual trigger','Active']].map(([l,s,st])=>`
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--c-gray-50);border-radius:var(--radius);border:1px solid var(--c-border);">
-                <span style="font-size:12.5px;">${l}</span>
-                <span style="font-size:11.5px;color:var(--c-text-3);">${s}</span>
-                <span class="chip chip-green">${st}</span>
-              </div>`).join('')}
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Integrations -->
-    <div class="tab-panel" id="admin-integrations">
-      <div style="padding:20px 24px;" class="section-gap">
-        <div class="card">
-          <div class="card-hdr"><div class="card-hdr-title">Integration Connections</div></div>
-          <div style="padding:16px;display:flex;flex-direction:column;gap:8px;">
-            ${[
-              {name:'Oracle Argus Safety 8.4',status:'Connected',color:'chip-green',detail:'DB link: @pva_to_src · Read/Write'},
-              {name:'EudraVigilance EVWEB',status:'Connected',color:'chip-green',detail:'Gateway: EV_EVWEB_PROD · E2B R3'},
-              {name:'JIRA / Atlassian',status:'Connected',color:'chip-green',detail:'Project: PV-OPS · Auto ticket creation'},
-              {name:'Slack',status:'Connected',color:'chip-green',detail:'Webhook: #pv-alerts · P1 notifications'},
-              {name:'Veeva Vault',status:'Pending',color:'chip-amber',detail:'OAuth setup required'},
-              {name:'ServiceNow',status:'Not configured',color:'chip-gray',detail:'—'},
-            ].map(i=>`
-              <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--c-border);border-radius:var(--radius);background:#fff;">
-                <div style="width:36px;height:36px;border-radius:var(--radius);background:var(--c-gray-100);display:flex;align-items:center;justify-content:center;font-size:16px;">🔌</div>
-                <div style="flex:1;"><div style="font-size:13px;font-weight:500;">${i.name}</div><div style="font-size:11.5px;color:var(--c-text-3);margin-top:1px;">${i.detail}</div></div>
-                <span class="chip ${i.color}">${i.status}</span>
-                <button class="btn btn-secondary btn-sm">Configure</button>
-              </div>`).join('')}
-          </div>
-        </div>
-      </div>
-    </div>
+    <div class="tab-panel active" id="admin-users"><div style="padding:20px 24px;" id="admin-users-body"></div></div>
+    <div class="tab-panel" id="admin-config"><div style="padding:20px 24px;" id="admin-config-body" class="section-gap"></div></div>
+    <div class="tab-panel" id="admin-integrations"><div style="padding:20px 24px;" id="admin-int-body"></div></div>
   </div>
 </div>
 
 </div><!-- /main -->
 </div><!-- /shell -->
 
-<!-- ════════════════════════════════════════════ -->
-<!-- SLIDE-OUT DETAIL PANEL                     -->
-<!-- ════════════════════════════════════════════ -->
+<!-- SLIDE-OUT PANEL -->
 <div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
 <div class="slide-panel" id="slide-panel">
   <div class="sp-hdr">
     <div class="sp-hdr-info">
-      <div class="sp-hdr-title" id="sp-title">EMA — GVP Module VI Rev 3</div>
+      <div class="sp-hdr-title" id="sp-title">EMA &mdash; GVP Module VI Rev 3</div>
       <div class="sp-hdr-meta">
         <span class="chip chip-red">High impact</span>
-        <span style="color:var(--c-border2);">|</span>
-        <span>Pharmacovigilance</span>
-        <span style="color:var(--c-border2);">|</span>
-        <span>Detected Jun 7, 2026</span>
+        <span>|</span><span>Pharmacovigilance</span>
+        <span>|</span><span>Detected Jun 7, 2026</span>
       </div>
     </div>
-    <button class="sp-close" onclick="closePanel()">✕</button>
+    <button class="sp-close" onclick="closePanel()">&#10005;</button>
   </div>
-
-  <div class="tabs-bar" style="padding:0 20px;flex-shrink:0;">
-    <div class="tab-item active" onclick="switchSpTab('overview',this)">Overview</div>
-    <div class="tab-item" onclick="switchSpTab('impact',this)">Impact</div>
-    <div class="tab-item" onclick="switchSpTab('actions',this)">Actions</div>
-    <div class="tab-item" onclick="switchSpTab('history',this)">History</div>
+  <div class="tabs-bar" style="padding:0 20px;">
+    <div class="tab-item active" onclick="switchSpTab(this)">Overview</div>
+    <div class="tab-item" onclick="switchSpTab(this)">Impact</div>
+    <div class="tab-item" onclick="switchSpTab(this)">Actions</div>
+    <div class="tab-item" onclick="switchSpTab(this)">History</div>
   </div>
-
-  <div class="sp-body" id="sp-body">
-    <!-- Overview tab (default) -->
-    <div id="sp-overview">
-      <div class="ai-summary">
-        <div class="ai-summary-label">AI Summary</div>
-        <div class="ai-summary-text" id="sp-ai-text">EMA amended GVP Module VI §VI.B.6.2: non-serious ADR reporting from EEA sources reduced from 90 to 45 calendar days. Effective 2026-09-05. This impacts all post-marketing products with EU marketing authorization. Argus Safety rule EMA_NONSER_POST_MKT must be updated and re-validated.</div>
-      </div>
-
-      <div class="sp-section">
-        <div class="sp-section-label">What changed</div>
-        <div style="display:flex;flex-direction:column;gap:6px;" id="sp-changes">
-          <div style="display:flex;gap:8px;padding:8px 10px;background:var(--c-red-lt);border-radius:var(--radius);border-left:3px solid var(--c-red);">
-            <span style="font-size:13px;">📋</span>
-            <div style="font-size:12.5px;color:var(--c-text);">§VI.B.6.2 — Non-serious ADR reporting timeline: <strong>90 days → 45 days</strong></div>
-          </div>
-          <div style="display:flex;gap:8px;padding:8px 10px;background:var(--c-amber-lt);border-radius:var(--radius);border-left:3px solid var(--c-amber);">
-            <span style="font-size:13px;">📅</span>
-            <div style="font-size:12.5px;color:var(--c-text);">Effective date: <strong>2026-09-05</strong> · Implementation deadline: <strong>2026-08-06</strong></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sp-section">
-        <div class="sp-section-label">Affected areas</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;" id="sp-areas">
-          ${['PhV','Argus Safety','EudraVigilance','SOP-PV-004','RegIntel ROD'].map(a=>`<span class="chip chip-blue">${a}</span>`).join('')}
-        </div>
-      </div>
-
-      <div class="sp-section">
-        <div class="sp-section-label">Recommended actions</div>
-        <div style="display:flex;flex-direction:column;gap:5px;" id="sp-actions">
-          ${[
-            {txt:'Update Argus Safety rule EMA_NONSER_POST_MKT: 90d → 45d',p:'P1'},
-            {txt:'Reconfigure EudraVigilance E2B export profile batch window',p:'P1'},
-            {txt:'Update SOP-PV-004 §4.2 — timeline reference',p:'P2'},
-            {txt:'Update RegIntel ROD row for EMA non-serious',p:'P1'},
-          ].map(a=>`
-            <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--c-gray-50);border-radius:var(--radius);border:1px solid var(--c-border);">
-              <div style="width:14px;height:14px;border-radius:3px;border:1.5px solid ${a.p==='P1'?'var(--c-red)':'var(--c-amber)'};flex-shrink:0;"></div>
-              <span style="font-size:12px;flex:1;">${a.txt}</span>
-              <span class="chip ${a.p==='P1'?'chip-red':'chip-amber'}">${a.p}</span>
-            </div>`).join('')}
-        </div>
-      </div>
+  <div class="sp-body">
+    <div class="ai-summary">
+      <div class="ai-summary-label">AI Summary</div>
+      <div class="ai-summary-text">EMA amended GVP Module VI &sect;VI.B.6.2: non-serious ADR reporting from EEA sources reduced from 90 to 45 calendar days effective 2026-09-05. Impacts all post-marketing EU-authorised products. Argus Safety rule <strong>EMA_NONSER_POST_MKT</strong> must be updated and re-validated. 4 compliance tasks generated.</div>
+    </div>
+    <div class="sp-section">
+      <div class="sp-section-label">What changed</div>
+      <div id="sp-changes-body"></div>
+    </div>
+    <div class="sp-section">
+      <div class="sp-section-label">Affected areas</div>
+      <div id="sp-areas-body" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+    </div>
+    <div class="sp-section">
+      <div class="sp-section-label">Recommended actions</div>
+      <div id="sp-actions-body" style="display:flex;flex-direction:column;gap:5px;"></div>
     </div>
   </div>
-
   <div class="sp-footer">
     <button class="btn btn-secondary" onclick="closePanel()">Close</button>
     <button class="btn btn-secondary">Mark reviewed</button>
-    <button class="btn btn-primary" onclick="closePanel();showView('actions',document.getElementById('nav-actions'),'Action Center')">Create actions →</button>
+    <button class="btn btn-primary" onclick="closePanel();showView('actions',document.getElementById('nav-actions'),'Action Center')">Create actions &rarr;</button>
   </div>
 </div>
 
 <script>
-// ── DATA ──
-const INTEL_DATA = [
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+var INTEL_DATA = [
   {date:'2026-06-07',ha:'EMA',title:'GVP Module VI Rev 3 — Non-serious ICSR timeline 90d→45d',cat:'Pharmacovigilance',impact:'high',status:'new'},
   {date:'2026-06-07',ha:'FDA',title:'21 CFR 312.32 — E2B R3 mandatory for IND safety reports 2027',cat:'Clinical Trials',impact:'medium',status:'review'},
   {date:'2026-06-06',ha:'PMDA',title:'J-ICSR v3.1 schema — new fields for herbal medicines',cat:'Format',impact:'medium',status:'review'},
@@ -981,242 +571,540 @@ const INTEL_DATA = [
   {date:'2026-06-01',ha:'HC',title:'FDR C.01.016 — mandatory reporting threshold update',cat:'Post-marketing',impact:'medium',status:'review'},
 ];
 
-const IMPACT_DATA = [
+var IMPACT_DATA = [
   {reg:'GVP Module VI Rev 3',ha:'EMA',impact:'high',systems:'Argus · EV · SOP',processes:'ICSR · Case Processing',risk:'High',status:'pending'},
   {reg:'21 CFR 312.32 E2B R3',ha:'FDA',impact:'medium',systems:'Argus · ESM Gateway',processes:'IND Safety Reports',risk:'Medium',status:'pending'},
   {reg:'J-ICSR v3.1 Schema',ha:'PMDA',impact:'medium',systems:'Argus · PMDA ESG',processes:'J-ICSR Submissions',risk:'Medium',status:'review'},
   {reg:'UK GVP Module IX',ha:'MHRA',impact:'low',systems:'Signal DB',processes:'Signal Detection',risk:'Low',status:'approved'},
 ];
 
-const KANBAN_DATA = {
+var KANBAN_DATA = {
   'Open':[
-    {title:'Update Argus EMA non-serious rule 90d→45d',system:'Argus Safety',owner:'PV Ops',priority:'P1',due:'2026-08-06'},
-    {title:'Register E2B R3 sender ID with FDA ESM',system:'FDA ESM',owner:'IT',priority:'P1',due:'2026-10-01'},
-    {title:'Update SOP-PV-004 §4.2 timeline reference',system:'QMS/SOP',owner:'Reg Affairs',priority:'P2',due:'2026-08-01'},
-    {title:'Update RegIntel ROD — EMA non-serious tl90→45',system:'RegIntel ROD',owner:'Admin',priority:'P1',due:'2026-09-04'},
+    {title:'Update Argus EMA non-serious rule 90d→45d',system:'Argus Safety',owner:'PV Ops',priority:'P1',due:'08-06'},
+    {title:'Register E2B R3 sender ID with FDA ESM',system:'FDA ESM',owner:'IT',priority:'P1',due:'10-01'},
+    {title:'Update SOP-PV-004 §4.2 timeline reference',system:'QMS/SOP',owner:'Reg Affairs',priority:'P2',due:'08-01'},
+    {title:'Update RegIntel ROD — EMA non-serious tl90→45',system:'RegIntel ROD',owner:'Admin',priority:'P1',due:'09-04'},
   ],
   'In Progress':[
-    {title:'Validate Argus EMA rule change in QA env',system:'Argus QA',owner:'QA',priority:'P1',due:'2026-08-20'},
-    {title:'Update EV export profile batch window',system:'EudraVigilance',owner:'IT',priority:'P1',due:'2026-08-06'},
+    {title:'Validate Argus EMA rule change in QA environment',system:'Argus QA',owner:'QA',priority:'P1',due:'08-20'},
+    {title:'Reconfigure EV export profile batch window to 45d',system:'EudraVigilance',owner:'IT',priority:'P1',due:'08-06'},
   ],
   'In Review':[
-    {title:'Change control pack CCR-EMA-001 QA sign-off',system:'Change Control',owner:'QA Manager',priority:'P1',due:'2026-08-01'},
+    {title:'Change control pack CCR-EMA-001 — QA sign-off',system:'Change Control',owner:'QA Manager',priority:'P1',due:'08-01'},
   ],
   'Completed':[
-    {title:'Gap analysis — EMA GVP VI Rev 3',system:'RegIntel',owner:'Pramod K.',priority:'P1',due:'2026-06-07'},
-    {title:'SUSAR definition review — VS-6766 IB v8',system:'ARISg',owner:'Medical',priority:'P2',due:'2026-06-01'},
+    {title:'Gap analysis — EMA GVP Module VI Rev 3',system:'RegIntel',owner:'Pramod K.',priority:'P1',due:'06-07'},
+    {title:'SUSAR definition review — VS-6766 IB v8',system:'ARISg',owner:'Medical',priority:'P2',due:'06-01'},
   ]
 };
 
-const KG_NODES = [
-  {id:'ema',label:'EMA',type:'ha',x:340,y:210,color:'#3C3489',bg:'#EEEDFE'},
-  {id:'gvp6',label:'GVP Module VI',type:'regulation',x:340,y:120,color:'#B7720A',bg:'#FEF6E8'},
-  {id:'gvp9',label:'GVP Module IX',type:'regulation',x:490,y:170,color:'#B7720A',bg:'#FEF6E8'},
-  {id:'icsr',label:'ICSR Reporting',type:'process',x:220,y:120,color:'#1A7A3E',bg:'#EBF7EF'},
-  {id:'signal',label:'Signal Mgmt',type:'process',x:490,y:80,color:'#1A7A3E',bg:'#EBF7EF'},
-  {id:'fda',label:'FDA',type:'ha',x:100,y:210,color:'#185FA5',bg:'#E6F1FB'},
-  {id:'cfr312',label:'21 CFR 312.32',type:'regulation',x:100,y:120,color:'#B7720A',bg:'#FEF6E8'},
-  {id:'argus',label:'Argus Safety',type:'system',x:200,y:310,color:'#C0392B',bg:'#FEF0EE'},
-  {id:'ev',label:'EudraVigilance',type:'system',x:340,y:310,color:'#C0392B',bg:'#FEF0EE'},
-  {id:'sop',label:'SOP / QMS',type:'system',x:480,y:310,color:'#5C4DB1',bg:'#F0EEFF'},
-  {id:'task1',label:'Update Argus rule',type:'action',x:200,y:410,color:'#0E8A6E',bg:'#E8F7F4'},
-  {id:'task2',label:'Update EV profile',type:'action',x:340,y:410,color:'#0E8A6E',bg:'#E8F7F4'},
-  {id:'task3',label:'Update SOP-004',type:'action',x:480,y:410,color:'#0E8A6E',bg:'#E8F7F4'},
-  {id:'pmda',label:'PMDA',type:'ha',x:580,y:210,color:'#854F0B',bg:'#FAEEDA'},
-  {id:'jicsr',label:'J-ICSR v3.1',type:'regulation',x:620,y:120,color:'#B7720A',bg:'#FEF6E8'},
+var KG_NODES = [
+  {id:'ema',label:'EMA',type:'ha',x:340,y:200,color:'#3C3489',bg:'#EEEDFE'},
+  {id:'gvp6',label:'GVP Module VI',type:'regulation',x:340,y:110,color:'#B7720A',bg:'#FEF6E8'},
+  {id:'gvp9',label:'GVP Module IX',type:'regulation',x:490,y:160,color:'#B7720A',bg:'#FEF6E8'},
+  {id:'icsr',label:'ICSR Reporting',type:'process',x:210,y:110,color:'#1A7A3E',bg:'#EBF7EF'},
+  {id:'signal',label:'Signal Mgmt',type:'process',x:490,y:75,color:'#1A7A3E',bg:'#EBF7EF'},
+  {id:'fda',label:'FDA',type:'ha',x:95,y:200,color:'#185FA5',bg:'#E6F1FB'},
+  {id:'cfr312',label:'21 CFR 312.32',type:'regulation',x:95,y:110,color:'#B7720A',bg:'#FEF6E8'},
+  {id:'argus',label:'Argus Safety',type:'system',x:190,y:295,color:'#C0392B',bg:'#FEF0EE'},
+  {id:'ev',label:'EudraVigilance',type:'system',x:340,y:295,color:'#C0392B',bg:'#FEF0EE'},
+  {id:'sop',label:'SOP / QMS',type:'system',x:490,y:295,color:'#5C4DB1',bg:'#F0EEFF'},
+  {id:'task1',label:'Update Argus rule',type:'action',x:190,y:390,color:'#0E8A6E',bg:'#E8F7F4'},
+  {id:'task2',label:'Update EV profile',type:'action',x:340,y:390,color:'#0E8A6E',bg:'#E8F7F4'},
+  {id:'task3',label:'Update SOP-004',type:'action',x:490,y:390,color:'#0E8A6E',bg:'#E8F7F4'},
+  {id:'pmda',label:'PMDA',type:'ha',x:590,y:200,color:'#854F0B',bg:'#FAEEDA'},
+  {id:'jicsr',label:'J-ICSR v3.1',type:'regulation',x:630,y:110,color:'#B7720A',bg:'#FEF6E8'},
 ];
-const KG_EDGES = [
+var KG_EDGES = [
   ['ema','gvp6'],['ema','gvp9'],['gvp6','icsr'],['gvp6','ev'],['gvp9','signal'],
   ['fda','cfr312'],['cfr312','icsr'],['icsr','argus'],['icsr','ev'],
   ['argus','task1'],['ev','task2'],['sop','task3'],['gvp6','sop'],
   ['pmda','jicsr'],['jicsr','argus'],
 ];
 
-// ── NAV ──
-function showView(name, el, label){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showView(name, el, label) {
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('view-'+name).classList.add('active');
-  if(el) el.classList.add('active');
-  document.getElementById('tb-section').textContent = label||name;
-  if(name==='knowledge') drawKG();
+  if (el) el.classList.add('active');
+  document.getElementById('tb-section').textContent = label || name;
+  if (name === 'knowledge') drawKG();
 }
 
-// ── PANEL ──
-function openPanel(title,aiText,changes,areas,actions){
-  if(title) document.getElementById('sp-title').textContent=title;
+// ══════════════════════════════════════════
+// SLIDE PANEL
+// ══════════════════════════════════════════
+function openPanel(title) {
+  if (title) document.getElementById('sp-title').textContent = title;
   document.getElementById('panel-overlay').classList.add('open');
   document.getElementById('slide-panel').classList.add('open');
 }
-function closePanel(){
+function closePanel() {
   document.getElementById('panel-overlay').classList.remove('open');
   document.getElementById('slide-panel').classList.remove('open');
 }
-function switchSpTab(name,el){
-  document.querySelectorAll('.slide-panel .tab-item').forEach(t=>t.classList.remove('active'));
+function switchSpTab(el) {
+  document.querySelectorAll('.slide-panel .tab-item').forEach(function(t){t.classList.remove('active');});
   el.classList.add('active');
 }
 
-// ── INTEL TABLE ──
-function renderIntelTable(){
-  const chips={high:'chip-red',medium:'chip-amber',low:'chip-green'};
-  const sChips={new:'chip-blue',review:'chip-amber',approved:'chip-green',closed:'chip-gray'};
-  document.getElementById('intel-tbody').innerHTML = INTEL_DATA.map((r,i)=>`
-    <tr onclick="openPanel('${r.ha} — ${r.title.substring(0,40)}…')" class="${i===0?'selected':''}">
-      <td><input type="checkbox" ${i===0?'checked':''}></td>
-      <td style="font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-3);">${r.date}</td>
-      <td><span style="font-size:11px;font-weight:700;background:${r.ha==='EMA'?'#EEEDFE':r.ha==='FDA'?'#E6F1FB':'var(--c-gray-100)'};color:${r.ha==='EMA'?'#3C3489':r.ha==='FDA'?'#185FA5':'var(--c-text-2)'};padding:2px 7px;border-radius:4px;">${r.ha}</span></td>
-      <td style="font-weight:500;max-width:280px;">${r.title}</td>
-      <td style="color:var(--c-text-3);font-size:12px;">${r.cat}</td>
-      <td><span class="chip ${chips[r.impact]}">${r.impact}</span></td>
-      <td><span class="chip ${sChips[r.status]}">${r.status}</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPanel()">View</button></td>
-    </tr>`).join('');
+// ══════════════════════════════════════════
+// DASHBOARD — Recent updates feed
+// ══════════════════════════════════════════
+function renderDashFeed() {
+  var FEED = [
+    {ha:'EMA',title:'GVP Module VI Rev 3 \u2014 Non-serious ICSR timeline 90d\u219245d',impact:'high',time:'2h ago',type:'PhV'},
+    {ha:'FDA',title:'21 CFR 312.32 \u2014 E2B R3 mandatory for IND safety reports from 2027',impact:'medium',time:'5h ago',type:'CT'},
+    {ha:'PMDA',title:'J-ICSR v3.1 schema \u2014 new fields for herbal medicines Q4 2026',impact:'medium',time:'1d ago',type:'Format'},
+    {ha:'MHRA',title:'UK GVP Module IX \u2014 signal management update post-Brexit',impact:'low',time:'2d ago',type:'Signal'},
+    {ha:'TGA',title:'Australian PV Responsibilities Guidelines revision',impact:'low',time:'3d ago',type:'PhV'},
+  ];
+  var bgMap = {high:'var(--c-red-lt)',medium:'var(--c-amber-lt)',low:'var(--c-green-lt)'};
+  var colorMap = {high:'var(--c-red)',medium:'var(--c-amber)',low:'var(--c-green)'};
+  var chipMap = {high:'chip-red',medium:'chip-amber',low:'chip-green'};
+  var el = document.getElementById('dash-recent-feed');
+  if (!el) return;
+  el.innerHTML = FEED.map(function(u) {
+    return '<div onclick="showView(\'intelligence\',document.getElementById(\'nav-intelligence\'),\'Regulatory Intelligence\')"' +
+      ' style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--c-gray-100);cursor:pointer;"' +
+      ' onmouseenter="this.style.background=\'var(--c-blue-lt)\'" onmouseleave="this.style.background=\'\'">' +
+      '<div style="width:34px;height:34px;border-radius:6px;background:' + bgMap[u.impact] + ';' +
+        'display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;' +
+        'color:' + colorMap[u.impact] + ';flex-shrink:0;">' + u.ha + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:12px;font-weight:500;color:var(--c-text);line-height:1.4;' +
+          'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + u.title + '</div>' +
+        '<div style="display:flex;gap:6px;margin-top:3px;">' +
+          '<span style="font-size:10px;color:var(--c-text-3);">' + u.type + '</span>' +
+          '<span style="font-size:10px;color:var(--c-text-3);">&middot;</span>' +
+          '<span style="font-size:10px;color:var(--c-text-3);">' + u.time + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<span class="chip ' + chipMap[u.impact] + '" style="align-self:center;">' + u.impact + '</span>' +
+      '</div>';
+  }).join('');
 }
 
-// ── IMPACT TABLE ──
-function renderImpactTable(){
-  const ic={high:'impact-high',medium:'impact-medium',low:'impact-low'};
-  const sc={pending:'chip-amber',review:'chip-blue',approved:'chip-green'};
-  document.getElementById('impact-tbody').innerHTML = IMPACT_DATA.map(r=>`
-    <tr onclick="document.getElementById('impact-detail-card').style.display='block'">
-      <td style="font-weight:500;">${r.reg}</td>
-      <td><span style="font-size:11px;font-weight:700;background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;">${r.ha}</span></td>
-      <td><span class="impact-badge ${ic[r.impact]}">${r.impact.toUpperCase()}</span></td>
-      <td style="font-size:12px;color:var(--c-text-3);">${r.systems}</td>
-      <td style="font-size:12px;color:var(--c-text-3);">${r.processes}</td>
-      <td><span class="chip ${r.risk==='High'?'chip-red':r.risk==='Medium'?'chip-amber':'chip-green'}">${r.risk}</span></td>
-      <td><span class="chip ${sc[r.status]}">${r.status}</span></td>
-      <td><button class="btn btn-ghost btn-sm">Assess →</button></td>
-    </tr>`).join('');
+// ══════════════════════════════════════════
+// DASHBOARD — Compliance progress grid
+// ══════════════════════════════════════════
+function renderDashCompliance() {
+  var COMPLIANCE = [
+    {label:'FDA (USA)',pct:92,cls:'progress-green'},
+    {label:'EMA (EU)',pct:78,cls:'progress-amber'},
+    {label:'PMDA (Japan)',pct:88,cls:'progress-green'},
+    {label:'MHRA (UK)',pct:95,cls:'progress-green'},
+    {label:'Oracle Argus Safety',pct:74,cls:'progress-amber'},
+    {label:'EudraVigilance',pct:81,cls:'progress-green'},
+    {label:'SOP / QMS',pct:69,cls:'progress-red'},
+    {label:'RegIntel ROD',pct:96,cls:'progress-green'},
+  ];
+  var el = document.getElementById('dash-compliance-grid');
+  if (!el) return;
+  el.innerHTML = COMPLIANCE.map(function(r) {
+    return '<div>' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:5px;">' +
+        '<span style="font-size:12px;color:var(--c-text-2);">' + r.label + '</span>' +
+        '<span style="font-size:12px;font-weight:600;color:var(--c-text);">' + r.pct + '%</span>' +
+      '</div>' +
+      '<div class="progress-bar"><div class="progress-fill ' + r.cls + '" style="width:' + r.pct + '%;"></div></div>' +
+      '</div>';
+  }).join('');
 }
 
-// ── KANBAN ──
-function renderKanban(){
-  const colors={'P1':'chip-red','P2':'chip-amber','P3':'chip-gray'};
-  document.getElementById('kanban-board').innerHTML = Object.entries(KANBAN_DATA).map(([col,cards])=>`
-    <div class="kanban-col">
-      <div class="kanban-col-hdr">
-        <div class="kanban-col-title">${col}</div>
-        <div class="kanban-count">${cards.length}</div>
-      </div>
-      <div class="kanban-cards">
-        ${cards.map(c=>`
-          <div class="kanban-card" onclick="openPanel('${c.title}')">
-            <div class="kanban-card-title">${c.title}</div>
-            <div class="kanban-card-meta">
-              <span class="kanban-card-system">${c.system}</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:5px;margin-top:7px;">
-              <span class="chip ${colors[c.priority]}" style="font-size:10px;">${c.priority}</span>
-              <span style="margin-left:auto;font-size:10.5px;color:var(--c-text-3);">${c.owner}</span>
-              <span style="font-size:10px;font-family:var(--f-mono);color:var(--c-text-3);">${c.due.slice(5)}</span>
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
+// ══════════════════════════════════════════
+// INTEL TABLE
+// ══════════════════════════════════════════
+function renderIntelTable() {
+  var haColors = {EMA:{bg:'#EEEDFE',color:'#3C3489'},FDA:{bg:'#E6F1FB',color:'#185FA5'}};
+  var def = {bg:'var(--c-gray-100)',color:'var(--c-text-2)'};
+  var impactChip = {high:'chip-red',medium:'chip-amber',low:'chip-green'};
+  var statusChip = {new:'chip-blue',review:'chip-amber',approved:'chip-green',closed:'chip-gray'};
+  var tbody = document.getElementById('intel-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = INTEL_DATA.map(function(r, i) {
+    var hc = haColors[r.ha] || def;
+    return '<tr onclick="openPanel(\'' + r.ha + ' \u2014 ' + r.title.substring(0,38) + '\u2026\')"' +
+      (i===0?' class="selected"':'') + '>' +
+      '<td><input type="checkbox"' + (i===0?' checked':'') + '/></td>' +
+      '<td style="font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-3);">' + r.date + '</td>' +
+      '<td><span style="font-size:11px;font-weight:700;background:' + hc.bg + ';color:' + hc.color + ';padding:2px 7px;border-radius:4px;">' + r.ha + '</span></td>' +
+      '<td style="font-weight:500;max-width:280px;">' + r.title + '</td>' +
+      '<td style="color:var(--c-text-3);font-size:12px;">' + r.cat + '</td>' +
+      '<td><span class="chip ' + impactChip[r.impact] + '">' + r.impact + '</span></td>' +
+      '<td><span class="chip ' + statusChip[r.status] + '">' + r.status + '</span></td>' +
+      '<td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openPanel()">View</button></td>' +
+      '</tr>';
+  }).join('');
 }
 
-// ── ACTIONS LIST ──
-function renderActionsList(){
-  const all = Object.entries(KANBAN_DATA).flatMap(([status,cards])=>cards.map(c=>({...c,status})));
-  const pc={'P1':'chip-red','P2':'chip-amber','P3':'chip-gray'};
-  const sc={'Open':'chip-blue','In Progress':'chip-amber','In Review':'chip-purple','Completed':'chip-green'};
-  document.getElementById('actions-tbody').innerHTML = all.map(t=>`
-    <tr onclick="openPanel('${t.title}')">
-      <td style="font-weight:500;max-width:200px;">${t.title}</td>
-      <td style="font-size:12px;color:var(--c-text-3);">EMA GVP VI Rev 3</td>
-      <td><span style="font-size:11px;background:var(--c-gray-100);padding:2px 7px;border-radius:4px;">${t.system}</span></td>
-      <td style="font-size:12px;">${t.owner}</td>
-      <td style="font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-3);">${t.due}</td>
-      <td><span class="chip ${pc[t.priority]}">${t.priority}</span></td>
-      <td><span class="chip ${sc[t.status]}">${t.status}</span></td>
-      <td><span class="chip chip-amber">GxP critical</span></td>
-    </tr>`).join('');
+// ══════════════════════════════════════════
+// IMPACT TABLE + DETAIL
+// ══════════════════════════════════════════
+function renderImpactTable() {
+  var impactCls = {high:'impact-high',medium:'impact-medium',low:'impact-low'};
+  var statusCls = {pending:'chip-amber',review:'chip-blue',approved:'chip-green'};
+  var riskCls = {High:'chip-red',Medium:'chip-amber',Low:'chip-green'};
+  var tbody = document.getElementById('impact-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = IMPACT_DATA.map(function(r) {
+    return '<tr onclick="showImpactDetail(\'' + r.reg + '\')">' +
+      '<td style="font-weight:500;">' + r.reg + '</td>' +
+      '<td><span style="font-size:11px;font-weight:700;background:#EEEDFE;color:#3C3489;padding:2px 7px;border-radius:4px;">' + r.ha + '</span></td>' +
+      '<td><span class="impact-badge ' + impactCls[r.impact] + '">' + r.impact.toUpperCase() + '</span></td>' +
+      '<td style="font-size:12px;color:var(--c-text-3);">' + r.systems + '</td>' +
+      '<td style="font-size:12px;color:var(--c-text-3);">' + r.processes + '</td>' +
+      '<td><span class="chip ' + riskCls[r.risk] + '">' + r.risk + '</span></td>' +
+      '<td><span class="chip ' + statusCls[r.status] + '">' + r.status + '</span></td>' +
+      '<td><button class="btn btn-ghost btn-sm">Assess &rarr;</button></td>' +
+      '</tr>';
+  }).join('');
 }
 
-function switchActionsView(name,el){
-  document.querySelectorAll('.tabs-bar .tab-item').forEach(t=>t.classList.remove('active'));
+function showImpactDetail(reg) {
+  var card = document.getElementById('impact-detail-card');
+  var body = document.getElementById('impact-detail-body');
+  card.style.display = 'block';
+  var systems = ['Oracle Argus Safety','EudraVigilance EVWEB','RegIntel ROD','SOP / QMS'];
+  var processes = ['ICSR Reporting (non-serious)','Case Processing (EEA)','E2B Batch Submission','Periodic Reporting (PSUR)'];
+  body.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">' +
+      '<div>' +
+        '<div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:10px;">Impact Score</div>' +
+        '<div class="impact-badge impact-high" style="font-size:15px;padding:7px 14px;margin-bottom:12px;">&#128308; HIGH</div>' +
+        '<div style="font-size:12px;color:var(--c-text-2);display:flex;flex-direction:column;gap:5px;">' +
+          '<div style="display:flex;justify-content:space-between;"><span>Compliance risk</span><span class="chip chip-red">High</span></div>' +
+          '<div style="display:flex;justify-content:space-between;"><span>Operational risk</span><span class="chip chip-amber">Medium</span></div>' +
+          '<div style="display:flex;justify-content:space-between;"><span>Patient safety</span><span class="chip chip-amber">Medium</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div>' +
+        '<div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:10px;">Affected Systems</div>' +
+        systems.map(function(s){return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--c-red);flex-shrink:0;"></div><span style="font-size:12.5px;">' + s + '</span></div>';}).join('') +
+      '</div>' +
+      '<div>' +
+        '<div style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--c-text-3);margin-bottom:10px;">Affected Processes</div>' +
+        processes.map(function(p){return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--c-amber);flex-shrink:0;"></div><span style="font-size:12.5px;">' + p + '</span></div>';}).join('') +
+      '</div>' +
+    '</div>' +
+    '<div style="margin-top:16px;" class="ai-summary">' +
+      '<div class="ai-summary-label">AI Recommendation</div>' +
+      '<div class="ai-summary-text">Immediate review of non-serious ICSR reporting timelines required. EMA GVP Module VI Rev 3 &sect;VI.B.6.2 reduces EEA-sourced non-serious ADR reporting from 90 to 45 calendar days effective 2026-09-05. Argus Safety rule <strong>EMA_NONSER_POST_MKT</strong> must be updated and re-validated. SOP-PV-004 &sect;4.2 requires amendment. 4 compliance tasks generated.</div>' +
+    '</div>';
+  card.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ══════════════════════════════════════════
+// KANBAN + LIST
+// ══════════════════════════════════════════
+function renderKanban() {
+  var priorChip = {P1:'chip-red',P2:'chip-amber',P3:'chip-gray'};
+  var board = document.getElementById('kanban-board');
+  if (!board) return;
+  board.innerHTML = Object.keys(KANBAN_DATA).map(function(col) {
+    var cards = KANBAN_DATA[col];
+    return '<div class="kanban-col">' +
+      '<div class="kanban-col-hdr">' +
+        '<div class="kanban-col-title">' + col + '</div>' +
+        '<div class="kanban-count">' + cards.length + '</div>' +
+      '</div>' +
+      '<div class="kanban-cards">' +
+        cards.map(function(c) {
+          return '<div class="kanban-card" onclick="openPanel(\'' + c.title + '\')">' +
+            '<div class="kanban-card-title">' + c.title + '</div>' +
+            '<div style="font-size:10.5px;color:var(--c-text-3);font-family:var(--f-mono);margin-bottom:6px;">' + c.system + '</div>' +
+            '<div style="display:flex;align-items:center;gap:5px;">' +
+              '<span class="chip ' + priorChip[c.priority] + '" style="font-size:10px;">' + c.priority + '</span>' +
+              '<span style="margin-left:auto;font-size:10.5px;color:var(--c-text-3);">' + c.owner + '</span>' +
+              '<span style="font-size:10px;font-family:var(--f-mono);color:var(--c-text-3);">' + c.due + '</span>' +
+            '</div>' +
+            '</div>';
+        }).join('') +
+      '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderActionsList() {
+  var all = [];
+  Object.keys(KANBAN_DATA).forEach(function(status) {
+    KANBAN_DATA[status].forEach(function(c){ all.push(Object.assign({},c,{status:status})); });
+  });
+  var pc = {P1:'chip-red',P2:'chip-amber',P3:'chip-gray'};
+  var sc = {Open:'chip-blue','In Progress':'chip-amber','In Review':'chip-purple',Completed:'chip-green'};
+  var tbody = document.getElementById('actions-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = all.map(function(t) {
+    return '<tr onclick="openPanel(\'' + t.title + '\')">' +
+      '<td style="font-weight:500;max-width:200px;">' + t.title + '</td>' +
+      '<td style="font-size:12px;color:var(--c-text-3);">EMA GVP VI Rev 3</td>' +
+      '<td><span style="font-size:11px;background:var(--c-gray-100);padding:2px 7px;border-radius:4px;">' + t.system + '</span></td>' +
+      '<td style="font-size:12px;">' + t.owner + '</td>' +
+      '<td style="font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-3);">2026-' + t.due + '</td>' +
+      '<td><span class="chip ' + pc[t.priority] + '">' + t.priority + '</span></td>' +
+      '<td><span class="chip ' + (sc[t.status]||'chip-gray') + '">' + t.status + '</span></td>' +
+      '<td><span class="chip chip-amber">GxP critical</span></td>' +
+      '</tr>';
+  }).join('');
+}
+
+function switchActionsView(name, el) {
+  document.querySelectorAll('#view-actions .tab-item').forEach(function(t){t.classList.remove('active');});
   el.classList.add('active');
   document.getElementById('actions-kanban').style.display = name==='kanban'?'block':'none';
-  const lv = document.getElementById('actions-list');
+  var lv = document.getElementById('actions-list');
   lv.style.display = name==='list'?'flex':'none';
 }
 
-function switchAdminTab(name,el){
-  document.querySelectorAll('#view-admin .tab-item').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('#view-admin .tab-panel').forEach(p=>p.classList.remove('active'));
+// ══════════════════════════════════════════
+// REPORTS
+// ══════════════════════════════════════════
+function renderReports() {
+  var cards = document.getElementById('reports-summary-cards');
+  if (!cards) return;
+
+  var taskStatus = [['Open','8','chip-blue'],['In Progress','5','chip-amber'],['Completed','14','chip-green'],['Overdue','3','chip-red']];
+  var byHA = [['EMA',11],['FDA',8],['PMDA',3],['MHRA',2]];
+  var trend = [['Q1 2026','91','progress-green'],['Q4 2025','87','progress-green'],['Q3 2025','79','progress-amber'],['Q2 2025','73','progress-amber']];
+
+  cards.innerHTML =
+    '<div class="card">' +
+      '<div class="card-hdr"><div class="card-hdr-title">Task Status</div></div>' +
+      '<div style="padding:16px;display:flex;flex-direction:column;gap:8px;">' +
+        taskStatus.map(function(r){return '<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:12.5px;color:var(--c-text-2);">' + r[0] + '</span><span class="chip ' + r[2] + '">' + r[1] + '</span></div>';}).join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="card-hdr"><div class="card-hdr-title">By Authority</div></div>' +
+      '<div style="padding:16px;display:flex;flex-direction:column;gap:6px;">' +
+        byHA.map(function(r){return '<div><div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px;"><span>' + r[0] + '</span><span style="font-weight:500;">' + r[1] + '</span></div><div class="progress-bar"><div class="progress-fill progress-blue" style="width:' + Math.round(r[1]/11*100) + '%;"></div></div></div>';}).join('') +
+      '</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="card-hdr"><div class="card-hdr-title">Compliance trend</div></div>' +
+      '<div style="padding:16px;display:flex;flex-direction:column;gap:8px;">' +
+        trend.map(function(r){return '<div><div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px;"><span>' + r[0] + '</span><span>' + r[1] + '%</span></div><div class="progress-bar"><div class="progress-fill ' + r[2] + '" style="width:' + r[1] + '%;"></div></div></div>';}).join('') +
+      '</div>' +
+    '</div>';
+
+  var auditData = [
+    {user:'Pramod K.',action:'Approved impact assessment IA-2026-047',time:'2026-06-07 08:31',icon:'&#9989;',bg:'var(--c-green-lt)'},
+    {user:'Sarah M.',action:'Submitted task TASK-GAP-CHG-EMA-001-01 for review',time:'2026-06-07 07:52',icon:'&#128228;',bg:'var(--c-blue-lt)'},
+    {user:'IT Admin',action:'Updated Argus Safety rule EMA_NONSER_POST_MKT (90d &rarr; pending)',time:'2026-06-06 16:44',icon:'&#9881;&#65039;',bg:'var(--c-amber-lt)'},
+    {user:'QA Manager',action:'Electronic signature applied &mdash; Change Control CCR-CHG-EMA-001',time:'2026-06-06 14:20',icon:'&#128394;',bg:'var(--c-purple-lt)'},
+    {user:'RegIntel AI',action:'Generated 4 compliance tasks for CHG-20260607-EMA-001',time:'2026-06-06 09:05',icon:'&#129302;',bg:'var(--c-gray-50)'},
+  ];
+  var auditEl = document.getElementById('audit-trail-body');
+  if (auditEl) {
+    auditEl.innerHTML = auditData.map(function(a) {
+      return '<div class="audit-row">' +
+        '<div class="audit-icon" style="background:' + a.bg + ';">' + a.icon + '</div>' +
+        '<div style="flex:1;font-size:12.5px;color:var(--c-text);"><strong>' + a.user + '</strong> &mdash; ' + a.action + '</div>' +
+        '<div class="audit-time">' + a.time + '</div>' +
+        '</div>';
+    }).join('');
+  }
+}
+
+// ══════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════
+function renderAdmin() {
+  var users = [
+    {name:'Pramod Kumar',email:'pramod@praxigent.com',role:'Admin / PV Consultant',status:'Active',last:'Today 08:31'},
+    {name:'Sarah Mitchell',email:'sarah.m@verastem.com',role:'PV Operations',status:'Active',last:'Today 07:52'},
+    {name:'IT Admin',email:'it@verastem.com',role:'Systems Administrator',status:'Active',last:'Yesterday'},
+    {name:'QA Manager',email:'qa@verastem.com',role:'QA Reviewer',status:'Active',last:'Jun 6'},
+  ];
+  var usersEl = document.getElementById('admin-users-body');
+  if (usersEl) {
+    usersEl.innerHTML =
+      '<div class="card">' +
+        '<div class="card-hdr"><div class="card-hdr-title">Users &amp; Roles</div><div class="card-hdr-right"><button class="btn btn-primary btn-sm">+ Invite user</button></div></div>' +
+        '<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Last login</th><th>Action</th></tr></thead><tbody>' +
+        users.map(function(u) {
+          return '<tr><td style="font-weight:500;">' + u.name + '</td>' +
+            '<td style="color:var(--c-text-3);font-family:var(--f-mono);font-size:11.5px;">' + u.email + '</td>' +
+            '<td><span class="chip chip-blue">' + u.role + '</span></td>' +
+            '<td><span class="chip chip-green">' + u.status + '</span></td>' +
+            '<td style="color:var(--c-text-3);font-size:12px;">' + u.last + '</td>' +
+            '<td><button class="btn btn-ghost btn-sm">Edit</button></td></tr>';
+        }).join('') +
+        '</tbody></table></div>';
+  }
+
+  var has = ['FDA','EMA','PMDA','MHRA','Health Canada','TGA','Swissmedic','MFDS','ANVISA','NMPA','CDSCO','SFDA'];
+  var schedule = [['HA website scraping','Every 24 hours','Active'],['Change classification','On detection','Active'],['Gap analysis','On classification','Active'],['Task generation','Manual trigger','Active']];
+  var configEl = document.getElementById('admin-config-body');
+  if (configEl) {
+    configEl.innerHTML =
+      '<div class="card">' +
+        '<div class="card-hdr"><div class="card-hdr-title">Health Authorities</div><div class="card-hdr-right"><button class="btn btn-primary btn-sm">+ Add HA</button></div></div>' +
+        '<div style="padding:14px 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">' +
+          has.map(function(ha){return '<div style="display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--c-border);border-radius:var(--radius);background:var(--c-gray-50);"><div style="width:6px;height:6px;border-radius:50%;background:var(--c-teal);"></div><span style="font-size:12px;font-weight:500;">' + ha + '</span><button class="btn btn-ghost btn-sm" style="margin-left:auto;padding:2px 6px;font-size:10px;">Edit</button></div>';}).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="card">' +
+        '<div class="card-hdr"><div class="card-hdr-title">Feed Schedule</div></div>' +
+        '<div style="padding:16px;display:flex;flex-direction:column;gap:8px;">' +
+          schedule.map(function(r){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--c-gray-50);border-radius:var(--radius);border:1px solid var(--c-border);"><span style="font-size:12.5px;">' + r[0] + '</span><span style="font-size:11.5px;color:var(--c-text-3);">' + r[1] + '</span><span class="chip chip-green">' + r[2] + '</span></div>';}).join('') +
+        '</div>' +
+      '</div>';
+  }
+
+  var integrations = [
+    {name:'Oracle Argus Safety 8.4',status:'Connected',cls:'chip-green',detail:'DB link: @pva_to_src &middot; Read/Write'},
+    {name:'EudraVigilance EVWEB',status:'Connected',cls:'chip-green',detail:'Gateway: EV_EVWEB_PROD &middot; E2B R3'},
+    {name:'JIRA / Atlassian',status:'Connected',cls:'chip-green',detail:'Project: PV-OPS &middot; Auto ticket creation'},
+    {name:'Slack',status:'Connected',cls:'chip-green',detail:'Webhook: #pv-alerts &middot; P1 notifications'},
+    {name:'Veeva Vault',status:'Pending',cls:'chip-amber',detail:'OAuth setup required'},
+    {name:'ServiceNow',status:'Not configured',cls:'chip-gray',detail:'&mdash;'},
+  ];
+  var intEl = document.getElementById('admin-int-body');
+  if (intEl) {
+    intEl.innerHTML =
+      '<div class="card">' +
+        '<div class="card-hdr"><div class="card-hdr-title">Integration Connections</div></div>' +
+        '<div style="padding:16px;display:flex;flex-direction:column;gap:8px;">' +
+          integrations.map(function(i) {
+            return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--c-border);border-radius:var(--radius);background:#fff;">' +
+              '<div style="width:36px;height:36px;border-radius:var(--radius);background:var(--c-gray-100);display:flex;align-items:center;justify-content:center;font-size:16px;">&#128299;</div>' +
+              '<div style="flex:1;"><div style="font-size:13px;font-weight:500;">' + i.name + '</div><div style="font-size:11.5px;color:var(--c-text-3);margin-top:1px;">' + i.detail + '</div></div>' +
+              '<span class="chip ' + i.cls + '">' + i.status + '</span>' +
+              '<button class="btn btn-secondary btn-sm">Configure</button>' +
+              '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+  }
+}
+
+function switchAdminTab(name, el) {
+  document.querySelectorAll('#view-admin .tab-item').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('#view-admin .tab-panel').forEach(function(p){p.classList.remove('active');});
   el.classList.add('active');
   document.getElementById('admin-'+name).classList.add('active');
 }
 
-// ── KNOWLEDGE GRAPH ──
-function drawKG(){
-  const svg = document.getElementById('kg-svg');
-  if(!svg) return;
-  const W = svg.clientWidth || 900;
-  const H = svg.clientHeight || 500;
-  const scaleX = W/700, scaleY = H/500;
+// ══════════════════════════════════════════
+// SLIDE PANEL CONTENT
+// ══════════════════════════════════════════
+function renderSlidePanel() {
+  var changesEl = document.getElementById('sp-changes-body');
+  if (changesEl) {
+    changesEl.innerHTML =
+      '<div style="display:flex;flex-direction:column;gap:6px;">' +
+        '<div style="display:flex;gap:8px;padding:8px 10px;background:var(--c-red-lt);border-radius:var(--radius);border-left:3px solid var(--c-red);">' +
+          '<span style="font-size:13px;">&#128203;</span>' +
+          '<div style="font-size:12.5px;color:var(--c-text);">&sect;VI.B.6.2 &mdash; Non-serious ADR reporting timeline: <strong>90 days &rarr; 45 days</strong></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;padding:8px 10px;background:var(--c-amber-lt);border-radius:var(--radius);border-left:3px solid var(--c-amber);">' +
+          '<span style="font-size:13px;">&#128197;</span>' +
+          '<div style="font-size:12.5px;color:var(--c-text);">Effective date: <strong>2026-09-05</strong> &middot; Implementation deadline: <strong>2026-08-06</strong></div>' +
+        '</div>' +
+      '</div>';
+  }
 
-  const typeLabels={ha:'Authority',regulation:'Regulation',process:'Process',system:'System',action:'Action'};
-  let html = `<defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#CBD2DC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+  var areasEl = document.getElementById('sp-areas-body');
+  if (areasEl) {
+    ['PhV','Argus Safety','EudraVigilance','SOP-PV-004','RegIntel ROD'].forEach(function(a) {
+      var sp = document.createElement('span');
+      sp.className = 'chip chip-blue';
+      sp.textContent = a;
+      areasEl.appendChild(sp);
+    });
+  }
 
-  // Edges
-  KG_EDGES.forEach(([a,b])=>{
-    const na=KG_NODES.find(n=>n.id===a), nb=KG_NODES.find(n=>n.id===b);
-    if(!na||!nb) return;
-    html+=`<line x1="${na.x*scaleX}" y1="${na.y*scaleY}" x2="${nb.x*scaleX}" y2="${nb.y*scaleY}" stroke="#CBD2DC" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)" opacity=".7"/>`;
+  var actionsEl = document.getElementById('sp-actions-body');
+  if (actionsEl) {
+    var actions = [
+      {txt:'Update Argus Safety rule EMA_NONSER_POST_MKT: 90d \u2192 45d',p:'P1'},
+      {txt:'Reconfigure EudraVigilance E2B export profile batch window',p:'P1'},
+      {txt:'Update SOP-PV-004 \u00a74.2 \u2014 timeline reference',p:'P2'},
+      {txt:'Update RegIntel ROD row for EMA non-serious',p:'P1'},
+    ];
+    actionsEl.innerHTML = actions.map(function(a) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--c-gray-50);border-radius:var(--radius);border:1px solid var(--c-border);">' +
+        '<div style="width:14px;height:14px;border-radius:3px;border:1.5px solid ' + (a.p==='P1'?'var(--c-red)':'var(--c-amber)') + ';flex-shrink:0;"></div>' +
+        '<span style="font-size:12px;flex:1;">' + a.txt + '</span>' +
+        '<span class="chip ' + (a.p==='P1'?'chip-red':'chip-amber') + '">' + a.p + '</span>' +
+        '</div>';
+    }).join('');
+  }
+}
+
+// ══════════════════════════════════════════
+// KNOWLEDGE GRAPH
+// ══════════════════════════════════════════
+function drawKG() {
+  var svg = document.getElementById('kg-svg');
+  if (!svg) return;
+  var W = svg.clientWidth || 900;
+  var H = svg.clientHeight || 500;
+  var sx = W/700, sy = H/500;
+  var html =
+    '<defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">' +
+    '<path d="M2 1L8 5L2 9" fill="none" stroke="#CBD2DC" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
+
+  KG_EDGES.forEach(function(e) {
+    var na = KG_NODES.find(function(n){return n.id===e[0];}), nb = KG_NODES.find(function(n){return n.id===e[1];});
+    if (!na || !nb) return;
+    html += '<line x1="' + (na.x*sx) + '" y1="' + (na.y*sy) + '" x2="' + (nb.x*sx) + '" y2="' + (nb.y*sy) + '" stroke="#CBD2DC" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arr)" opacity=".7"/>';
   });
 
-  // Nodes
-  KG_NODES.forEach(n=>{
-    const w=n.label.length*7+24, h=32;
-    const x=n.x*scaleX-w/2, y=n.y*scaleY-h/2;
-    html+=`<g class="kg-node" onclick="showKGTooltip(event,'${n.id}')" style="cursor:pointer;">
-      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${n.bg}" stroke="${n.color}" stroke-width="1.5"/>
-      <text x="${n.x*scaleX}" y="${n.y*scaleY+5}" text-anchor="middle" fill="${n.color}" font-size="11.5" font-weight="600" font-family="Inter,sans-serif">${n.label}</text>
-    </g>`;
+  KG_NODES.forEach(function(n) {
+    var w = n.label.length*7+24, h=32;
+    var x = n.x*sx-w/2, y = n.y*sy-h/2;
+    html += '<g style="cursor:pointer;" onclick="showKGTooltip(event,\'' + n.id + '\')">' +
+      '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="6" fill="' + n.bg + '" stroke="' + n.color + '" stroke-width="1.5"/>' +
+      '<text x="' + (n.x*sx) + '" y="' + (n.y*sy+5) + '" text-anchor="middle" fill="' + n.color + '" font-size="11.5" font-weight="600" font-family="Inter,sans-serif">' + n.label + '</text>' +
+      '</g>';
   });
 
-  // Legend
-  const types=[['ha','Authority','#3C3489','#EEEDFE'],['regulation','Regulation','#B7720A','#FEF6E8'],['process','Process','#1A7A3E','#EBF7EF'],['system','System','#C0392B','#FEF0EE'],['action','Action','#0E8A6E','#E8F7F4']];
-  types.forEach(([t,l,c,bg],i)=>{
-    const lx=16, ly=16+i*26;
-    html+=`<rect x="${lx}" y="${ly}" width="${l.length*6.5+16}" height="20" rx="4" fill="${bg}" stroke="${c}" stroke-width="1"/>
-    <text x="${lx+8}" y="${ly+13}" fill="${c}" font-size="10.5" font-weight="600" font-family="Inter,sans-serif">${l}</text>`;
+  var types = [['Authority','#3C3489','#EEEDFE'],['Regulation','#B7720A','#FEF6E8'],['Process','#1A7A3E','#EBF7EF'],['System','#C0392B','#FEF0EE'],['Action','#0E8A6E','#E8F7F4']];
+  types.forEach(function(t, i) {
+    html += '<rect x="12" y="' + (14+i*26) + '" width="' + (t[0].length*6+18) + '" height="20" rx="4" fill="' + t[2] + '" stroke="' + t[1] + '" stroke-width="1"/>' +
+      '<text x="20" y="' + (27+i*26) + '" fill="' + t[1] + '" font-size="10.5" font-weight="600" font-family="Inter,sans-serif">' + t[0] + '</text>';
   });
-
   svg.innerHTML = html;
 }
 
-function showKGTooltip(e, id){
-  const n=KG_NODES.find(x=>x.id===id);
-  if(!n) return;
-  const tip=document.getElementById('kg-tooltip');
-  const typeLabels={ha:'Health Authority',regulation:'Regulation',process:'Process',system:'System',action:'Action'};
-  const connected=KG_EDGES.filter(([a,b])=>a===id||b===id).map(([a,b])=>KG_NODES.find(x=>x.id===(a===id?b:a))?.label).filter(Boolean);
-  tip.innerHTML=`<div style="font-size:12px;font-weight:600;color:${n.color};margin-bottom:4px;">${n.label}</div>
-    <div style="font-size:10.5px;color:#6B7E95;margin-bottom:6px;">${typeLabels[n.type]||n.type}</div>
-    ${connected.length?`<div style="font-size:11px;color:#4A5D72;"><strong>Connected to:</strong><br>${connected.join(', ')}</div>`:''}`;
-  const rect=document.getElementById('kg-canvas').getBoundingClientRect();
-  tip.style.left=(e.clientX-rect.left+10)+'px';
-  tip.style.top=(e.clientY-rect.top-20)+'px';
-  tip.style.display='block';
-  setTimeout(()=>tip.style.display='none',3000);
+function showKGTooltip(e, id) {
+  var n = KG_NODES.find(function(x){return x.id===id;});
+  if (!n) return;
+  var tip = document.getElementById('kg-tooltip');
+  var typeLabels = {ha:'Health Authority',regulation:'Regulation',process:'Process',system:'System',action:'Action'};
+  var connected = KG_EDGES.filter(function(ed){return ed[0]===id||ed[1]===id;}).map(function(ed){
+    var otherId = ed[0]===id?ed[1]:ed[0];
+    var other = KG_NODES.find(function(x){return x.id===otherId;});
+    return other?other.label:null;
+  }).filter(Boolean);
+  tip.innerHTML = '<div style="font-size:12px;font-weight:600;color:' + n.color + ';margin-bottom:3px;">' + n.label + '</div>' +
+    '<div style="font-size:10.5px;color:#6B7E95;margin-bottom:5px;">' + (typeLabels[n.type]||n.type) + '</div>' +
+    (connected.length?'<div style="font-size:11px;color:#4A5D72;"><strong>Connected to:</strong><br>' + connected.join(', ') + '</div>':'');
+  var rect = document.getElementById('kg-canvas').getBoundingClientRect();
+  tip.style.left = (e.clientX-rect.left+12)+'px';
+  tip.style.top = (e.clientY-rect.top-20)+'px';
+  tip.style.display = 'block';
+  setTimeout(function(){tip.style.display='none';}, 3000);
 }
 
-// ── INIT ──
-window.addEventListener('load', ()=>{
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('load', function() {
+  renderDashFeed();
+  renderDashCompliance();
   renderIntelTable();
   renderImpactTable();
   renderKanban();
   renderActionsList();
-
-  // Hover on feed rows
-  document.querySelectorAll('.feed-row').forEach(r=>{
-    r.addEventListener('mouseenter',()=>r.style.background='var(--c-blue-lt)');
-    r.addEventListener('mouseleave',()=>r.style.background='');
-  });
+  renderReports();
+  renderAdmin();
+  renderSlidePanel();
 });
 </script>
 </body>
