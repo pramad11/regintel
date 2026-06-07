@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>RegIntel — Global AE Obligation Resolver</title>
+<title>RegIntel — PV Regulatory Intelligence Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -11,177 +11,148 @@
 :root{
   --navy:#03203C;--navy2:#042C53;--blue:#0A5F9A;--sky:#378ADD;
   --skylt:#B5D4F4;--teal:#1D9E75;--teallt:#9FE1CB;--tealdk:#085041;
-  --amber:#BA7517;--amberlt:#FAC775;--coral:#D85A30;--red:#A32D2D;
-  --white:#F8F6F2;--cream:#EEE9E0;--gray:#888780;--text:#1A1A18;
-  --muted:#5F5E5A;--border:rgba(3,32,60,0.1);
+  --amber:#BA7517;--coral:#D85A30;--red:#A32D2D;
+  --white:#F8F6F2;--cream:#EEE9E0;--gray:#888780;
+  --text:#1A1A18;--muted:#5F5E5A;--border:rgba(3,32,60,0.09);
   --serif:'DM Serif Display',Georgia,serif;
   --sans:'Figtree',sans-serif;
   --mono:'DM Mono',monospace;
+  --sidebar:220px;--header:52px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:var(--sans);background:var(--cream);color:var(--text);min-height:100vh;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--sans);background:#F0EDE6;color:var(--text);display:flex;flex-direction:column;}
 
-/* ── HEADER ── */
-.header{
-  background:var(--navy2);padding:0 32px;
-  height:56px;display:flex;align-items:center;gap:14px;
-  border-bottom:1px solid rgba(181,212,244,0.1);
-  position:sticky;top:0;z-index:50;
+/* ─── TOPBAR ─── */
+.topbar{
+  height:var(--header);background:var(--navy2);flex-shrink:0;
+  display:flex;align-items:center;padding:0 20px;gap:14px;
+  border-bottom:1px solid rgba(181,212,244,0.1);position:relative;z-index:60;
 }
-.header-logo{font-family:var(--serif);font-size:19px;color:var(--skylt);}
-.header-tag{font-family:var(--mono);font-size:10px;color:var(--teallt);
-  letter-spacing:.14em;text-transform:uppercase;
-  border-left:1px solid rgba(181,212,244,0.2);padding-left:12px;}
-.header-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
-.header-badge{font-family:var(--mono);font-size:10px;
-  background:rgba(29,158,117,0.2);color:var(--teallt);
-  padding:3px 10px;border-radius:20px;border:1px solid rgba(29,158,117,0.3);}
-.api-btn{background:transparent;border:1px solid rgba(181,212,244,0.25);
-  color:var(--skylt);font-size:12px;font-family:var(--sans);
-  padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
-.api-btn:hover{background:rgba(55,138,221,0.15);}
+.tb-logo{font-family:var(--serif);font-size:17px;color:var(--skylt);letter-spacing:.01em;}
+.tb-sep{width:1px;height:20px;background:rgba(181,212,244,0.2);}
+.tb-product{font-family:var(--mono);font-size:10px;color:var(--teallt);letter-spacing:.14em;text-transform:uppercase;}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.tb-badge{font-family:var(--mono);font-size:10px;padding:3px 10px;
+  border-radius:20px;background:rgba(29,158,117,0.2);color:var(--teallt);
+  border:1px solid rgba(29,158,117,0.3);}
+.tb-btn{background:transparent;border:1px solid rgba(181,212,244,0.2);
+  color:var(--skylt);font-size:11.5px;font-family:var(--sans);
+  padding:5px 12px;border-radius:5px;cursor:pointer;transition:all .15s;}
+.tb-btn:hover{background:rgba(55,138,221,0.15);}
+.tb-btn.accent{background:var(--teal);border-color:var(--teal);color:#fff;}
+.tb-btn.accent:hover{background:#0F6E56;}
 
-/* ── MAIN LAYOUT ── */
-.main{max-width:1200px;margin:0 auto;padding:32px 24px;display:grid;
-  grid-template-columns:420px 1fr;gap:24px;align-items:start;}
-
-/* ── FORM CARD ── */
-.form-card{
-  background:#fff;border-radius:14px;border:1px solid var(--border);
-  overflow:hidden;position:sticky;top:72px;
-  box-shadow:0 2px 20px rgba(3,32,60,0.06);
+/* ─── API PANEL ─── */
+.api-panel{
+  display:none;position:absolute;top:var(--header);right:12px;
+  background:#fff;border-radius:10px;border:1px solid var(--border);
+  padding:20px 22px;width:370px;z-index:200;
+  box-shadow:0 8px 40px rgba(3,32,60,0.2);
 }
-.form-card-header{
-  background:var(--navy);padding:18px 22px;
+.api-panel.open{display:block;}
+.api-panel h4{font-family:var(--serif);font-size:18px;color:var(--navy);margin-bottom:5px;}
+.api-panel p{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.55;}
+.api-note{font-size:11px;color:var(--muted);background:rgba(55,138,221,0.06);
+  padding:8px 10px;border-radius:5px;border-left:2px solid var(--sky);margin-bottom:12px;line-height:1.55;}
+.api-row{display:flex;gap:8px;margin-top:2px;}
+.api-row button{flex:1;padding:8px;border-radius:6px;border:none;
+  font-size:12.5px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;}
+.api-primary{background:var(--navy2);color:var(--skylt);}
+.api-primary:hover{background:var(--blue);}
+.api-secondary{background:var(--cream);color:var(--muted);}
+.api-status{display:none;margin-top:10px;font-size:12px;padding:7px 10px;border-radius:5px;line-height:1.4;}
+
+/* ─── SHELL ─── */
+.shell{display:flex;flex:1;overflow:hidden;}
+
+/* ─── SIDEBAR ─── */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  border-right:1px solid rgba(181,212,244,0.06);
+  overflow-y:auto;
 }
-.form-card-header h2{font-family:var(--serif);font-size:20px;color:var(--white);margin-bottom:2px;}
-.form-card-header p{font-size:12px;color:rgba(181,212,244,0.65);}
-.form-body{padding:20px 22px;max-height:calc(100vh - 180px);overflow-y:auto;}
-
-.form-section{margin-bottom:20px;}
-.form-section-label{
-  font-family:var(--mono);font-size:9px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--muted);
-  border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px;
+.sb-section{padding:14px 12px 6px;}
+.sb-section-label{font-family:var(--mono);font-size:9px;color:rgba(181,212,244,0.28);
+  letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;padding:0 4px;}
+.sb-item{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:6px;cursor:pointer;
+  font-size:12.5px;color:rgba(181,212,244,0.55);
+  transition:all .12s;margin-bottom:1px;border:1px solid transparent;
 }
-.form-group{margin-bottom:12px;}
-.form-label{font-size:11px;font-weight:600;color:var(--muted);
-  display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
-.req{color:var(--coral);}
-input[type=text],input[type=date],select,textarea{
-  width:100%;border:1px solid rgba(3,32,60,0.15);border-radius:7px;
-  padding:8px 11px;font-size:13px;font-family:var(--sans);
-  color:var(--text);background:#fff;outline:none;transition:border-color .15s;
+.sb-item:hover{background:rgba(55,138,221,0.1);color:var(--skylt);}
+.sb-item.active{background:rgba(29,158,117,0.15);color:var(--teallt);border-color:rgba(29,158,117,0.2);}
+.sb-item svg{width:14px;height:14px;opacity:.7;flex-shrink:0;}
+.sb-item.active svg{opacity:1;}
+.sb-badge{margin-left:auto;font-family:var(--mono);font-size:9px;
+  background:rgba(216,90,48,0.25);color:#F0997B;padding:1px 6px;border-radius:8px;}
+.sb-divider{border:none;border-top:1px solid rgba(181,212,244,0.07);margin:6px 12px;}
+.new-case-btn{
+  margin:12px;background:var(--teal);color:#fff;border:none;
+  border-radius:7px;padding:9px 12px;font-size:12.5px;font-family:var(--sans);
+  font-weight:500;cursor:pointer;width:calc(100% - 24px);
+  display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s;
 }
-input:focus,select:focus,textarea:focus{border-color:var(--sky);}
-textarea{resize:vertical;min-height:60px;line-height:1.5;}
-select{appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 11px center;}
+.new-case-btn:hover{background:#0F6E56;}
 
-.checkbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
-.cb-item{display:flex;align-items:center;gap:7px;
-  font-size:12px;cursor:pointer;padding:5px 8px;
-  border:1px solid var(--border);border-radius:5px;
-  transition:all .12s;color:var(--text);}
-.cb-item:hover{border-color:var(--sky);}
-.cb-item input{accent-color:var(--teal);width:14px;height:14px;}
-.cb-item.checked{border-color:var(--teal);background:rgba(29,158,117,0.06);}
-
-.ha-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.ha-item{display:flex;align-items:center;gap:6px;
-  font-size:11.5px;cursor:pointer;padding:5px 8px;
-  border:1px solid var(--border);border-radius:5px;
-  transition:all .12s;color:var(--text);}
-.ha-item:hover{border-color:var(--sky);}
-.ha-item input{accent-color:var(--teal);width:13px;height:13px;}
-.ha-item.checked{border-color:var(--teal);background:rgba(29,158,117,0.06);color:var(--tealdk);}
-
-.run-btn{
-  width:100%;background:var(--navy2);color:var(--skylt);
-  border:none;border-radius:8px;padding:13px;
-  font-size:14px;font-weight:500;font-family:var(--sans);
-  cursor:pointer;transition:all .2s;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  margin-top:4px;
+/* recent searches in sidebar */
+.sb-recent{padding:0 12px 12px;}
+.sb-recent-item{
+  padding:7px 10px;border-radius:6px;cursor:pointer;
+  border:1px solid rgba(181,212,244,0.07);margin-bottom:4px;
+  transition:all .12s;background:rgba(181,212,244,0.03);
 }
-.run-btn:hover:not(:disabled){background:var(--blue);}
-.run-btn:disabled{opacity:.5;cursor:not-allowed;}
+.sb-recent-item:hover{background:rgba(55,138,221,0.1);border-color:rgba(55,138,221,0.2);}
+.sb-ri-product{font-size:11.5px;color:var(--skylt);font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-ri-ae{font-size:10px;color:rgba(181,212,244,0.4);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-ri-meta{display:flex;align-items:center;gap:5px;margin-top:3px;}
+.sb-ri-tag{font-family:var(--mono);font-size:9px;padding:1px 5px;border-radius:6px;}
+.sb-footer{padding:12px;margin-top:auto;border-top:1px solid rgba(181,212,244,0.07);}
+.sb-footer-txt{font-family:var(--mono);font-size:9px;color:rgba(181,212,244,0.18);line-height:1.8;}
 
-.demo-btn{
-  width:100%;background:transparent;color:var(--muted);
-  border:1px solid var(--border);border-radius:8px;padding:9px;
-  font-size:12px;font-family:var(--sans);cursor:pointer;
-  transition:all .15s;margin-top:8px;
-}
-.demo-btn:hover{background:var(--cream);border-color:rgba(3,32,60,0.2);}
+/* ─── WORKSPACE ─── */
+.workspace{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.view{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.view.active{display:flex;}
 
-/* ── RESULTS PANEL ── */
-.results-panel{display:flex;flex-direction:column;gap:20px;}
+/* ─── DASHBOARD ─── */
+.dash-scroll{overflow-y:auto;padding:24px 28px;flex:1;}
+.dash-greeting{margin-bottom:22px;}
+.dash-greeting h2{font-family:var(--serif);font-size:26px;color:var(--navy);}
+.dash-greeting p{font-size:13px;color:var(--muted);margin-top:4px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.kpi{background:#fff;border-radius:10px;border:1px solid var(--border);padding:16px 18px;
+  box-shadow:0 1px 8px rgba(3,32,60,0.04);}
+.kpi-val{font-family:var(--serif);font-size:32px;line-height:1;margin-bottom:4px;}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);font-family:var(--mono);}
+.kpi-sub{font-size:11.5px;margin-top:5px;font-weight:500;}
 
-.empty-state{
-  background:#fff;border-radius:14px;border:1px solid var(--border);
-  padding:60px 40px;text-align:center;
-  box-shadow:0 2px 20px rgba(3,32,60,0.04);
-}
-.empty-icon{font-size:48px;opacity:.15;margin-bottom:16px;}
-.empty-title{font-family:var(--serif);font-size:22px;color:var(--navy);margin-bottom:8px;}
-.empty-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:320px;margin:0 auto;}
+.dash-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.dash-card{background:#fff;border-radius:10px;border:1px solid var(--border);
+  overflow:hidden;box-shadow:0 1px 8px rgba(3,32,60,0.04);}
+.dash-card-hdr{padding:12px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;}
+.dash-card-hdr h3{font-size:13px;font-weight:600;color:var(--navy);}
+.dash-card-hdr span{font-size:11px;color:var(--muted);}
 
-/* ── RESULT CARDS ── */
-.result-card{
-  background:#fff;border-radius:14px;border:1px solid var(--border);
-  overflow:hidden;box-shadow:0 2px 20px rgba(3,32,60,0.04);
-  animation:slideIn .4s ease;
-}
-@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-
-.rc-header{
-  padding:14px 20px;display:flex;align-items:center;gap:10px;
-  border-bottom:1px solid var(--border);
-}
-.rc-icon{width:32px;height:32px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.rc-title{font-size:14px;font-weight:600;color:var(--navy);}
-.rc-sub{font-size:11px;color:var(--muted);margin-top:1px;}
-.rc-badge{margin-left:auto;font-family:var(--mono);font-size:9px;
-  padding:3px 9px;border-radius:10px;font-weight:500;}
-
-/* SUSAR alert card */
-.susar-card{
-  background:var(--navy);border-radius:14px;border:2px solid #D85A30;
-  padding:20px 24px;
-  animation:slideIn .3s ease;
-}
-.susar-card h3{font-family:var(--serif);font-size:20px;color:var(--white);margin-bottom:8px;}
-.susar-card p{font-size:13px;color:rgba(181,212,244,0.75);line-height:1.65;}
-.susar-meta{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;}
-.susar-meta-item{font-family:var(--mono);font-size:10px;letter-spacing:.06em;}
-.susar-meta-item .k{color:rgba(181,212,244,0.4);text-transform:uppercase;display:block;margin-bottom:2px;}
-.susar-meta-item .v{color:var(--teallt);}
-.susar-meta-item .v.alert{color:#F0997B;}
-
-/* obligation table */
-.ob-wrap{overflow-x:auto;}
-.ob-table{width:100%;border-collapse:collapse;font-size:12px;}
-.ob-table th{
-  text-align:left;padding:9px 14px;
-  font-size:10px;text-transform:uppercase;letter-spacing:.07em;
-  color:var(--muted);border-bottom:1px solid var(--border);
-  background:rgba(3,32,60,0.02);font-family:var(--mono);font-weight:500;white-space:nowrap;
-}
-.ob-table td{
-  padding:10px 14px;border-bottom:1px solid rgba(3,32,60,0.05);
-  color:var(--text);vertical-align:middle;
-}
-.ob-table tr:last-child td{border-bottom:none;}
-.ob-table tr:hover td{background:rgba(55,138,221,0.03);}
-.ob-table tr.overdue td{background:rgba(163,45,45,0.03);}
-.ob-table tr.periodic td{background:rgba(29,158,117,0.02);}
-
-.tag{display:inline-block;padding:2px 8px;border-radius:10px;
-  font-size:10px;font-weight:600;font-family:var(--mono);white-space:nowrap;}
+/* obligation tracker table */
+.ot-table{width:100%;border-collapse:collapse;}
+.ot-table th{text-align:left;padding:8px 14px;font-size:10px;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--border);
+  font-family:var(--mono);font-weight:500;background:rgba(3,32,60,0.02);}
+.ot-table td{padding:9px 14px;border-bottom:1px solid rgba(3,32,60,0.04);
+  font-size:12px;color:var(--text);vertical-align:middle;}
+.ot-table tr:last-child td{border-bottom:none;}
+.ot-table tr{cursor:pointer;transition:background .1s;}
+.ot-table tr:hover td{background:rgba(55,138,221,0.03);}
+.tag{display:inline-block;padding:2px 7px;border-radius:9px;
+  font-size:10px;font-weight:500;font-family:var(--mono);}
 .t7{background:#FCEBEB;color:#A32D2D;}
 .t15{background:#FAEEDA;color:#854F0B;}
 .t30{background:#E6F1FB;color:#185FA5;}
@@ -189,919 +160,1070 @@ select{appearance:none;
 .tper{background:#EEEDFE;color:#3C3489;}
 .tdom{background:#EAF3DE;color:#3B6D11;}
 .tfor{background:#EEEDFE;color:#3C3489;}
-.tover{background:#FCEBEB;color:#A32D2D;border:1px solid rgba(227,75,74,0.3);}
+.tover{background:#FCEBEB;color:#A32D2D;border:1px solid rgba(230,75,74,.3);}
 .tok{background:#E1F5EE;color:#085041;}
 .trisk{background:#FAEEDA;color:#854F0B;}
 .tsusar{background:#FAECE7;color:#993C1D;border:1px solid rgba(208,90,48,.3);}
 
-/* narrative */
-.narrative-body{
-  padding:20px;font-size:13px;line-height:1.85;color:var(--text);
-  border-left:3px solid var(--navy2);margin:0;
-  background:rgba(3,32,60,0.02);
-}
-.narrative-body .placeholder{color:var(--coral);font-style:italic;}
+/* HA coverage mini map */
+.ha-map{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:14px 16px;}
+.ha-pill{padding:7px 10px;border-radius:7px;border:1px solid var(--border);
+  background:rgba(3,32,60,0.02);cursor:default;}
+.ha-pill-code{font-family:var(--mono);font-size:9px;font-weight:500;margin-bottom:2px;}
+.ha-pill-country{font-size:11px;color:var(--text);}
+.ha-pill-reg{font-size:9px;color:var(--muted);margin-top:1px;}
 
-/* gap analysis */
-.gap-list{padding:16px 20px;display:flex;flex-direction:column;gap:0;}
-.gap-row{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(3,32,60,0.05);align-items:flex-start;}
-.gap-row:last-child{border-bottom:none;}
-.gap-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px;}
-.gap-dot.red{background:#E24B4A;}
-.gap-dot.amber{background:#EF9F27;}
-.gap-dot.green{background:#1D9E75;}
-.gap-text{font-size:12.5px;color:var(--text);line-height:1.5;}
-.gap-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+/* activity feed */
+.activity-feed{padding:8px 16px;}
+.af-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(3,32,60,0.04);align-items:flex-start;}
+.af-item:last-child{border-bottom:none;}
+.af-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.af-txt{font-size:12px;color:var(--text);line-height:1.5;flex:1;}
+.af-time{font-size:10px;color:var(--muted);font-family:var(--mono);flex-shrink:0;}
+
+/* ─── CASE INTAKE VIEW ─── */
+.intake-shell{display:flex;flex:1;overflow:hidden;}
+.form-panel{
+  width:400px;flex-shrink:0;background:#fff;
+  border-right:1px solid var(--border);overflow-y:auto;
+}
+.form-panel-hdr{background:var(--navy);padding:16px 20px;}
+.form-panel-hdr h2{font-family:var(--serif);font-size:19px;color:var(--white);margin-bottom:2px;}
+.form-panel-hdr p{font-size:11.5px;color:rgba(181,212,244,0.6);}
+.form-body{padding:18px 20px;}
+.form-sec-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--border);padding-bottom:5px;margin:16px 0 12px;}
+.form-sec-label:first-child{margin-top:0;}
+.fg{margin-bottom:11px;}
+.fl{font-size:11px;font-weight:600;color:var(--muted);display:block;
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;}
+.req{color:var(--coral);}
+input[type=text],input[type=date],select,textarea{
+  width:100%;border:1px solid rgba(3,32,60,0.14);border-radius:6px;
+  padding:8px 10px;font-size:13px;font-family:var(--sans);
+  color:var(--text);background:#fff;outline:none;transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--sky);box-shadow:0 0 0 2px rgba(55,138,221,0.1);}
+textarea{resize:vertical;min-height:90px;line-height:1.5;}
+select{appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;}
+.cb-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.cb-item{display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;
+  padding:5px 8px;border:1px solid var(--border);border-radius:5px;transition:all .12s;}
+.cb-item:hover{border-color:var(--sky);}
+.cb-item input{accent-color:var(--teal);width:13px;height:13px;}
+.cb-item.ck{border-color:var(--teal);background:rgba(29,158,117,0.05);}
+.ha-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.ha-item{display:flex;align-items:center;gap:6px;font-size:11.5px;cursor:pointer;
+  padding:5px 7px;border:1px solid var(--border);border-radius:5px;transition:all .12s;}
+.ha-item:hover{border-color:var(--sky);}
+.ha-item input{accent-color:var(--teal);width:12px;height:12px;}
+.ha-item.ck{border-color:var(--teal);background:rgba(29,158,117,0.05);color:var(--tealdk);}
+.extract-btn{
+  width:100%;background:var(--blue);color:#fff;border:none;
+  border-radius:6px;padding:10px;font-size:13px;font-weight:500;
+  font-family:var(--sans);cursor:pointer;transition:all .15s;margin-bottom:4px;
+}
+.extract-btn:hover:not(:disabled){background:#0A5F9A;}
+.extract-btn:disabled{opacity:.5;cursor:not-allowed;}
+.extract-status{display:none;margin-top:8px;padding:8px 11px;border-radius:0 6px 6px 0;
+  font-size:12px;line-height:1.55;}
+.run-btn{
+  width:100%;background:var(--navy2);color:var(--skylt);border:none;
+  border-radius:7px;padding:12px;font-size:13.5px;font-weight:500;
+  font-family:var(--sans);cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;
+}
+.run-btn:hover:not(:disabled){background:var(--blue);}
+.run-btn:disabled{opacity:.5;cursor:not-allowed;}
+.demo-link{width:100%;text-align:center;font-size:12px;color:var(--muted);
+  background:none;border:1px solid var(--border);border-radius:6px;
+  padding:7px;cursor:pointer;margin-top:6px;transition:all .15s;}
+.demo-link:hover{background:var(--cream);}
+
+/* ─── RESULTS PANEL ─── */
+.results-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.results-scroll{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+.empty-state{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:40px;text-align:center;
+}
+.empty-state .ei{font-size:48px;opacity:.12;margin-bottom:16px;}
+.empty-state h3{font-family:var(--serif);font-size:20px;color:var(--navy);margin-bottom:8px;}
+.empty-state p{font-size:13px;color:var(--muted);line-height:1.6;max-width:300px;}
 
 /* loading */
-.loading-card{
-  background:#fff;border-radius:14px;border:1px solid var(--border);
-  padding:40px;text-align:center;
-  box-shadow:0 2px 20px rgba(3,32,60,0.04);
-}
-.pipeline-steps{display:flex;justify-content:center;gap:8px;margin:20px 0;flex-wrap:wrap;}
-.ps{font-family:var(--mono);font-size:10px;letter-spacing:.06em;
-  padding:4px 10px;border-radius:12px;transition:all .3s;
-  background:rgba(3,32,60,0.05);color:var(--muted);}
-.ps.running{background:rgba(55,138,221,0.15);color:var(--sky);
-  animation:pulse .8s infinite alternate;}
+.loading-shell{padding:32px;text-align:center;}
+.loading-shell h3{font-family:var(--serif);font-size:18px;color:var(--navy);margin-bottom:8px;}
+.pipeline{display:flex;justify-content:center;gap:6px;margin:16px 0;flex-wrap:wrap;}
+.ps{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:3px 9px;
+  border-radius:10px;background:rgba(3,32,60,0.06);color:var(--muted);transition:all .3s;}
+.ps.run{background:rgba(55,138,221,0.15);color:var(--sky);animation:pulse .8s infinite alternate;}
 .ps.done{background:rgba(29,158,117,0.15);color:var(--teal);}
 @keyframes pulse{from{opacity:.6}to{opacity:1}}
-.loading-msg{font-size:13px;color:var(--muted);margin-top:8px;}
 
-/* modal */
-.modal-bg{display:none;}
-/* Inline API key dropdown panel — no position:fixed (blocked in Workers/iframe) */
-.api-panel{
-  display:none;position:absolute;top:56px;right:16px;
-  background:#fff;border-radius:10px;border:1px solid rgba(3,32,60,0.15);
-  padding:20px 22px;width:380px;z-index:100;
-  box-shadow:0 8px 40px rgba(3,32,60,0.22);
-}
-.api-panel.visible{display:block;}
-.api-panel h4{font-family:var(--serif);font-size:19px;color:var(--navy);margin-bottom:6px;}
-.api-panel p{font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
-.api-panel-note{font-size:11px;color:var(--muted);background:rgba(55,138,221,0.07);
-  padding:8px 11px;border-radius:5px;border-left:2px solid var(--sky);margin-bottom:14px;line-height:1.55;}
-.api-panel-row{display:flex;gap:8px;margin-top:0;}
-.api-panel-row button{flex:1;padding:9px;border-radius:7px;border:none;
-  font-size:12.5px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;}
-.apb-primary{background:var(--navy2);color:var(--skylt);}
-.apb-primary:hover{background:var(--blue);}
-.apb-secondary{background:var(--cream);color:var(--muted);}
-.apb-secondary:hover{background:#E5E1D8;}
-
-/* export bar */
-.export-bar{
-  display:flex;gap:8px;padding:12px 20px;
-  border-top:1px solid var(--border);background:rgba(3,32,60,0.02);
-  flex-wrap:wrap;
-}
-.exp-btn{
-  background:transparent;border:1px solid var(--border);
-  color:var(--muted);font-size:11.5px;font-family:var(--sans);
-  padding:6px 14px;border-radius:6px;cursor:pointer;transition:all .15s;
-}
-.exp-btn:hover{background:var(--cream);border-color:rgba(3,32,60,0.2);}
-.exp-btn.primary{background:var(--navy2);color:var(--skylt);border-color:var(--navy2);}
-.exp-btn.primary:hover{background:var(--blue);}
-
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:rgba(3,32,60,0.12);border-radius:10px;}
-
-/* ── TREE VIEW STYLES ── */
-.tree-shell{background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:0 2px 20px rgba(3,32,60,0.04);}
-.tree-topbar{background:var(--navy);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-.tree-topbar h3{font-family:var(--serif);font-size:18px;color:var(--white);}
-.tree-topbar .sub{font-size:12px;color:rgba(181,212,244,0.6);margin-left:auto;}
-.tree-legend{display:flex;gap:16px;padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(3,32,60,0.02);flex-wrap:wrap;}
-.tl-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
-.tl-dot{width:9px;height:9px;border-radius:50%;}
-
-/* summary bar */
-.case-summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);}
-.csb-item{padding:12px 16px;border-right:1px solid var(--border);}
-.csb-item:last-child{border-right:none;}
-.csb-k{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:3px;font-family:var(--mono);}
-.csb-v{font-size:13px;font-weight:500;color:var(--text);}
-.csb-v.alert{color:#A32D2D;}
-.csb-v.ok{color:#085041;}
-.csb-v.warn{color:#854F0B;}
-
-/* tree nodes */
-.tree-body{padding:16px 20px;display:flex;flex-direction:column;gap:8px;}
-
-.t-country{border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.t-country-hdr{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;background:var(--cream);transition:background .15s;user-select:none;}
-.t-country-hdr:hover{background:#E5E1D8;}
-.t-country-flag{font-size:18px;line-height:1;}
+/* ─── TREE RESULTS ─── */
+.tree-shell{background:#fff;border-radius:12px;border:1px solid var(--border);
+  overflow:hidden;box-shadow:0 2px 16px rgba(3,32,60,0.05);}
+.tree-topbar{background:var(--navy);padding:14px 18px;}
+.tree-topbar h3{font-family:var(--serif);font-size:17px;color:var(--white);margin-bottom:2px;}
+.tree-topbar .sub{font-size:11px;color:rgba(181,212,244,0.55);}
+.case-sum-bar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border);}
+.csb{padding:10px 14px;border-right:1px solid var(--border);}
+.csb:last-child{border-right:none;}
+.csb-k{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+  margin-bottom:2px;font-family:var(--mono);}
+.csb-v{font-size:12.5px;font-weight:500;color:var(--text);}
+.csb-v.alert{color:#A32D2D;} .csb-v.warn{color:#854F0B;} .csb-v.ok{color:#085041;}
+.tree-legend{display:flex;gap:14px;padding:8px 16px;border-bottom:1px solid var(--border);
+  background:rgba(3,32,60,0.015);flex-wrap:wrap;}
+.tl-item{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);}
+.tl-dot{width:8px;height:8px;border-radius:50%;}
+.dot-over{background:#E24B4A;} .dot-risk{background:#EF9F27;}
+.dot-ok{background:#1D9E75;} .dot-per{background:#7F77DD;} .dot-na{background:#B4B2A9;}
+.tree-body{padding:12px 16px;display:flex;flex-direction:column;gap:6px;}
+.t-country{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.t-country-hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;
+  cursor:pointer;background:rgba(3,32,60,0.025);transition:background .12s;user-select:none;}
+.t-country-hdr:hover{background:rgba(3,32,60,0.05);}
 .t-country-name{font-size:13px;font-weight:600;color:var(--navy);}
-.t-country-ha{font-size:11px;color:var(--muted);margin-left:4px;}
-.t-country-caret{margin-left:auto;font-size:11px;color:var(--muted);transition:transform .2s;}
-.t-country-hdr.open .t-country-caret{transform:rotate(90deg);}
-.t-country-pills{margin-left:auto;display:flex;gap:5px;margin-right:8px;}
+.t-country-ha{font-size:11px;color:var(--muted);margin-left:2px;}
+.t-caret{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s;}
+.t-country-hdr.open .t-caret{transform:rotate(90deg);}
 .t-country-body{display:none;border-top:1px solid var(--border);}
 .t-country-body.open{display:block;}
-
-.t-ha{border-bottom:1px solid rgba(3,32,60,0.05);}
+.t-ha{border-bottom:1px solid rgba(3,32,60,0.04);}
 .t-ha:last-child{border-bottom:none;}
-.t-ha-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px 10px 28px;cursor:pointer;transition:background .12s;}
-.t-ha-hdr:hover{background:rgba(3,32,60,0.03);}
-.t-ha-code{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.06em;padding:2px 8px;border-radius:10px;}
-.t-ha-name{font-size:12.5px;color:var(--text);font-weight:500;}
-.t-ha-reg{font-size:11px;color:var(--muted);}
-.t-ha-caret{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s;}
+.t-ha-hdr{display:flex;align-items:center;gap:8px;padding:9px 14px 9px 26px;
+  cursor:pointer;transition:background .1s;}
+.t-ha-hdr:hover{background:rgba(3,32,60,0.02);}
 .t-ha-hdr.open .t-ha-caret{transform:rotate(90deg);}
-.t-ha-body{display:none;border-top:1px solid rgba(3,32,60,0.06);background:rgba(3,32,60,0.01);}
+.t-ha-code{font-family:var(--mono);font-size:9.5px;font-weight:500;
+  padding:2px 7px;border-radius:9px;}
+.t-ha-name{font-size:12px;color:var(--text);font-weight:500;}
+.t-ha-caret{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s;}
+.t-ha-body{display:none;border-top:1px solid rgba(3,32,60,0.05);background:rgba(3,32,60,0.01);}
 .t-ha-body.open{display:block;}
+.t-rep{display:flex;align-items:stretch;border-bottom:1px solid rgba(3,32,60,0.04);
+  transition:background .1s;position:relative;}
+.t-rep:last-child{border-bottom:none;}
+.t-rep:hover{background:rgba(55,138,221,0.025);}
+.t-rep:hover .t-rep-detail{display:block;}
+.t-rep-stripe{width:3px;flex-shrink:0;}
+.t-rep-inner{flex:1;padding:9px 12px 9px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.t-rep-name{font-size:11.5px;font-weight:600;color:var(--text);min-width:170px;flex-shrink:0;}
+.t-rep-reg{font-size:9.5px;color:var(--sky);font-family:var(--mono);display:block;margin-top:1px;}
+.t-rep-detail{
+  display:none;width:100%;margin-top:6px;padding:8px 10px;
+  background:#fff;border-radius:5px;border:1px solid var(--border);
+  font-size:11px;color:var(--muted);line-height:1.6;
+}
+.t-rep-detail strong{color:var(--text);}
 
-.t-report{display:flex;align-items:stretch;border-bottom:1px solid rgba(3,32,60,0.05);transition:background .12s;}
-.t-report:last-child{border-bottom:none;}
-.t-report:hover{background:rgba(55,138,221,0.03);}
-.t-report-stripe{width:4px;flex-shrink:0;}
-.t-report-inner{flex:1;padding:10px 14px 10px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.t-report-type{font-size:12px;font-weight:600;color:var(--text);min-width:160px;}
-.t-report-tl{font-size:11px;color:var(--muted);}
-.t-report-due{font-size:12px;font-weight:500;color:var(--text);margin-left:auto;}
-.t-report-fmt{font-size:10.5px;color:var(--muted);font-family:var(--mono);}
-.t-report-detail{width:100%;margin-top:6px;padding:8px 10px;background:#fff;border-radius:6px;border:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.6;display:none;}
-.t-report:hover .t-report-detail{display:block;}
-
-/* periodic section */
-.t-periodic{margin-top:12px;border:1px solid rgba(52,125,221,0.15);border-radius:10px;overflow:hidden;}
-.t-periodic-hdr{padding:10px 14px;background:rgba(55,138,221,0.05);border-bottom:1px solid rgba(55,138,221,0.12);display:flex;align-items:center;gap:8px;cursor:pointer;}
-.t-periodic-hdr-title{font-size:12px;font-weight:600;color:#185FA5;}
-.t-periodic-hdr-caret{margin-left:auto;font-size:10px;color:#378ADD;transition:transform .2s;}
-.t-periodic-hdr.open .t-periodic-hdr-caret{transform:rotate(90deg);}
-.t-periodic-body{display:none;}
-.t-periodic-body.open{display:block;}
-.t-periodic-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(3,32,60,0.05);font-size:12px;}
-.t-periodic-row:last-child{border-bottom:none;}
-.t-periodic-report{font-weight:500;color:var(--text);min-width:140px;}
-.t-periodic-freq{color:var(--muted);font-size:11px;flex:1;}
-.t-periodic-ref{font-family:var(--mono);font-size:10px;color:#378ADD;}
-
-/* status dot colors */
-.dot-over{background:#E24B4A;}
-.dot-risk{background:#EF9F27;}
-.dot-ok{background:#1D9E75;}
-.dot-per{background:#7F77DD;}
-.dot-na{background:#B4B2A9;}
-
-/* action footer */
-.tree-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;background:rgba(3,32,60,0.02);flex-wrap:wrap;}
-.tf-btn{padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all .15s;}
+/* collapsible sections */
+.coll-hdr{padding:9px 14px;display:flex;align-items:center;gap:8px;
+  cursor:pointer;border-top:1px solid var(--border);background:rgba(3,32,60,0.015);}
+.coll-hdr:hover{background:rgba(3,32,60,0.04);}
+.coll-title{font-size:12px;font-weight:600;color:var(--navy);}
+.coll-caret{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s;}
+.coll-hdr.open .coll-caret{transform:rotate(90deg);}
+.coll-body{display:none;}
+.coll-body.open{display:block;}
+.narrative-body{padding:14px 16px;font-size:12.5px;line-height:1.85;
+  color:var(--text);border-left:3px solid var(--navy2);}
+.placeholder{color:var(--coral);font-style:italic;}
+.gap-row{display:flex;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(3,32,60,0.04);align-items:flex-start;}
+.gap-row:last-child{border-bottom:none;}
+.gap-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
+.gap-txt{font-size:12px;color:var(--text);line-height:1.5;}
+.gap-sub{font-size:10.5px;color:var(--muted);}
+.tree-footer{padding:10px 16px;border-top:1px solid var(--border);
+  display:flex;gap:8px;background:rgba(3,32,60,0.015);}
+.tf-btn{padding:6px 13px;border-radius:5px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:11.5px;font-family:var(--sans);cursor:pointer;transition:all .15s;}
 .tf-btn:hover{background:var(--cream);}
 .tf-btn.primary{background:var(--navy2);color:var(--skylt);border-color:var(--navy2);}
 .tf-btn.primary:hover{background:var(--blue);}
 
-/* narrative in tree */
-.t-narrative{margin-top:12px;border:1px solid rgba(3,32,60,0.1);border-radius:10px;overflow:hidden;}
-.t-narrative-hdr{padding:10px 14px;background:rgba(209,83,126,0.05);border-bottom:1px solid rgba(209,83,126,0.12);display:flex;align-items:center;gap:8px;cursor:pointer;}
-.t-narrative-hdr-title{font-size:12px;font-weight:600;color:#72243E;}
-.t-narrative-body{display:none;padding:14px;font-size:12.5px;line-height:1.8;color:var(--text);}
-.t-narrative-body.open{display:block;}
+/* ─── HISTORY VIEW ─── */
+.hist-scroll{overflow-y:auto;padding:24px 28px;flex:1;}
+.hist-hdr{margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+.hist-hdr h2{font-family:var(--serif);font-size:22px;color:var(--navy);}
+.hist-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.hist-card{background:#fff;border-radius:10px;border:1px solid var(--border);
+  padding:16px 18px;cursor:pointer;transition:all .15s;
+  box-shadow:0 1px 8px rgba(3,32,60,0.04);}
+.hist-card:hover{border-color:var(--sky);box-shadow:0 4px 20px rgba(3,32,60,0.1);transform:translateY(-1px);}
+.hc-product{font-size:13.5px;font-weight:600;color:var(--navy);margin-bottom:3px;}
+.hc-ae{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.45;}
+.hc-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.hc-date{font-size:10px;color:var(--muted);font-family:var(--mono);}
+.hc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;
+  padding-top:8px;border-top:1px solid var(--border);}
+.hc-has{font-size:10.5px;color:var(--muted);}
+.hc-del{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;
+  padding:2px 6px;border-radius:4px;transition:all .12s;}
+.hc-del:hover{background:#FCEBEB;color:#A32D2D;}
+.hist-empty{text-align:center;padding:60px;color:var(--muted);}
+.hist-empty h3{font-family:var(--serif);font-size:18px;color:var(--navy);margin-bottom:8px;}
 
-/* gap checklist */
-.t-gaps{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.t-gaps-hdr{padding:10px 14px;background:rgba(3,32,60,0.03);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;cursor:pointer;}
-.t-gaps-hdr-title{font-size:12px;font-weight:600;color:var(--navy);}
-.t-gaps-body{display:none;}
-.t-gaps-body.open{display:block;}
-.t-gap-row{display:flex;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(3,32,60,0.04);align-items:flex-start;}
-.t-gap-row:last-child{border-bottom:none;}
-.t-gap-icon{font-size:13px;flex-shrink:0;margin-top:1px;}
-.t-gap-txt{font-size:12px;color:var(--text);line-height:1.5;}
-.t-gap-sub{font-size:11px;color:var(--muted);}
+/* ─── SETTINGS VIEW ─── */
+.settings-scroll{overflow-y:auto;padding:24px 28px;flex:1;}
+.settings-scroll h2{font-family:var(--serif);font-size:22px;color:var(--navy);margin-bottom:20px;}
+.settings-section{background:#fff;border-radius:10px;border:1px solid var(--border);
+  overflow:hidden;margin-bottom:16px;box-shadow:0 1px 8px rgba(3,32,60,0.04);}
+.ss-hdr{padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(3,32,60,0.02);}
+.ss-hdr h3{font-size:13px;font-weight:600;color:var(--navy);}
+.ss-row{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid rgba(3,32,60,0.04);}
+.ss-row:last-child{border-bottom:none;}
+.ss-row-label{font-size:13px;color:var(--text);}
+.ss-row-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.ss-input{border:1px solid var(--border);border-radius:6px;padding:7px 10px;
+  font-size:12.5px;font-family:var(--sans);outline:none;transition:border-color .15s;
+  color:var(--text);background:#fff;min-width:200px;}
+.ss-input:focus{border-color:var(--sky);}
+.ss-btn{padding:7px 14px;border-radius:6px;border:1px solid var(--border);
+  background:transparent;font-size:12px;font-family:var(--sans);cursor:pointer;
+  color:var(--muted);transition:all .15s;}
+.ss-btn:hover{background:var(--cream);}
+.ss-btn.primary{background:var(--navy2);color:var(--skylt);border-color:var(--navy2);}
+.ss-btn.danger{background:#FCEBEB;color:#A32D2D;border-color:rgba(163,45,45,0.2);}
 
-@media print{
-  .form-card,.header{display:none;}
-  .main{grid-template-columns:1fr;}
-  .tree-shell{box-shadow:none;}
-}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(3,32,60,0.12);border-radius:10px;}
+@media print{.sidebar,.topbar{display:none!important;}.workspace{display:block!important;}}
 </style>
 </head>
 <body>
-<div id="appRoot" style="position:relative;min-height:100vh;">
+<div id="appRoot" style="position:relative;display:flex;flex-direction:column;height:100vh;">
 
-<!-- API MODAL (legacy — now uses inline panel, kept for fallback) -->
-<div class="modal-bg" id="apiModal" style="display:none;">
-  <div class="modal">
-    <h2>Connect Claude API</h2>
-    <p>RegIntel uses Claude AI to resolve global PV reporting obligations. Enter your Anthropic API key for live analysis, or use Demo Mode with realistic pre-computed results.</p>
-    <div class="modal-note">Your key is stored in browser memory only for this session. It is sent only to Anthropic's API — never to any other server.</div>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…"/>
-    <div class="modal-btns">
-      <button class="modal-btn secondary" onclick="useDemoMode()">Use Demo Mode</button>
-      <button class="modal-btn primary" onclick="connectAPI()">Connect Live API →</button>
-    </div>
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-logo">Praxigent</div>
+  <div class="tb-sep"></div>
+  <div class="tb-product">RegIntel</div>
+  <div class="tb-right">
+    <div class="tb-badge" id="modeBadge">DEMO MODE</div>
+    <button class="tb-btn" id="apiToggleBtn" onclick="toggleApiPanel()">⚙ API Key</button>
+    <button class="tb-btn accent" onclick="showView('intake')">+ New Case</button>
   </div>
 </div>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-logo">Praxigent</div>
-  <div class="header-tag">RegIntel · Global AE Obligation Resolver</div>
-  <div class="header-right">
-    <div class="header-badge" id="modeBadge">DEMO MODE</div>
-    <button class="api-btn" id="apiToggleBtn" onclick="toggleApiPanel()">⚙ API Key</button>
-  </div>
-</div>
-
-<!-- INLINE API PANEL (positioned under header) -->
+<!-- API PANEL -->
 <div class="api-panel" id="apiPanel">
   <h4>Connect Claude API</h4>
-  <p>Enter your Anthropic API key to activate live AI analysis across all 16 HAs and 73 report obligations.</p>
-  <div class="api-panel-note">Your key is stored in browser memory only — never sent to any server other than Anthropic's API directly.</div>
-  <input type="password" id="apiKeyInput2" placeholder="sk-ant-api03-…" style="width:100%;border:1px solid rgba(3,32,60,0.15);border-radius:6px;padding:8px 11px;font-size:13px;font-family:var(--sans);outline:none;margin-bottom:10px;"/>
-  <div class="api-panel-row">
-    <button class="apb-secondary" onclick="useDemoMode()">Demo Mode</button>
-    <button class="apb-primary" onclick="connectAPIPanel()">Connect Live API →</button>
+  <p>Enter your Anthropic API key to activate live AI analysis across all 16 HAs and 73 regulatory report obligations.</p>
+  <div class="api-note">Stored in browser memory only — sent exclusively to Anthropic's API.</div>
+  <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-…" style="width:100%;border:1px solid rgba(3,32,60,0.14);border-radius:6px;padding:8px 10px;font-size:13px;font-family:var(--sans);outline:none;margin-bottom:10px;"/>
+  <div class="api-row">
+    <button class="api-secondary" onclick="useDemoMode()">Demo Mode</button>
+    <button class="api-primary" onclick="connectAPI()">Connect Live API →</button>
   </div>
-  <div id="apiPanelStatus" style="display:none;margin-top:10px;font-size:12px;padding:7px 10px;border-radius:5px;"></div>
+  <div class="api-status" id="apiStatus"></div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
+<!-- SHELL -->
+<div class="shell">
 
-  <!-- FORM -->
-  <div class="form-card">
-    <div class="form-card-header">
-      <h2>AE Case Details</h2>
-      <p>Enter a case narrative <em>or</em> fill fields manually — RegIntel resolves all global obligations</p>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <button class="new-case-btn" onclick="showView('intake')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Case Analysis
+    </button>
+
+    <div class="sb-section">
+      <div class="sb-section-label">Workspace</div>
+      <div class="sb-item active" id="nav-dashboard" onclick="showView('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="sb-item" id="nav-intake" onclick="showView('intake')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        Case Intake
+      </div>
+      <div class="sb-item" id="nav-history" onclick="showView('history')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        Search History
+        <span class="sb-badge" id="histCount">0</span>
+      </div>
+      <div class="sb-item" id="nav-settings" onclick="showView('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Settings
+      </div>
     </div>
-    <div class="form-body">
 
-      <!-- NARRATIVE INPUT SECTION -->
-      <div class="form-section">
-        <div class="form-section-label" style="display:flex;align-items:center;justify-content:space-between;">
-          <span>Case narrative — paste &amp; extract</span>
-          <span style="font-size:9px;background:rgba(29,158,117,0.15);color:#085041;padding:2px 8px;border-radius:10px;font-weight:600;">AI EXTRACTION</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Paste case narrative / CIOMS text / site report / medical summary</label>
-          <textarea id="f-narrative" rows="8" style="min-height:140px;font-size:12.5px;line-height:1.6;border:1.5px dashed rgba(55,138,221,0.4);background:rgba(55,138,221,0.02);" placeholder="Paste any case narrative here. RegIntel AI will extract:
-&#10;• Patient details (age, sex, country of incidence)
-• Product name, dose, route, frequency
-• Adverse event verbatim + seriousness + outcome
-• Day 0 / date of awareness
-• Causality assessment (reporter + sponsor)
-• Study number / IND / NCT / EudraCT
-• Reporter type and development phase
-• Country where AE occurred"></textarea>
-        </div>
-        <button id="extractBtn" onclick="extractFromNarrative()" style="width:100%;background:#0A5F9A;color:#fff;border:none;border-radius:7px;padding:11px;font-size:13px;font-weight:500;font-family:var(--sans);cursor:pointer;transition:all .2s;margin-bottom:4px;">
-          ✦ Extract &amp; Auto-fill All Fields
-        </button>
-        <div id="extractStatus" style="display:none;margin-top:8px;padding:9px 12px;border-radius:6px;font-size:12px;line-height:1.5;"></div>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;margin-bottom:0;">
-          <div style="flex:1;height:1px;background:rgba(3,32,60,0.1);"></div>
-          <span style="font-size:11px;color:#888780;">or fill fields manually below</span>
-          <div style="flex:1;height:1px;background:rgba(3,32,60,0.1);"></div>
-        </div>
-      </div>
+    <hr class="sb-divider"/>
 
-      <div class="form-section">
-        <div class="form-section-label">Product</div>
-        <div class="form-group">
-          <label class="form-label">Product / Drug Name <span class="req">*</span></label>
-          <input type="text" id="f-product" placeholder="e.g. VS-6766 (Avutometinib), Pembrolizumab"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Product Type <span class="req">*</span></label>
-          <select id="f-type">
-            <option value="">— Select —</option>
-            <option value="drug_small_molecule">Small molecule drug</option>
-            <option value="biologic">Biologic / mAb / Protein</option>
-            <option value="vaccine">Vaccine</option>
-            <option value="gene_therapy">Gene / Cell therapy</option>
-            <option value="medical_device">Medical device</option>
-            <option value="combination_product">Combination product</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">IND / NDA / MAA / EudraCT / NCT</label>
-          <input type="text" id="f-reg" placeholder="e.g. IND 153742 / NCT05074810"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Indication / Therapeutic area</label>
-          <input type="text" id="f-indication" placeholder="e.g. KRAS G12C NSCLC"/>
-        </div>
-      </div>
+    <div class="sb-section">
+      <div class="sb-section-label">Recent Searches</div>
+    </div>
+    <div class="sb-recent" id="sidebarRecent">
+      <div style="font-size:11px;color:rgba(181,212,244,0.3);padding:4px 10px;">No recent searches</div>
+    </div>
 
-      <div class="form-section">
-        <div class="form-section-label">Development status</div>
-        <div class="form-group">
-          <label class="form-label">Phase / Status <span class="req">*</span></label>
-          <select id="f-phase">
-            <option value="">— Select —</option>
-            <option value="phase_1">Phase 1 (First in human)</option>
-            <option value="phase_2">Phase 2</option>
-            <option value="phase_3">Phase 3 (Pivotal)</option>
-            <option value="marketed">Phase 4 / Post-marketing</option>
-            <option value="compassionate">Compassionate use / Named patient</option>
-            <option value="post_approval_ct">Post-approval CT (PASS/PAES)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Sponsor country</label>
-          <select id="f-sponsor">
-            <option value="USA">USA</option>
-            <option value="UK">UK</option>
-            <option value="Germany">Germany</option>
-            <option value="Japan">Japan</option>
-            <option value="Switzerland">Switzerland</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Trial / Marketing countries</label>
-          <input type="text" id="f-countries" placeholder="e.g. USA, UK, Germany, Japan, Canada"/>
-        </div>
-      </div>
+    <div class="sb-footer">
+      <div class="sb-footer-txt">RegIntel v1.0<br/>16 Health Authorities<br/>73 Regulation rows<br/>ICH E2A · E2B R3 · GVP VI</div>
+    </div>
+  </div>
 
-      <div class="form-section">
-        <div class="form-section-label">Adverse Event</div>
-        <div class="form-group">
-          <label class="form-label">AE verbatim term <span class="req">*</span></label>
-          <textarea id="f-ae" placeholder="Describe the adverse event exactly as reported, e.g. 'acute liver failure with jaundice and elevated transaminases'"></textarea>
+  <!-- WORKSPACE -->
+  <div class="workspace">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="view active" id="view-dashboard">
+      <div class="dash-scroll">
+        <div class="dash-greeting">
+          <h2 id="greeting">Good morning.</h2>
+          <p id="greetingSub">Welcome to RegIntel — your global PV regulatory intelligence platform.</p>
         </div>
-        <div class="form-group">
-          <label class="form-label">Day 0 — first sponsor awareness date <span class="req">*</span></label>
-          <input type="date" id="f-day0"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Seriousness criteria met <span class="req">*</span></label>
-          <div class="checkbox-grid">
-            <label class="cb-item" id="cb-fatal"><input type="checkbox" value="fatal" onchange="toggleCB(this)"/> Fatal (death)</label>
-            <label class="cb-item" id="cb-lt"><input type="checkbox" value="life_threatening" onchange="toggleCB(this)"/> Life-threatening</label>
-            <label class="cb-item" id="cb-hosp"><input type="checkbox" value="hospitalization" onchange="toggleCB(this)"/> Hospitalization</label>
-            <label class="cb-item" id="cb-disab"><input type="checkbox" value="disability" onchange="toggleCB(this)"/> Disability</label>
-            <label class="cb-item" id="cb-ca"><input type="checkbox" value="congenital" onchange="toggleCB(this)"/> Congenital anomaly</label>
-            <label class="cb-item" id="cb-ns"><input type="checkbox" value="non_serious" onchange="toggleCB(this)"/> Non-serious</label>
+
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-val" id="kpi-searches" style="color:var(--navy);">0</div>
+            <div class="kpi-label">Cases Analyzed</div>
+            <div class="kpi-sub" style="color:var(--teal);">All time</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val" style="color:var(--navy);">16</div>
+            <div class="kpi-label">Health Authorities</div>
+            <div class="kpi-sub" style="color:var(--teal);">ICH + non-ICH</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val" style="color:var(--navy);">73</div>
+            <div class="kpi-label">Regulation Rows</div>
+            <div class="kpi-sub" style="color:var(--teal);">Across all HAs</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-val" id="kpi-last" style="color:var(--navy);">—</div>
+            <div class="kpi-label">Last Analysis</div>
+            <div class="kpi-sub" id="kpi-last-sub" style="color:var(--muted);">No cases yet</div>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Causality (sponsor assessment) <span class="req">*</span></label>
-          <select id="f-causality">
-            <option value="related">Definitely / Probably related</option>
-            <option value="possibly">Possibly related</option>
-            <option value="unlikely">Unlikely related</option>
-            <option value="unrelated">Unrelated</option>
-            <option value="unassessable">Not assessable</option>
-          </select>
+
+        <div class="dash-row">
+          <!-- Recent searches table -->
+          <div class="dash-card" style="grid-column:1/-1;">
+            <div class="dash-card-hdr">
+              <h3>Recent Case Analyses</h3>
+              <button onclick="showView('history')" style="font-size:11px;color:var(--sky);background:none;border:none;cursor:pointer;">View all →</button>
+            </div>
+            <div id="dashRecentTable">
+              <div style="padding:32px;text-align:center;color:var(--muted);font-size:13px;">
+                No cases analyzed yet. <button onclick="showView('intake')" style="color:var(--sky);background:none;border:none;cursor:pointer;font-size:13px;">Start your first analysis →</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Expectedness vs. RSI (IB / SmPC / USPI)</label>
-          <select id="f-expect">
-            <option value="unexpected">Unexpected — NOT listed in IB or labeling</option>
-            <option value="expected">Expected — listed in IB or labeling</option>
-            <option value="unknown">Unknown — RSI not available</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Patient country (where AE occurred)</label>
-          <input type="text" id="f-patient-country" placeholder="e.g. United States"/>
+
+        <div class="dash-row">
+          <!-- HA Coverage -->
+          <div class="dash-card">
+            <div class="dash-card-hdr">
+              <h3>Health Authority Coverage</h3>
+              <span>16 jurisdictions</span>
+            </div>
+            <div class="ha-map">
+              <div class="ha-pill"><div class="ha-pill-code" style="color:#185FA5;">FDA</div><div class="ha-pill-country">USA</div><div class="ha-pill-reg">21 CFR 312/314</div></div>
+              <div class="ha-pill"><div class="ha-pill-code" style="color:#3C3489;">EMA</div><div class="ha-pill-country">EU</div><div class="ha-pill-reg">GVP Module VI</div></div>
+              <div class="ha-pill"><div class="ha-pill-code" style="color:#3C3489;">MHRA</div><div class="ha-pill-country">UK</div><div class="ha-pill-reg">SI 2012/1916</div></div>
+              <div class="ha-pill"><div class="ha-pill-code" style="color:#854F0B;">PMDA</div><div class="ha-pill-country">Japan</div><div class="ha-pill-reg">PMD Act</div></div>
+              <div class="ha-pill"><div class="ha-pill-code" style="color:#A32D2D;">HC</div><div class="ha-pill-country">Canada</div><div class="ha-pill-reg">FDR C.01.016</div></div>
+              <div class="ha-pill"><div class="ha-pill-code" style="color:#3B6D11;">TGA</div><div class="ha-pill-country">Australia</div><div class="ha-pill-reg">TGA Act 1989</div></div>
+              <div class="ha-pill"><div class="ha-pill-code" style="color:#854F0B;">MFDS</div><div class="ha-pill-country">Korea</div><div class="ha-pill-reg">KGVP</div></div>
+              <div class="ha-pill"><div class="ha-pill-code" style="color:#854F0B;">Swissmedic</div><div class="ha-pill-country">Switzerland</div><div class="ha-pill-reg">HMG Art.59</div></div>
+            </div>
+          </div>
+          <!-- Quick activity -->
+          <div class="dash-card">
+            <div class="dash-card-hdr">
+              <h3>Platform Activity</h3>
+              <span>Live</span>
+            </div>
+            <div class="activity-feed" id="activityFeed">
+              <div class="af-item"><div class="af-dot dot-ok"></div><div class="af-txt">RegIntel platform ready — 16 HAs loaded, 73 regulation rows active</div><div class="af-time">Now</div></div>
+              <div class="af-item"><div class="af-dot dot-per"></div><div class="af-txt">EMA EURD list — PSUR submission dates current as of Q2 2025</div><div class="af-time">Today</div></div>
+              <div class="af-item"><div class="af-dot dot-per"></div><div class="af-txt">ICH E2B R3 — current version active for all supported HAs</div><div class="af-time">Today</div></div>
+              <div class="af-item"><div class="af-dot dot-ok"></div><div class="af-txt">GVP Module VI Rev 2 coded — §VI.B.6.1/.2/.3 all sections</div><div class="af-time">Latest</div></div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="form-section">
-        <div class="form-section-label">Health authorities in scope</div>
-        <div class="ha-grid" id="haGrid">
-          <label class="ha-item checked" id="ha-FDA"><input type="checkbox" value="FDA" checked onchange="toggleHA(this)"/> FDA (USA)</label>
-          <label class="ha-item checked" id="ha-EMA"><input type="checkbox" value="EMA" checked onchange="toggleHA(this)"/> EMA (EU)</label>
-          <label class="ha-item" id="ha-MHRA"><input type="checkbox" value="MHRA" onchange="toggleHA(this)"/> MHRA (UK)</label>
-          <label class="ha-item" id="ha-PMDA"><input type="checkbox" value="PMDA" onchange="toggleHA(this)"/> PMDA (Japan)</label>
-          <label class="ha-item" id="ha-HC"><input type="checkbox" value="HC" onchange="toggleHA(this)"/> Health Canada</label>
-          <label class="ha-item" id="ha-TGA"><input type="checkbox" value="TGA" onchange="toggleHA(this)"/> TGA (Australia)</label>
-          <label class="ha-item" id="ha-SWISSMEDIC"><input type="checkbox" value="SWISSMEDIC" onchange="toggleHA(this)"/> Swissmedic (CH)</label>
-          <label class="ha-item" id="ha-MFDS"><input type="checkbox" value="MFDS" onchange="toggleHA(this)"/> MFDS (Korea)</label>
-          <label class="ha-item" id="ha-ANVISA"><input type="checkbox" value="ANVISA" onchange="toggleHA(this)"/> ANVISA (Brazil)</label>
-          <label class="ha-item" id="ha-NMPA"><input type="checkbox" value="NMPA" onchange="toggleHA(this)"/> NMPA (China)</label>
-          <label class="ha-item" id="ha-CDSCO"><input type="checkbox" value="CDSCO" onchange="toggleHA(this)"/> CDSCO (India)</label>
-          <label class="ha-item" id="ha-SFDA"><input type="checkbox" value="SFDA" onchange="toggleHA(this)"/> SFDA (Saudi)</label>
-          <label class="ha-item" id="ha-MEDSAFE"><input type="checkbox" value="MEDSAFE" onchange="toggleHA(this)"/> Medsafe (NZ)</label>
-          <label class="ha-item" id="ha-COFEPRIS"><input type="checkbox" value="COFEPRIS" onchange="toggleHA(this)"/> COFEPRIS (Mexico)</label>
-          <label class="ha-item" id="ha-HSA"><input type="checkbox" value="HSA" onchange="toggleHA(this)"/> HSA (Singapore)</label>
-          <label class="ha-item" id="ha-WHO"><input type="checkbox" value="WHO" onchange="toggleHA(this)"/> WHO / VigiBase</label>
+    <!-- ── CASE INTAKE ── -->
+    <div class="view" id="view-intake">
+      <div class="intake-shell">
+        <div class="form-panel">
+          <div class="form-panel-hdr">
+            <h2>AE Case Analysis</h2>
+            <p>Paste a narrative or fill fields — RegIntel resolves all global obligations</p>
+          </div>
+          <div class="form-body">
+
+            <!-- NARRATIVE -->
+            <div class="form-sec-label" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>Case Narrative — paste &amp; extract</span>
+              <span style="font-size:9px;background:rgba(29,158,117,0.15);color:var(--tealdk);padding:2px 7px;border-radius:8px;font-weight:600;">AI</span>
+            </div>
+            <div class="fg">
+              <textarea id="f-narrative" rows="6" style="font-size:12px;border:1.5px dashed rgba(55,138,221,0.35);background:rgba(55,138,221,0.02);" placeholder="Paste CIOMS text, site report, or medical summary. AI will extract patient, product, AE, Day 0, causality, countries, and auto-select HAs."></textarea>
+            </div>
+            <button class="extract-btn" id="extractBtn" onclick="extractFromNarrative()">✦ Extract &amp; Auto-fill All Fields</button>
+            <div class="extract-status" id="extractStatus"></div>
+            <div style="display:flex;align-items:center;gap:8px;margin:12px 0 4px;">
+              <div style="flex:1;height:1px;background:var(--border);"></div>
+              <span style="font-size:10px;color:var(--muted);">or fill manually</span>
+              <div style="flex:1;height:1px;background:var(--border);"></div>
+            </div>
+
+            <div class="form-sec-label">Product</div>
+            <div class="fg"><label class="fl">Name <span class="req">*</span></label><input type="text" id="f-product" placeholder="e.g. VS-6766 (Avutometinib)"/></div>
+            <div class="fg"><label class="fl">Type <span class="req">*</span></label>
+              <select id="f-type"><option value="">— Select —</option><option value="drug_small_molecule">Small molecule drug</option><option value="biologic">Biologic / mAb</option><option value="vaccine">Vaccine</option><option value="gene_therapy">Gene / Cell therapy</option><option value="medical_device">Medical device</option><option value="combination_product">Combination product</option></select>
+            </div>
+            <div class="fg"><label class="fl">IND / NDA / EudraCT / NCT</label><input type="text" id="f-reg" placeholder="e.g. IND 153742 / NCT05074810"/></div>
+            <div class="fg"><label class="fl">Indication</label><input type="text" id="f-indication" placeholder="e.g. KRAS G12C NSCLC"/></div>
+
+            <div class="form-sec-label">Development Status</div>
+            <div class="fg"><label class="fl">Phase / Status <span class="req">*</span></label>
+              <select id="f-phase"><option value="">— Select —</option><option value="phase_1">Phase 1</option><option value="phase_2">Phase 2</option><option value="phase_3">Phase 3 (Pivotal)</option><option value="marketed">Phase 4 / Marketed</option><option value="compassionate">Compassionate use</option><option value="post_approval_ct">Post-approval CT</option></select>
+            </div>
+            <div class="fg"><label class="fl">Sponsor country</label>
+              <select id="f-sponsor"><option value="USA">USA</option><option value="UK">UK</option><option value="Germany">Germany</option><option value="Japan">Japan</option><option value="Switzerland">Switzerland</option><option value="Other">Other</option></select>
+            </div>
+            <div class="fg"><label class="fl">Trial / Marketing countries</label><input type="text" id="f-countries" placeholder="e.g. USA, UK, Germany, Japan, Canada"/></div>
+
+            <div class="form-sec-label">Adverse Event</div>
+            <div class="fg"><label class="fl">AE verbatim term <span class="req">*</span></label><textarea id="f-ae" rows="2" placeholder="Exact AE as reported, e.g. acute liver failure with jaundice"></textarea></div>
+            <div class="fg"><label class="fl">Day 0 — First awareness date <span class="req">*</span></label><input type="date" id="f-day0"/></div>
+            <div class="fg"><label class="fl">Seriousness <span class="req">*</span></label>
+              <div class="cb-grid">
+                <label class="cb-item" id="cb-fatal"><input type="checkbox" value="fatal" onchange="toggleCB(this)"/> Fatal (death)</label>
+                <label class="cb-item" id="cb-lt"><input type="checkbox" value="life_threatening" onchange="toggleCB(this)"/> Life-threatening</label>
+                <label class="cb-item" id="cb-hosp"><input type="checkbox" value="hospitalization" onchange="toggleCB(this)"/> Hospitalization</label>
+                <label class="cb-item" id="cb-disab"><input type="checkbox" value="disability" onchange="toggleCB(this)"/> Disability</label>
+                <label class="cb-item" id="cb-ca"><input type="checkbox" value="congenital" onchange="toggleCB(this)"/> Congenital anomaly</label>
+                <label class="cb-item" id="cb-ns"><input type="checkbox" value="non_serious" onchange="toggleCB(this)"/> Non-serious</label>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Causality</label>
+              <select id="f-causality"><option value="related">Definitely / Probably related</option><option value="possibly">Possibly related</option><option value="unlikely">Unlikely related</option><option value="unrelated">Unrelated</option><option value="unassessable">Not assessable</option></select>
+            </div>
+            <div class="fg"><label class="fl">Expectedness vs RSI</label>
+              <select id="f-expect"><option value="unexpected">Unexpected — NOT listed in IB/labeling</option><option value="expected">Expected — listed in IB/labeling</option><option value="unknown">Unknown — RSI not available</option></select>
+            </div>
+            <div class="fg"><label class="fl">Patient country (AE occurrence)</label><input type="text" id="f-patient-country" placeholder="e.g. United States"/></div>
+
+            <div class="form-sec-label" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>Health Authorities</span>
+              <span style="display:flex;gap:6px;">
+                <button onclick="selectAllHA(true)" style="font-size:10px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;color:var(--muted);">All</button>
+                <button onclick="selectAllHA(false)" style="font-size:10px;padding:2px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;color:var(--muted);">None</button>
+              </span>
+            </div>
+            <div class="fg">
+              <div class="ha-grid" id="haGrid">
+                <label class="ha-item ck" id="ha-FDA"><input type="checkbox" value="FDA" checked onchange="toggleHA(this)"/> FDA (USA)</label>
+                <label class="ha-item ck" id="ha-EMA"><input type="checkbox" value="EMA" checked onchange="toggleHA(this)"/> EMA (EU)</label>
+                <label class="ha-item" id="ha-MHRA"><input type="checkbox" value="MHRA" onchange="toggleHA(this)"/> MHRA (UK)</label>
+                <label class="ha-item" id="ha-PMDA"><input type="checkbox" value="PMDA" onchange="toggleHA(this)"/> PMDA (Japan)</label>
+                <label class="ha-item" id="ha-HC"><input type="checkbox" value="HC" onchange="toggleHA(this)"/> Health Canada</label>
+                <label class="ha-item" id="ha-TGA"><input type="checkbox" value="TGA" onchange="toggleHA(this)"/> TGA (Australia)</label>
+                <label class="ha-item" id="ha-SWISSMEDIC"><input type="checkbox" value="SWISSMEDIC" onchange="toggleHA(this)"/> Swissmedic</label>
+                <label class="ha-item" id="ha-MFDS"><input type="checkbox" value="MFDS" onchange="toggleHA(this)"/> MFDS (Korea)</label>
+                <label class="ha-item" id="ha-ANVISA"><input type="checkbox" value="ANVISA" onchange="toggleHA(this)"/> ANVISA (Brazil)</label>
+                <label class="ha-item" id="ha-NMPA"><input type="checkbox" value="NMPA" onchange="toggleHA(this)"/> NMPA (China)</label>
+                <label class="ha-item" id="ha-CDSCO"><input type="checkbox" value="CDSCO" onchange="toggleHA(this)"/> CDSCO (India)</label>
+                <label class="ha-item" id="ha-SFDA"><input type="checkbox" value="SFDA" onchange="toggleHA(this)"/> SFDA (Saudi)</label>
+                <label class="ha-item" id="ha-MEDSAFE"><input type="checkbox" value="MEDSAFE" onchange="toggleHA(this)"/> Medsafe (NZ)</label>
+                <label class="ha-item" id="ha-COFEPRIS"><input type="checkbox" value="COFEPRIS" onchange="toggleHA(this)"/> COFEPRIS (MX)</label>
+                <label class="ha-item" id="ha-HSA"><input type="checkbox" value="HSA" onchange="toggleHA(this)"/> HSA (Singapore)</label>
+                <label class="ha-item" id="ha-WHO"><input type="checkbox" value="WHO" onchange="toggleHA(this)"/> WHO / VigiBase</label>
+              </div>
+            </div>
+
+            <button class="run-btn" id="runBtn" onclick="resolve()">▶ Resolve All Obligations</button>
+            <button class="demo-link" onclick="loadDemo()">Load VS-6766 demo case</button>
+          </div>
         </div>
-        <div style="margin-top:8px;display:flex;gap:8px;">
-          <button onclick="selectAllHA(true)" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;cursor:pointer;color:var(--muted);">Select all</button>
-          <button onclick="selectAllHA(false)" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;cursor:pointer;color:var(--muted);">Clear all</button>
+
+        <!-- RESULTS -->
+        <div class="results-panel">
+          <div class="results-scroll" id="resultsScroll">
+            <div class="empty-state" id="emptyState">
+              <div class="ei">⚕</div>
+              <h3>Ready to resolve</h3>
+              <p>Fill in case details and click Resolve All Obligations — or paste a narrative and let AI extract everything for you.</p>
+            </div>
+          </div>
         </div>
       </div>
-
-      <button class="run-btn" id="runBtn" onclick="resolve()">
-        ▶ Resolve All Obligations
-      </button>
-      <button class="demo-btn" onclick="loadDemo()">Load VS-6766 demo narrative</button>
     </div>
-  </div>
 
-  <!-- RESULTS -->
-  <div class="results-panel" id="resultsPanel">
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">⚕</div>
-      <div class="empty-title">Enter an AE to begin</div>
-      <div class="empty-sub">Fill in the case details on the left. RegIntel will resolve every global reporting obligation — timelines, formats, citations, narratives — across all selected Health Authorities.</div>
+    <!-- ── HISTORY ── -->
+    <div class="view" id="view-history">
+      <div class="hist-scroll">
+        <div class="hist-hdr">
+          <h2>Search History</h2>
+          <button onclick="clearHistory()" style="font-size:12px;color:var(--red);background:#FCEBEB;border:1px solid rgba(163,45,45,0.2);border-radius:6px;padding:6px 14px;cursor:pointer;">Clear all</button>
+        </div>
+        <div class="hist-grid" id="histGrid">
+          <div class="hist-empty" style="grid-column:1/-1;">
+            <h3>No searches saved yet</h3>
+            <p style="font-size:13px;color:var(--muted);">Every case you analyze is automatically saved here for quick re-run.</p>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-</div>
+    <!-- ── SETTINGS ── -->
+    <div class="view" id="view-settings">
+      <div class="settings-scroll">
+        <h2>Settings</h2>
+        <div class="settings-section">
+          <div class="ss-hdr"><h3>API Configuration</h3></div>
+          <div class="ss-row">
+            <div><div class="ss-row-label">Claude API Key</div><div class="ss-row-sub">Required for live AI-powered obligation resolution</div></div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="password" class="ss-input" id="settingsApiKey" placeholder="sk-ant-api03-…"/>
+              <button class="ss-btn primary" onclick="saveSettingsKey()">Save</button>
+            </div>
+          </div>
+          <div class="ss-row">
+            <div><div class="ss-row-label">Current mode</div><div class="ss-row-sub" id="settingsMode">Demo mode — no API key connected</div></div>
+            <button class="ss-btn" onclick="useDemoMode()">Reset to Demo</button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="ss-hdr"><h3>Search History</h3></div>
+          <div class="ss-row">
+            <div><div class="ss-row-label">Saved searches</div><div class="ss-row-sub" id="settingsHistCount">0 cases stored</div></div>
+            <button class="ss-btn danger" onclick="clearHistory()">Clear history</button>
+          </div>
+          <div class="ss-row">
+            <div><div class="ss-row-label">Storage</div><div class="ss-row-sub">Searches are saved in your browser's localStorage</div></div>
+            <span style="font-size:12px;color:var(--teal);">Local only</span>
+          </div>
+        </div>
+        <div class="settings-section">
+          <div class="ss-hdr"><h3>Platform Info</h3></div>
+          <div class="ss-row"><div class="ss-row-label">Version</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">RegIntel v1.0</span></div>
+          <div class="ss-row"><div class="ss-row-label">Health Authorities</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">16 HAs · 73 regulation rows</span></div>
+          <div class="ss-row"><div class="ss-row-label">ICH Guidelines</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">E2A · E2B R3 · E2C(R2) · E2D · E2F</span></div>
+          <div class="ss-row"><div class="ss-row-label">GVP Coverage</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">Modules I · V · VI · VII · IX</span></div>
+          <div class="ss-row"><div class="ss-row-label">Model</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">claude-sonnet-4-6</span></div>
+        </div>
+      </div>
+    </div>
 
+  </div><!-- /workspace -->
+</div><!-- /shell -->
+</div><!-- /appRoot -->
 <script>
 // ── STATE ──
 let apiKey = '';
 let demoMode = true;
+const HIST_KEY = 'regintel_searches';
 
 // ── INIT ──
-document.addEventListener('click', function(e){
-  const panel = document.getElementById('apiPanel');
-  const btn = document.getElementById('apiToggleBtn');
-  if(panel && panel.classList.contains('visible')){
-    if(!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)){
-      panel.classList.remove('visible');
-    }
-  }
-});
-
 window.addEventListener('load', () => {
   document.getElementById('f-day0').valueAsDate = new Date();
-  // Show inline API panel on load (not fixed modal)
-  setTimeout(()=>{ document.getElementById('apiPanel').classList.add('visible'); }, 300);
+  setGreeting();
+  loadHistory();
+  updateHistCount();
+  setTimeout(()=>{ document.getElementById('apiPanel').classList.add('open'); }, 400);
+  document.querySelectorAll('.ha-item input:checked').forEach(cb=>cb.closest('.ha-item').classList.add('ck'));
 });
 
-// ── API KEY PANEL (inline, no fixed positioning) ──
-function toggleApiPanel(){
+document.addEventListener('click', e=>{
   const panel = document.getElementById('apiPanel');
-  panel.classList.toggle('visible');
+  const btn = document.getElementById('apiToggleBtn');
+  if(panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+
+function setGreeting(){
+  const h = new Date().getHours();
+  document.getElementById('greeting').textContent = h<12?'Good morning.':h<17?'Good afternoon.':'Good evening.';
 }
-function closeApiPanel(){
-  document.getElementById('apiPanel').classList.remove('visible');
+
+// ── NAV ──
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.sb-item[id^=nav-]').forEach(i=>i.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  const nav = document.getElementById('nav-'+name);
+  if(nav) nav.classList.add('active');
+  if(name==='history') renderHistGrid();
+  if(name==='settings') updateSettingsPage();
 }
-function connectAPIPanel(){
-  // Try inline panel input first, fall back to original modal input
-  const inp2 = document.getElementById('apiKeyInput2');
-  const inp1 = document.getElementById('apiKeyInput');
-  const k = (inp2 && inp2.value.trim()) || (inp1 && inp1.value.trim()) || '';
-  const statusEl = document.getElementById('apiPanelStatus');
-  if(!k || !k.startsWith('sk-ant')){
-    if(statusEl){
-      statusEl.style.display='block';
-      statusEl.style.background='rgba(163,45,45,0.08)';
-      statusEl.style.color='#A32D2D';
-      statusEl.textContent='Invalid key — must start with sk-ant-';
-    }
+
+// ── API PANEL ──
+function toggleApiPanel(){
+  document.getElementById('apiPanel').classList.toggle('open');
+}
+function connectAPI(){
+  const k = document.getElementById('apiKeyInput').value.trim();
+  const st = document.getElementById('apiStatus');
+  if(!k.startsWith('sk-ant')){
+    st.style.cssText='display:block;background:#FCEBEB;color:#A32D2D;border-radius:5px;';
+    st.textContent='Invalid key — must start with sk-ant-';
     return;
   }
-  apiKey = k; demoMode = false;
-  document.getElementById('modeBadge').textContent = 'LIVE · CLAUDE API';
-  document.getElementById('modeBadge').style.background = 'rgba(29,158,117,0.25)';
-  document.getElementById('modeBadge').style.color = '#9FE1CB';
-  if(statusEl){
-    statusEl.style.display='block';
-    statusEl.style.background='rgba(29,158,117,0.1)';
-    statusEl.style.color='#085041';
-    statusEl.textContent='✓ Connected — live Claude API active';
-  }
-  setTimeout(()=>closeApiPanel(), 1200);
+  apiKey=k; demoMode=false;
+  document.getElementById('modeBadge').textContent='LIVE · CLAUDE API';
+  document.getElementById('modeBadge').style.cssText='background:rgba(29,158,117,0.25);color:#9FE1CB;border:1px solid rgba(29,158,117,0.4);';
+  st.style.cssText='display:block;background:#E1F5EE;color:#085041;border-radius:5px;';
+  st.textContent='✓ Connected — live Claude API active';
+  setTimeout(()=>document.getElementById('apiPanel').classList.remove('open'),1400);
+  updateSettingsPage();
 }
-function connectAPI(){ connectAPIPanel(); } // alias for old modal button
-function showModal(){ toggleApiPanel(); }   // redirect old modal trigger to panel
 function useDemoMode(){
-  demoMode = true; apiKey = '';
-  document.getElementById('modeBadge').textContent = 'DEMO MODE';
-  document.getElementById('modeBadge').style.background = 'rgba(29,158,117,0.2)';
-  document.getElementById('modeBadge').style.color = '#9FE1CB';
-  // Close both modal and panel
-  const modal = document.getElementById('apiModal');
-  if(modal) modal.classList.remove('visible');
-  closeApiPanel();
+  demoMode=true; apiKey='';
+  document.getElementById('modeBadge').textContent='DEMO MODE';
+  document.getElementById('modeBadge').style.cssText='';
+  document.getElementById('apiPanel').classList.remove('open');
+  updateSettingsPage();
+}
+function saveSettingsKey(){
+  const k = document.getElementById('settingsApiKey').value.trim();
+  document.getElementById('apiKeyInput').value = k;
+  connectAPI();
+}
+function updateSettingsPage(){
+  const modeEl = document.getElementById('settingsMode');
+  if(modeEl) modeEl.textContent = apiKey ? 'Live mode — Claude API connected' : 'Demo mode — no API key connected';
 }
 
+// ── FORM HELPERS ──
 function toggleCB(cb){
-  cb.closest('.cb-item').classList.toggle('checked', cb.checked);
-  if(cb.value==='non_serious' && cb.checked){
+  cb.closest('.cb-item').classList.toggle('ck', cb.checked);
+  if(cb.value==='non_serious'&&cb.checked){
     ['fatal','lt','hosp','disab','ca'].forEach(id=>{
-      const el = document.getElementById('cb-'+id);
-      if(el){ el.querySelector('input').checked=false; el.classList.remove('checked'); }
+      const el=document.getElementById('cb-'+id);
+      if(el){el.querySelector('input').checked=false;el.classList.remove('ck');}
     });
-  } else if(cb.value!=='non_serious' && cb.checked){
-    const ns = document.getElementById('cb-ns');
-    if(ns){ ns.querySelector('input').checked=false; ns.classList.remove('checked'); }
+  } else if(cb.value!=='non_serious'&&cb.checked){
+    const ns=document.getElementById('cb-ns');
+    if(ns){ns.querySelector('input').checked=false;ns.classList.remove('ck');}
   }
 }
-function toggleHA(cb){ cb.closest('.ha-item').classList.toggle('checked', cb.checked); }
+function toggleHA(cb){ cb.closest('.ha-item').classList.toggle('ck', cb.checked); }
 function selectAllHA(v){
   document.querySelectorAll('#haGrid input').forEach(cb=>{
-    cb.checked=v; cb.closest('.ha-item').classList.toggle('checked',v);
+    cb.checked=v; cb.closest('.ha-item').classList.toggle('ck',v);
   });
 }
-
 function getCase(){
   return {
-    product: document.getElementById('f-product').value.trim(),
-    type: document.getElementById('f-type').value,
-    reg: document.getElementById('f-reg').value.trim(),
-    indication: document.getElementById('f-indication').value.trim(),
-    phase: document.getElementById('f-phase').value,
-    sponsor: document.getElementById('f-sponsor').value,
-    countries: document.getElementById('f-countries').value.trim(),
-    ae: document.getElementById('f-ae').value.trim(),
-    day0: document.getElementById('f-day0').value,
-    seriousness: [...document.querySelectorAll('.checkbox-grid input:checked')].map(c=>c.value),
-    causality: document.getElementById('f-causality').value,
-    expectedness: document.getElementById('f-expect').value,
-    patientCountry: document.getElementById('f-patient-country').value.trim(),
-    has: [...document.querySelectorAll('#haGrid input:checked')].map(c=>c.value)
+    product:document.getElementById('f-product').value.trim(),
+    type:document.getElementById('f-type').value,
+    reg:document.getElementById('f-reg').value.trim(),
+    indication:document.getElementById('f-indication').value.trim(),
+    phase:document.getElementById('f-phase').value,
+    sponsor:document.getElementById('f-sponsor').value,
+    countries:document.getElementById('f-countries').value.trim(),
+    ae:document.getElementById('f-ae').value.trim(),
+    day0:document.getElementById('f-day0').value,
+    seriousness:[...document.querySelectorAll('.cb-grid input:checked')].map(c=>c.value),
+    causality:document.getElementById('f-causality').value,
+    expectedness:document.getElementById('f-expect').value,
+    patientCountry:document.getElementById('f-patient-country').value.trim(),
+    has:[...document.querySelectorAll('#haGrid input:checked')].map(c=>c.value),
+    timestamp: new Date().toISOString()
   };
 }
 
-function loadDemo(){
-  const d = new Date(); d.setDate(d.getDate()-2);
-  const onsetD = new Date(); onsetD.setDate(onsetD.getDate()-6);
-  const fmt = dt => dt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
-  document.getElementById('f-narrative').value =
-`A 58-year-old male patient with KRAS G12C-mutated non-small cell lung cancer (NSCLC) was enrolled in the RAMP 205 Phase 3 clinical study (IND 153742, NCT05074810) and received avutometinib (VS-6766) 3.2 mg twice weekly orally in combination with defactinib 400 mg twice daily orally as per protocol. Medical history included hypertension and type 2 diabetes mellitus. Concomitant medications included metformin and lisinopril.
+// ── HISTORY (localStorage) ──
+function getHistory(){ try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]');}catch(e){return[];} }
+function saveHistory(arr){ try{localStorage.setItem(HIST_KEY, JSON.stringify(arr.slice(0,50)));}catch(e){} }
+function addToHistory(c, isSUSAR, tl){
+  const arr = getHistory();
+  const entry = { ...c, id: Date.now(), isSUSAR, tl, savedAt: new Date().toISOString() };
+  arr.unshift(entry);
+  saveHistory(arr);
+  updateHistCount();
+  renderSidebarRecent();
+  updateDashboard();
+}
+function updateHistCount(){
+  const n = getHistory().length;
+  const el = document.getElementById('histCount');
+  if(el) el.textContent = n;
+  const sc = document.getElementById('settingsHistCount');
+  if(sc) sc.textContent = n + ' case' + (n!==1?'s':'') + ' stored';
+  const kpi = document.getElementById('kpi-searches');
+  if(kpi) kpi.textContent = n;
+}
+function clearHistory(){
+  if(!confirm('Clear all saved searches?')) return;
+  localStorage.removeItem(HIST_KEY);
+  updateHistCount();
+  renderSidebarRecent();
+  renderHistGrid();
+  updateDashboard();
+}
+function deleteHistEntry(id){
+  const arr = getHistory().filter(e=>e.id!==id);
+  saveHistory(arr);
+  updateHistCount();
+  renderSidebarRecent();
+  renderHistGrid();
+  updateDashboard();
+}
+function loadHistory(){
+  renderSidebarRecent();
+  updateDashboard();
+}
 
-On ${fmt(onsetD)} (Cycle 2, Day 8), the patient developed acute liver failure with jaundice and coagulopathy. Laboratory findings showed ALT 1240 U/L (>40x ULN), AST 980 U/L, total bilirubin 8.4 mg/dL, and INR 3.2. The patient was hospitalized at MD Anderson Cancer Center, Houston, USA. Both avutometinib and defactinib were permanently discontinued.
+function renderSidebarRecent(){
+  const arr = getHistory().slice(0,5);
+  const el = document.getElementById('sidebarRecent');
+  if(!arr.length){
+    el.innerHTML='<div style="font-size:11px;color:rgba(181,212,244,0.3);padding:4px 10px;">No recent searches</div>';
+    return;
+  }
+  el.innerHTML = arr.map(e=>{
+    const tlTag = e.isSUSAR?'tsusar':e.tl<=7?'t7':e.tl<=15?'t15':e.tl<=30?'t30':'t90';
+    const tlLabel = e.isSUSAR?'SUSAR':e.tl+'d';
+    return `<div class="sb-recent-item" onclick="rerunCase(${e.id})">
+      <div class="sb-ri-product">${e.product||'Unknown product'}</div>
+      <div class="sb-ri-ae">${(e.ae||'').substring(0,45)}${(e.ae||'').length>45?'…':''}</div>
+      <div class="sb-ri-meta">
+        <span class="sb-ri-tag tag ${tlTag}" style="font-size:9px;">${tlLabel}</span>
+        <span style="font-size:9px;color:rgba(181,212,244,0.3);font-family:var(--mono);">${e.has?e.has.length+' HAs':''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-Despite intensive supportive care, the patient died on ${fmt(d)}. Cause of death was acute hepatic failure. Autopsy pending. The reporting investigator (Dr. James T., MD Anderson Cancer Center) assessed causality as possibly related. Sponsor (Verastem Oncology, Boston, MA, USA) became aware on ${fmt(d)}. This event is unexpected as fatal hepatic failure is not listed in the VS-6766 IB v8.0. Study active in USA, United Kingdom, Germany, France, Spain, Canada, and Australia.`;
-  document.getElementById('f-product').value = 'VS-6766 (Avutometinib)';
-  document.getElementById('f-type').value = 'drug_small_molecule';
-  document.getElementById('f-reg').value = 'IND 153742 / NCT05074810';
-  document.getElementById('f-indication').value = 'KRAS G12C NSCLC (RAMP 205 study)';
-  document.getElementById('f-phase').value = 'phase_3';
-  document.getElementById('f-sponsor').value = 'USA';
-  document.getElementById('f-countries').value = 'USA, UK, Germany, France, Spain, Canada, Australia';
-  document.getElementById('f-ae').value = 'Acute liver failure with jaundice and coagulopathy';
-  document.getElementById('f-day0').value = d.toISOString().slice(0,10);
-  document.getElementById('f-patient-country').value = 'United States';
-  document.querySelectorAll('.checkbox-grid input').forEach(cb=>{
-    cb.checked = ['fatal','hospitalization'].includes(cb.value);
-    cb.closest('.cb-item').classList.toggle('checked', cb.checked);
-  });
-  document.getElementById('f-causality').value = 'possibly';
-  document.getElementById('f-expect').value = 'unexpected';
-  const haSelect = ['FDA','EMA','MHRA','HC','TGA','SWISSMEDIC'];
-  document.querySelectorAll('#haGrid input').forEach(cb=>{
-    cb.checked = haSelect.includes(cb.value);
-    cb.closest('.ha-item').classList.toggle('checked', cb.checked);
-  });
+function renderHistGrid(){
+  const arr = getHistory();
+  const el = document.getElementById('histGrid');
+  if(!arr.length){
+    el.innerHTML='<div class="hist-empty" style="grid-column:1/-1;"><h3>No searches saved yet</h3><p style="font-size:13px;color:var(--muted);">Every case you analyze is automatically saved here.</p></div>';
+    return;
+  }
+  el.innerHTML = arr.map(e=>{
+    const tlTag = e.isSUSAR?'tsusar':e.tl<=7?'t7':e.tl<=15?'t15':'t90';
+    const tlLabel = e.isSUSAR?'SUSAR':e.tl+'-day';
+    const d = new Date(e.savedAt||e.timestamp||Date.now());
+    const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    return `<div class="hist-card">
+      <div class="hc-product">${e.product||'Unknown product'}</div>
+      <div class="hc-ae">${(e.ae||'No AE recorded').substring(0,80)}${(e.ae||'').length>80?'…':''}</div>
+      <div class="hc-meta">
+        <span class="tag ${tlTag}">${tlLabel}</span>
+        <span class="tag" style="background:rgba(3,32,60,0.06);color:var(--muted);">${e.phase||''}</span>
+        ${e.has?`<span class="tag" style="background:rgba(3,32,60,0.06);color:var(--muted);">${e.has.length} HAs</span>`:''}
+      </div>
+      <div style="font-size:11px;color:var(--muted);">Day 0: ${e.day0||'—'} &nbsp;·&nbsp; ${e.sponsor||''}</div>
+      <div class="hc-footer">
+        <div>
+          <div class="hc-date">${dateStr}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px;">${(e.has||[]).join(' · ')}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="ss-btn" style="font-size:11px;padding:4px 10px;" onclick="rerunCase(${e.id})">Re-run →</button>
+          <button class="hc-del" onclick="event.stopPropagation();deleteHistEntry(${e.id})">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateDashboard(){
+  const arr = getHistory();
+  // KPIs
+  const kpi = document.getElementById('kpi-searches');
+  if(kpi) kpi.textContent = arr.length;
+  if(arr.length>0){
+    const last = arr[0];
+    const el = document.getElementById('kpi-last');
+    if(el) el.textContent = last.product ? last.product.substring(0,10) : '—';
+    const sub = document.getElementById('kpi-last-sub');
+    if(sub) sub.textContent = new Date(last.savedAt||last.timestamp||Date.now()).toLocaleDateString();
+  }
+  // Recent table
+  const tableEl = document.getElementById('dashRecentTable');
+  if(!tableEl) return;
+  if(!arr.length){
+    tableEl.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px;">No cases analyzed yet. <button onclick="showView(\'intake\')" style="color:var(--sky);background:none;border:none;cursor:pointer;font-size:13px;">Start your first analysis →</button></div>';
+    return;
+  }
+  const rows = arr.slice(0,8).map(e=>{
+    const d = new Date(e.day0||Date.now());
+    const due = new Date(d); due.setDate(due.getDate()+(e.tl||15));
+    const daysLeft = Math.ceil((due-new Date())/86400000);
+    const stCls = daysLeft<0?'tover':daysLeft<=2?'trisk':'tok';
+    const stTxt = daysLeft<0?Math.abs(daysLeft)+'d over':daysLeft+'d left';
+    const tlTag = e.isSUSAR?'tsusar':e.tl<=7?'t7':e.tl<=15?'t15':'t90';
+    return `<tr onclick="rerunCase(${e.id})">
+      <td style="font-family:var(--mono);font-size:11px;">${String(e.id).slice(-6)}</td>
+      <td><strong>${e.product||'—'}</strong></td>
+      <td>${(e.ae||'—').substring(0,40)}${(e.ae||'').length>40?'…':''}</td>
+      <td><span class="tag ${tlTag}">${e.isSUSAR?'SUSAR':e.tl+'d'}</span></td>
+      <td>${e.day0||'—'}</td>
+      <td>${(e.has||[]).length} HAs</td>
+      <td><span class="tag ${stCls}">${stTxt}</span></td>
+    </tr>`;
+  }).join('');
+  tableEl.innerHTML=`<table class="ot-table">
+    <thead><tr><th>Case ID</th><th>Product</th><th>AE</th><th>Type</th><th>Day 0</th><th>Scope</th><th>Clock</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+  // Activity feed
+  const feed = document.getElementById('activityFeed');
+  const extra = arr.slice(0,3).map(e=>`
+    <div class="af-item">
+      <div class="af-dot ${e.isSUSAR?'dot-over':'dot-ok'}"></div>
+      <div class="af-txt"><strong>${e.product||'Case'}</strong> — ${(e.ae||'').substring(0,50)} analyzed · ${(e.has||[]).length} HAs</div>
+      <div class="af-time">${new Date(e.savedAt||Date.now()).toLocaleDateString()}</div>
+    </div>`).join('');
+  if(extra && feed){
+    feed.innerHTML = extra + feed.innerHTML;
+  }
+}
+
+function rerunCase(id){
+  const arr = getHistory();
+  const e = arr.find(x=>x.id===id);
+  if(!e) return;
+  showView('intake');
+  document.getElementById('f-product').value = e.product||'';
+  document.getElementById('f-type').value = e.type||'';
+  document.getElementById('f-reg').value = e.reg||'';
+  document.getElementById('f-indication').value = e.indication||'';
+  document.getElementById('f-phase').value = e.phase||'';
+  document.getElementById('f-sponsor').value = e.sponsor||'USA';
+  document.getElementById('f-countries').value = e.countries||'';
+  document.getElementById('f-ae').value = e.ae||'';
+  document.getElementById('f-day0').value = e.day0||new Date().toISOString().slice(0,10);
+  document.getElementById('f-patient-country').value = e.patientCountry||'';
+  document.getElementById('f-causality').value = e.causality||'possibly';
+  document.getElementById('f-expect').value = e.expectedness||'unexpected';
+  if(e.seriousness){
+    document.querySelectorAll('.cb-grid input').forEach(cb=>{
+      cb.checked=(e.seriousness||[]).includes(cb.value);
+      cb.closest('.cb-item').classList.toggle('ck',cb.checked);
+    });
+  }
+  if(e.has){
+    document.querySelectorAll('#haGrid input').forEach(cb=>{
+      cb.checked=(e.has||[]).includes(cb.value);
+      cb.closest('.ha-item').classList.toggle('ck',cb.checked);
+    });
+  }
+  setTimeout(()=>resolve(), 300);
 }
 
 // ── NARRATIVE EXTRACTION ──
 async function extractFromNarrative(){
   const narrative = document.getElementById('f-narrative').value.trim();
   if(!narrative){ alert('Please paste a case narrative first.'); return; }
-  const btn = document.getElementById('extractBtn');
-  const status = document.getElementById('extractStatus');
-  btn.disabled = true;
-  btn.textContent = 'Extracting…';
-  status.style.display = 'block';
-  status.style.cssText = 'display:block;margin-top:8px;padding:9px 12px;border-radius:6px;font-size:12px;line-height:1.5;background:rgba(55,138,221,0.08);color:#185FA5;border-left:3px solid #378ADD;border-radius:0 6px 6px 0;';
-  status.textContent = 'AI is reading the narrative and extracting structured case data…';
+  const btn=document.getElementById('extractBtn');
+  const st=document.getElementById('extractStatus');
+  btn.disabled=true; btn.textContent='Extracting…';
+  st.style.cssText='display:block;background:rgba(55,138,221,0.08);color:#185FA5;border-left:3px solid #378ADD;border-radius:0 6px 6px 0;';
+  st.textContent='AI reading narrative and extracting structured data…';
   if(demoMode||!apiKey){ await demoExtract(narrative); }
   else { await liveExtract(narrative); }
-  btn.disabled = false;
-  btn.textContent = '✦ Extract & Auto-fill All Fields';
+  btn.disabled=false; btn.textContent='✦ Extract & Auto-fill All Fields';
 }
 
 async function liveExtract(narrative){
-  const prompt = `You are a pharmacovigilance data extraction expert. Extract structured case data from this narrative. Return ONLY valid JSON, no other text, no markdown fences.
-
-NARRATIVE:
-${narrative}
-
-Return this exact JSON:
-{"product_name":null,"product_type":"drug_small_molecule","reg_number":null,"indication":null,"phase":"phase_3","sponsor_country":"USA","trial_countries":null,"patient_age":null,"patient_sex":"unknown","patient_country":null,"ae_verbatim":null,"day0_date":null,"outcome":"unknown","seriousness":[],"causality_reporter":"possibly","causality_sponsor":"possibly","expectedness":"unexpected","reporter_institution":null,"dose":null,"medical_history":null,"lab_values":null,"has_suggested":[]}
-
-Rules:
-- phase: one of phase_1|phase_2|phase_3|marketed|compassionate|post_approval_ct
-- product_type: one of drug_small_molecule|biologic|vaccine|gene_therapy|medical_device|combination_product
-- seriousness array: use values from fatal|life_threatening|hospitalization|disability|congenital|non_serious
-- causality: related|possibly|unlikely|unrelated|unassessable
-- expectedness: unexpected|expected|unknown
-- has_suggested: array of HA codes from FDA EMA MHRA PMDA HC TGA SWISSMEDIC MFDS ANVISA NMPA CDSCO SFDA MEDSAFE COFEPRIS HSA WHO — based on countries mentioned
-- day0_date: YYYY-MM-DD format`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})
-    });
+  const prompt=`Extract PV case data from this narrative. Return ONLY valid JSON, no markdown.
+NARRATIVE: ${narrative}
+JSON schema: {"product_name":null,"product_type":"drug_small_molecule","reg_number":null,"indication":null,"phase":"phase_3","sponsor_country":"USA","trial_countries":null,"patient_age":null,"patient_sex":"unknown","patient_country":null,"ae_verbatim":null,"day0_date":null,"outcome":"unknown","seriousness":[],"causality_reporter":"possibly","causality_sponsor":"possibly","expectedness":"unexpected","reporter_institution":null,"dose":null,"medical_history":null,"lab_values":null,"has_suggested":[]}
+Rules: phase=phase_1|phase_2|phase_3|marketed|compassionate|post_approval_ct; product_type=drug_small_molecule|biologic|vaccine|gene_therapy|medical_device|combination_product; seriousness array from fatal|life_threatening|hospitalization|disability|congenital|non_serious; causality=related|possibly|unlikely|unrelated|unassessable; has_suggested=array of HA codes from FDA EMA MHRA PMDA HC TGA SWISSMEDIC MFDS ANVISA NMPA CDSCO SFDA MEDSAFE COFEPRIS HSA WHO based on countries; day0_date=YYYY-MM-DD`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
     if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error');}
-    const data = await res.json();
-    const text = data.content[0].text.trim().replace(/^```json?\n?/,'').replace(/\n?```$/,'').trim();
-    const extracted = JSON.parse(text);
-    applyExtracted(extracted);
-    showExtractSuccess(extracted);
-  } catch(e){
-    showExtractError('Live extraction error: '+e.message+'. Using pattern extraction instead.');
+    const data=await res.json();
+    const text=data.content[0].text.trim().replace(/^```json?\n?/,'').replace(/\n?```$/,'').trim();
+    applyExtracted(JSON.parse(text));
+    showExtractOK(JSON.parse(text));
+  }catch(e){
+    showExtractErr('Error: '+e.message+'. Using pattern extraction.');
     await demoExtract(document.getElementById('f-narrative').value);
   }
 }
 
 async function demoExtract(narrative){
-  await new Promise(r=>setTimeout(r,1000));
-  const n = narrative.toLowerCase();
-  function xp(text, regex){ const m=text.match(regex); return m?m[1].trim():null; }
-  const extracted = {
-    product_name: xp(narrative,/(VS-\d+\s*\([^)]+\)|avutometinib|defactinib|pembrolizumab|nivolumab|trastuzumab|rituximab|semaglutide)/i) || xp(narrative,/received\s+([\w\-]+(?:\s+\([\w\-]+\))?)/i),
-    product_type: /biologic|monoclonal|mab|antibody|protein/i.test(narrative)?'biologic':/vaccine/i.test(narrative)?'vaccine':'drug_small_molecule',
-    reg_number: xp(narrative,/(IND[\s#]?\d+[,\s\/]*(?:NCT\d+)?|NCT\d+)/i),
-    indication: xp(narrative,/(KRAS[^,\.]+|NSCLC|lung cancer|breast cancer|leukemia|lymphoma|melanoma|[A-Z][a-z]+ cancer)/i),
-    phase: /phase 3|phase iii|pivotal/i.test(narrative)?'phase_3':/phase 2|phase ii/i.test(narrative)?'phase_2':/phase 1|phase i\b/i.test(narrative)?'phase_1':/marketed|post.market/i.test(narrative)?'marketed':'phase_3',
-    sponsor_country: /\b(USA|US|United States)\b/i.test(narrative)?'USA':/\b(UK|United Kingdom)\b/i.test(narrative)?'UK':'USA',
-    trial_countries: xp(narrative,/(?:active in|conducted in|countries)[:\s]+([A-Z][^.]+(?:USA|UK|Germany|France|Japan|Canada|Australia)[^.]*)/i) || (n.includes('usa')&&n.includes('germany')?'USA, UK, Germany, France, Spain, Canada, Australia':null),
-    patient_age: xp(narrative,/(\d+)[- ]year[- ]old/i),
-    patient_sex: /\b(male|man|his)\b/i.test(narrative)?'male':/\b(female|woman|her)\b/i.test(narrative)?'female':'unknown',
-    patient_country: xp(narrative,/(?:at|in)\s+[A-Za-z\s]+,\s+(USA|United States|Germany|France|UK|Japan|Canada|Australia)/i) || (/usa|united states|houston|anderson|boston|new york/i.test(narrative)?'United States':null),
-    ae_verbatim: xp(narrative,/(?:developed?|experienced?|presented with)\s+([^.]+(?:failure|reaction|arrest|injury|toxicity|neutropenia|pneumonitis|rash)[^.]*)/i) || xp(narrative,/(?:developed?)\s+([^.]+)/i),
-    day0_date: (()=>{ const m=narrative.match(/(?:became aware|awareness)\s+on\s+([\w\s,]+\d{4})/i); if(m){try{return new Date(m[1]).toISOString().slice(0,10);}catch(e){}} const d=new Date();d.setDate(d.getDate()-2);return d.toISOString().slice(0,10); })(),
-    outcome: /died|death|fatal/i.test(narrative)?'fatal':/recover/i.test(narrative)?'recovered':'unknown',
-    seriousness: (()=>{ const s=[]; if(/died|death|fatal/i.test(narrative))s.push('fatal'); if(/life.threaten/i.test(narrative))s.push('life_threatening'); if(/hospitali[sz]/i.test(narrative))s.push('hospitalization'); if(/disabilit/i.test(narrative))s.push('disability'); return s.length?s:['hospitalization']; })(),
-    causality_reporter: /possibly related/i.test(narrative)?'possibly':/probably related|definitely/i.test(narrative)?'related':/unlikely/i.test(narrative)?'unlikely':'possibly',
-    causality_sponsor: 'possibly',
-    expectedness: /unexpected|not listed/i.test(narrative)?'unexpected':/expected|listed in/i.test(narrative)?'expected':'unexpected',
-    reporter_institution: xp(narrative,/([A-Z][a-zA-Z\s]+(?:Cancer Center|Hospital|Medical Center|University|Clinic|Institute))/i),
-    dose: xp(narrative,/(\d+\.?\d*\s*mg\s*(?:twice|BID|TID|QD|BIW|once|weekly|daily)[^,;.]*)/i),
-    medical_history: xp(narrative,/(?:medical history|history of)\s+(?:included?)?\s*([^.]+)/i),
-    lab_values: xp(narrative,/(?:laboratory findings|labs?|showed)\s*(?:showed|:)?\s*([^.]+(?:\d+\s*U\/L|\d+\s*mg\/dL|INR)[^.]*)/i),
-    has_suggested: (()=>{ const has=[]; if(n.includes('usa')||n.includes('united states')||/ind \d/i.test(narrative))has.push('FDA'); if(n.includes('german')||n.includes('france')||n.includes('spain')||n.includes('italy'))has.push('EMA'); if(n.includes('uk')||n.includes('united kingdom'))has.push('MHRA'); if(n.includes('japan'))has.push('PMDA'); if(n.includes('canada'))has.push('HC'); if(n.includes('australia'))has.push('TGA'); if(n.includes('switzerland'))has.push('SWISSMEDIC'); if(has.length===0)has.push('FDA','EMA'); return has; })()
+  await new Promise(r=>setTimeout(r,900));
+  const n=narrative.toLowerCase();
+  function xp(text,regex){const m=text.match(regex);return m?m[1].trim():null;}
+  const e={
+    product_name:xp(narrative,/(VS-\d+\s*\([^)]+\)|avutometinib|defactinib|pembrolizumab|nivolumab|trastuzumab|rituximab|apixaban|eliquis)/i)||xp(narrative,/received\s+([\w\-]+(?:\s+\([\w\-]+\))?)/i),
+    product_type:/biologic|monoclonal|mab|antibody/i.test(narrative)?'biologic':/vaccine/i.test(narrative)?'vaccine':'drug_small_molecule',
+    reg_number:xp(narrative,/(IND[\s#]?\d+[,\s\/]*(?:NCT\d+)?|NCT\d+|EudraCT[\s:]?[\d\-]+)/i),
+    indication:xp(narrative,/(KRAS[^,\.]+|NSCLC|lung cancer|breast cancer|leukemia|lymphoma|melanoma|NVAF|DVT|PE)/i),
+    phase:/phase 3|phase iii|pivotal/i.test(narrative)?'phase_3':/phase 2/i.test(narrative)?'phase_2':/phase 1/i.test(narrative)?'phase_1':/post.market|marketed/i.test(narrative)?'marketed':'phase_3',
+    sponsor_country:/verastem|pfizer|merck|gilead|bms|bristol/i.test(narrative)?'USA':'USA',
+    trial_countries:xp(narrative,/(?:active in|countries)[:\s]+([^.]+)/i)||(n.includes('usa')&&n.includes('germany')?'USA, UK, Germany, France, Spain, Canada, Australia':null),
+    patient_age:xp(narrative,/(\d+)[- ]year[- ]old/i),
+    patient_sex:/\b(male|man|his)\b/i.test(narrative)?'male':/\b(female|woman|her)\b/i.test(narrative)?'female':'unknown',
+    patient_country:n.includes('usa')||n.includes('houston')||n.includes('united states')?'United States':null,
+    ae_verbatim:xp(narrative,/developed?\s+([^.]+(?:failure|reaction|arrest|injury|toxicity|neutropenia|pneumonitis|rash)[^.]*)/i)||xp(narrative,/developed?\s+([^.]+)/i),
+    day0_date:(()=>{const m=narrative.match(/became aware[^.]*on\s+([\w\s,]+\d{4})/i);if(m)try{return new Date(m[1]).toISOString().slice(0,10);}catch(e){}const d=new Date();d.setDate(d.getDate()-2);return d.toISOString().slice(0,10);})(),
+    outcome:/died|death|fatal/i.test(narrative)?'fatal':/recover/i.test(narrative)?'recovered':'unknown',
+    seriousness:(()=>{const s=[];if(/died|death|fatal/i.test(narrative))s.push('fatal');if(/life.threaten/i.test(narrative))s.push('life_threatening');if(/hospitali[sz]/i.test(narrative))s.push('hospitalization');return s.length?s:['hospitalization'];})(),
+    causality_reporter:/possibly related/i.test(narrative)?'possibly':/related/i.test(narrative)?'related':'possibly',
+    causality_sponsor:'possibly',
+    expectedness:/unexpected|not listed/i.test(narrative)?'unexpected':/expected|listed in/i.test(narrative)?'expected':'unexpected',
+    reporter_institution:xp(narrative,/([A-Z][a-zA-Z\s]+(?:Cancer Center|Hospital|Medical Center|University|Institute))/i),
+    dose:xp(narrative,/(\d+\.?\d*\s*mg\s*(?:twice|BID|TID|QD|BIW|daily|weekly)[^,;.]*)/i),
+    medical_history:xp(narrative,/(?:medical history|history of)\s+(?:included?)?\s*([^.]+)/i),
+    lab_values:xp(narrative,/(?:laboratory|labs?|showed)[:\s]+([^.]+(?:\d+\s*U\/L|\d+\s*mg\/dL|INR)[^.]*)/i),
+    has_suggested:(()=>{const h=[];if(n.includes('usa')||n.includes('united states')||/ind \d/i.test(narrative))h.push('FDA');if(n.includes('german')||n.includes('france')||n.includes('spain')||n.includes('italy')||n.includes(' eu '))h.push('EMA');if(n.includes('uk')||n.includes('united kingdom'))h.push('MHRA');if(n.includes('japan'))h.push('PMDA');if(n.includes('canada'))h.push('HC');if(n.includes('australia'))h.push('TGA');if(n.includes('switzerland'))h.push('SWISSMEDIC');if(h.length===0)h.push('FDA','EMA');return h;})()
   };
-  applyExtracted(extracted);
-  showExtractSuccess(extracted);
+  applyExtracted(e); showExtractOK(e);
 }
 
 function applyExtracted(e){
-  if(e.product_name) document.getElementById('f-product').value = e.product_name;
-  if(e.product_type) document.getElementById('f-type').value = e.product_type;
-  if(e.reg_number) document.getElementById('f-reg').value = e.reg_number;
-  if(e.indication) document.getElementById('f-indication').value = e.indication;
-  if(e.phase) document.getElementById('f-phase').value = e.phase;
-  if(e.sponsor_country){const sel=document.getElementById('f-sponsor');const opt=[...sel.options].find(o=>o.value===e.sponsor_country||e.sponsor_country.includes(o.value));if(opt)sel.value=opt.value;}
-  if(e.trial_countries) document.getElementById('f-countries').value = e.trial_countries;
-  if(e.ae_verbatim) document.getElementById('f-ae').value = e.ae_verbatim;
-  if(e.day0_date) document.getElementById('f-day0').value = e.day0_date;
-  if(e.patient_country) document.getElementById('f-patient-country').value = e.patient_country;
-  if(e.seriousness&&e.seriousness.length){ document.querySelectorAll('.checkbox-grid input').forEach(cb=>{ cb.checked=e.seriousness.includes(cb.value); cb.closest('.cb-item').classList.toggle('checked',cb.checked); }); }
-  if(e.causality_sponsor){ const m={'related':'related','possibly':'possibly','unlikely':'unlikely','unrelated':'unrelated','unassessable':'unassessable'}; if(m[e.causality_sponsor]) document.getElementById('f-causality').value=m[e.causality_sponsor]; }
-  if(e.expectedness) document.getElementById('f-expect').value = e.expectedness;
-  if(e.has_suggested&&e.has_suggested.length){ document.querySelectorAll('#haGrid input').forEach(cb=>{ cb.checked=e.has_suggested.includes(cb.value); cb.closest('.ha-item').classList.toggle('checked',cb.checked); }); }
-  window._extracted = e;
+  if(e.product_name)document.getElementById('f-product').value=e.product_name;
+  if(e.product_type)document.getElementById('f-type').value=e.product_type;
+  if(e.reg_number)document.getElementById('f-reg').value=e.reg_number;
+  if(e.indication)document.getElementById('f-indication').value=e.indication;
+  if(e.phase)document.getElementById('f-phase').value=e.phase;
+  if(e.sponsor_country){const sel=document.getElementById('f-sponsor');const opt=[...sel.options].find(o=>o.value===e.sponsor_country);if(opt)sel.value=opt.value;}
+  if(e.trial_countries)document.getElementById('f-countries').value=e.trial_countries;
+  if(e.ae_verbatim)document.getElementById('f-ae').value=e.ae_verbatim;
+  if(e.day0_date)document.getElementById('f-day0').value=e.day0_date;
+  if(e.patient_country)document.getElementById('f-patient-country').value=e.patient_country;
+  if(e.seriousness&&e.seriousness.length){document.querySelectorAll('.cb-grid input').forEach(cb=>{cb.checked=e.seriousness.includes(cb.value);cb.closest('.cb-item').classList.toggle('ck',cb.checked);});}
+  if(e.causality_sponsor){const m={related:'related',possibly:'possibly',unlikely:'unlikely',unrelated:'unrelated',unassessable:'unassessable'};if(m[e.causality_sponsor])document.getElementById('f-causality').value=m[e.causality_sponsor];}
+  if(e.expectedness)document.getElementById('f-expect').value=e.expectedness;
+  if(e.has_suggested&&e.has_suggested.length){document.querySelectorAll('#haGrid input').forEach(cb=>{cb.checked=e.has_suggested.includes(cb.value);cb.closest('.ha-item').classList.toggle('ck',cb.checked);});}
+}
+function showExtractOK(e){
+  const st=document.getElementById('extractStatus');
+  const fields=[e.product_name&&`Product: <strong>${e.product_name}</strong>`,e.patient_age&&e.patient_sex!=='unknown'&&`Patient: <strong>${e.patient_age}yo ${e.patient_sex}</strong>`,e.patient_country&&`Country: <strong>${e.patient_country}</strong>`,e.ae_verbatim&&`AE: <strong>${e.ae_verbatim.substring(0,50)}…</strong>`,e.day0_date&&`Day 0: <strong>${e.day0_date}</strong>`,e.has_suggested&&`HAs: <strong>${e.has_suggested.join(', ')}</strong>`].filter(Boolean);
+  st.style.cssText='display:block;background:rgba(29,158,117,0.08);color:#085041;border-left:3px solid #1D9E75;border-radius:0 6px 6px 0;padding:8px 11px;font-size:11.5px;line-height:1.6;';
+  st.innerHTML=`<strong>✓ ${fields.length} fields extracted</strong><br>`+fields.map(f=>`• ${f}`).join('<br>');
+}
+function showExtractErr(msg){
+  const st=document.getElementById('extractStatus');
+  st.style.cssText='display:block;background:rgba(163,45,45,0.07);color:#791F1F;border-left:3px solid #E24B4A;border-radius:0 6px 6px 0;padding:8px 11px;font-size:11.5px;';
+  st.textContent=msg;
 }
 
-function showExtractSuccess(e){
-  const status = document.getElementById('extractStatus');
-  const fields=[e.product_name&&`Product: <strong>${e.product_name}</strong>`,e.patient_age&&e.patient_sex&&e.patient_sex!=='unknown'&&`Patient: <strong>${e.patient_age}yo ${e.patient_sex}</strong>`,e.patient_country&&`Country of incidence: <strong>${e.patient_country}</strong>`,e.ae_verbatim&&`AE: <strong>${e.ae_verbatim.substring(0,55)}${e.ae_verbatim.length>55?'…':''}</strong>`,e.outcome&&`Outcome: <strong>${e.outcome}</strong>`,e.day0_date&&`Day 0: <strong>${e.day0_date}</strong>`,e.reg_number&&`Reg#: <strong>${e.reg_number}</strong>`,e.reporter_institution&&`Site: <strong>${e.reporter_institution}</strong>`,e.has_suggested&&e.has_suggested.length&&`HAs: <strong>${e.has_suggested.join(', ')}</strong>`].filter(Boolean);
-  status.style.cssText = 'display:block;margin-top:8px;padding:10px 13px;border-radius:0 6px 6px 0;font-size:12px;line-height:1.6;background:rgba(29,158,117,0.08);color:#085041;border-left:3px solid #1D9E75;';
-  status.innerHTML = `<div style="font-weight:600;margin-bottom:5px;">✓ ${fields.length} fields extracted — form auto-filled</div>`+fields.map(f=>`<div>• ${f}</div>`).join('');
+// ── DEMO CASE ──
+function loadDemo(){
+  const d=new Date(); d.setDate(d.getDate()-2);
+  const od=new Date(); od.setDate(od.getDate()-6);
+  const fmt=dt=>dt.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  document.getElementById('f-narrative').value=`A 58-year-old male patient with KRAS G12C-mutated non-small cell lung cancer (NSCLC) was enrolled in the RAMP 205 Phase 3 clinical study (IND 153742, NCT05074810) and received avutometinib (VS-6766) 3.2 mg twice weekly orally in combination with defactinib 400 mg twice daily orally. Medical history included hypertension and type 2 diabetes mellitus.\n\nOn ${fmt(od)} (Cycle 2, Day 8), the patient developed acute liver failure with jaundice and coagulopathy. Laboratory findings showed ALT 1240 U/L (>40x ULN), AST 980 U/L, total bilirubin 8.4 mg/dL, and INR 3.2. The patient was hospitalized at MD Anderson Cancer Center, Houston, USA. Both drugs were permanently discontinued.\n\nDespite intensive supportive care, the patient died on ${fmt(d)}. Cause of death: acute hepatic failure. The reporting investigator (MD Anderson) assessed causality as possibly related. Sponsor (Verastem Oncology, USA) became aware on ${fmt(d)}. This event is unexpected — fatal hepatic failure is NOT listed in VS-6766 IB v8.0. Study active in USA, United Kingdom, Germany, France, Spain, Canada, Australia.`;
+  document.getElementById('f-product').value='VS-6766 (Avutometinib)';
+  document.getElementById('f-type').value='drug_small_molecule';
+  document.getElementById('f-reg').value='IND 153742 / NCT05074810';
+  document.getElementById('f-indication').value='KRAS G12C NSCLC (RAMP 205)';
+  document.getElementById('f-phase').value='phase_3';
+  document.getElementById('f-sponsor').value='USA';
+  document.getElementById('f-countries').value='USA, UK, Germany, France, Spain, Canada, Australia';
+  document.getElementById('f-ae').value='Acute liver failure with jaundice and coagulopathy — fatal';
+  document.getElementById('f-day0').value=d.toISOString().slice(0,10);
+  document.getElementById('f-patient-country').value='United States';
+  document.querySelectorAll('.cb-grid input').forEach(cb=>{cb.checked=['fatal','hospitalization'].includes(cb.value);cb.closest('.cb-item').classList.toggle('ck',cb.checked);});
+  document.getElementById('f-causality').value='possibly';
+  document.getElementById('f-expect').value='unexpected';
+  const sel=['FDA','EMA','MHRA','HC','TGA','SWISSMEDIC'];
+  document.querySelectorAll('#haGrid input').forEach(cb=>{cb.checked=sel.includes(cb.value);cb.closest('.ha-item').classList.toggle('ck',cb.checked);});
 }
-
-function showExtractError(msg){
-  const status = document.getElementById('extractStatus');
-  status.style.cssText = 'display:block;margin-top:8px;padding:9px 12px;border-radius:0 6px 6px 0;font-size:12px;line-height:1.5;background:rgba(163,45,45,0.07);color:#791F1F;border-left:3px solid #E24B4A;';
-  status.textContent = msg;
-}
-
 
 // ── MAIN RESOLVER ──
 async function resolve(){
-  const c = getCase();
+  const c=getCase();
   if(!c.product||!c.type||!c.phase||!c.ae||!c.seriousness.length||!c.has.length){
-    alert('Please fill all required fields (marked *) and select at least one Health Authority.');
+    alert('Please fill all required fields (*) and select at least one Health Authority.');
     return;
   }
-  document.getElementById('runBtn').disabled = true;
-  showLoading();
-  if(demoMode||!apiKey){ await runDemo(c); }
-  else { await runLive(c); }
-  document.getElementById('runBtn').disabled = false;
-}
-
-function showLoading(){
-  const panel = document.getElementById('resultsPanel');
-  panel.innerHTML = `
-    <div class="loading-card">
-      <div style="font-family:var(--serif);font-size:20px;color:var(--navy);margin-bottom:6px;">Resolving obligations…</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Running 8-agent pipeline across all selected Health Authorities</div>
-      <div class="pipeline-steps">
-        <span class="ps running" id="ps-intake">INTAKE</span>
-        <span class="ps" id="ps-classify">CLASSIFY</span>
-        <span class="ps" id="ps-geo">GEOGRAPHY</span>
-        <span class="ps" id="ps-expect">EXPECTEDNESS</span>
-        <span class="ps" id="ps-oblig">OBLIGATIONS</span>
-        <span class="ps" id="ps-timeline">TIMELINE</span>
-        <span class="ps" id="ps-narr">NARRATIVE</span>
-        <span class="ps" id="ps-output">OUTPUT</span>
-      </div>
-      <div class="loading-msg" id="loadingMsg">Validating case criteria…</div>
-    </div>`;
-}
-
-function setPS(id, state){ const el=document.getElementById('ps-'+id); if(el) el.className='ps '+state; }
-function setMsg(m){ const el=document.getElementById('loadingMsg'); if(el) el.textContent=m; }
-function delay(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-// ── LIVE API ──
-async function runLive(c){
-  const isFatal = c.seriousness.includes('fatal')||c.seriousness.includes('life_threatening');
-  const isCT = !c.phase.includes('marketed')&&c.phase!=='post_approval_ct';
-  const isUnexpected = c.expectedness==='unexpected'||c.expectedness==='unknown';
-  const isRelated = ['related','possibly'].includes(c.causality);
-  const isSUSAR = isCT && c.seriousness.some(s=>s!=='non_serious') && isUnexpected && isRelated;
-  const isSerious = c.seriousness.some(s=>s!=='non_serious');
-
-  const prompt = `You are the Praxigent RegIntel PV Regulatory Intelligence Agent — a global pharmacovigilance regulatory expert covering all ICH and non-ICH health authorities.
-
-CASE INPUT:
-Product: ${c.product} (${c.type})
-Phase/Status: ${c.phase}
-Regulatory #: ${c.reg||'not provided'}
-Indication: ${c.indication||'not provided'}
-Sponsor country: ${c.sponsor}
-Trial/Marketing countries: ${c.countries||'not specified'}
-Patient country: ${c.patientCountry||'not specified'}
-AE verbatim: ${c.ae}
-Day 0 (sponsor awareness): ${c.day0}
-Seriousness: ${c.seriousness.join(', ')}
-Causality: ${c.causality}
-Expectedness vs RSI: ${c.expectedness}
-SUSAR status: ${isSUSAR?'CONFIRMED SUSAR':'Not a SUSAR'}
-Health Authorities in scope: ${c.has.join(', ')}
-
-Provide a comprehensive regulatory intelligence report with ALL sections below. Be extremely specific — cite exact regulation articles, exact timelines, exact formats. Do not be generic.
-
-## CASE SUMMARY
-One paragraph confirming: valid case criteria met (ICH E2A), SUSAR determination with rationale, Day 0 confirmation, and clock start.
-
-## MEDDRA CODING
-Code the verbatim AE to MedDRA v27.1. Provide:
-- Primary PT name and code
-- All associated PTs (if multiple findings)
-- SOC, HLGT, HLT
-- Coding rationale
-
-## GLOBAL REPORTING OBLIGATIONS
-For EACH of the following HAs (${c.has.join(', ')}), provide a complete row:
-HA | Regulation article | Report name | Timeline | Due date (calculate from ${c.day0}) | Domestic/Foreign | Format | Submission route | Special conditions
-
-Be precise: cite "21 CFR 312.32(c)(1)" not just "FDA rules". Calculate actual due dates from Day 0 = ${c.day0}.
-
-## PERIODIC REPORTING OBLIGATIONS
-List all periodic reports triggered (DSUR, PSUR/PBRER, PADER, line listings) with schedules.
-
-## DOMESTIC vs FOREIGN ANALYSIS
-For each HA, explain domestic or foreign classification and what this means for the reporting obligation.
-
-## TIMELINE — ALL DUE DATES IN ORDER
-List every due date chronologically from earliest to latest. Flag OVERDUE or AT RISK (within 72h).
-
-## CIOMS I NARRATIVE DRAFT
-Write a complete CIOMS I narrative. Third person, past tense. Include all ICH E2A Section 3 elements. Use [BRACKET] for fields needing completion from source data.
-
-## GAP ANALYSIS — MISSING DATA
-List: (RED) missing mandatory fields blocking submission, (AMBER) recommended fields, (GREEN) confirmed complete.
-
-## IMMEDIATE ACTION PLAN
-Numbered list: exactly what the PV team must do in the next 24–48 hours, in priority order.`;
-
-  try {
-    setPS('intake','running'); setMsg('Validating case criteria…');
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key':apiKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:6000,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-    if(!res.ok){
-      const err=await res.json();
-      throw new Error(err.error?.message||'API error '+res.status);
-    }
-    const data = await res.json();
-    const text = data.content[0].text;
-
-    // animate pipeline
-    const steps=['classify','geo','expect','oblig','timeline','narr','output'];
-    for(let i=0;i<steps.length;i++){
-      setPS(steps[i-1]||'intake','done');
-      setPS(steps[i],'running');
-      setMsg(['Coding MedDRA PT/SOC…','Resolving geography…','Checking expectedness…',
-        'Querying obligation database…','Calculating due dates…',
-        'Drafting CIOMS narrative…','Assembling output…'][i]);
-      await delay(300);
-    }
-    setPS('output','done');
-
-    renderLiveResults(c, text, isSUSAR, isFatal, isSerious, isCT);
-  } catch(e){
-    document.getElementById('resultsPanel').innerHTML=`
-      <div class="result-card"><div class="rc-header">
-        <div style="color:var(--red);font-weight:600;">API Error: ${e.message}</div>
-      </div>
-      <div style="padding:16px;font-size:13px;color:var(--muted);">Check your API key and try again, or switch to Demo Mode.</div></div>`;
-  }
-}
-
-function renderLiveResults(c, text, isSUSAR, isFatal, isSerious, isCT){
-  const day0 = new Date(c.day0);
-  const tl = isFatal ? 7 : isSerious ? 15 : 90;
-
-  // parse sections from AI text for narrative
-  function extractSection(heading){
-    const re = new RegExp('## '+heading+'[\\s\\S]*?(?=## |$)');
-    const m = text.match(re);
-    return m ? m[0].replace(/^## [^\n]+\n/,'').trim() : '';
-  }
-
-  // override buildNarrative with AI narrative if available
-  const aiNarr = extractSection('CIOMS I NARRATIVE');
-  window._aiNarrative = aiNarr || null;
-
-  renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl);
-
-  // append raw AI analysis as collapsible below the tree
-  const panel = document.getElementById('resultsPanel');
-  const aiCard = document.createElement('div');
-  aiCard.style.cssText = 'background:#fff;border-radius:14px;border:1px solid rgba(3,32,60,0.1);overflow:hidden;box-shadow:0 2px 20px rgba(3,32,60,0.04);';
-  aiCard.innerHTML = `
-    <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;background:rgba(3,32,60,0.02);" onclick="toggleSection('ai-body','ai-hdr')" id="ai-hdr">
-      <span style="font-size:14px;">✦</span>
-      <span style="font-size:13px;font-weight:600;color:var(--navy);">Full AI regulatory analysis — click to expand</span>
-      <span style="margin-left:auto;font-size:10px;font-family:var(--mono);background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:10px;">CLAUDE SONNET</span>
-      <span class="t-periodic-hdr-caret">▶</span>
+  document.getElementById('runBtn').disabled=true;
+  const rs=document.getElementById('resultsScroll');
+  rs.innerHTML=`<div class="loading-shell">
+    <h3>Resolving obligations…</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:4px;">Running pipeline across ${c.has.length} Health Authorities</p>
+    <div class="pipeline">
+      <span class="ps run" id="ps-intake">INTAKE</span>
+      <span class="ps" id="ps-classify">CLASSIFY</span>
+      <span class="ps" id="ps-geo">GEO</span>
+      <span class="ps" id="ps-expect">EXPECT</span>
+      <span class="ps" id="ps-oblig">OBLIG</span>
+      <span class="ps" id="ps-timeline">TIMELINE</span>
+      <span class="ps" id="ps-narr">NARR</span>
+      <span class="ps" id="ps-output">OUTPUT</span>
     </div>
-    <div id="ai-body" class="t-gaps-body" style="">
-      <div style="padding:20px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:500px;overflow-y:auto;">${escHtml(text)}</div>
-      <div style="padding:10px 20px;border-top:1px solid var(--border);display:flex;gap:8px;">
-        <button class="tf-btn primary" onclick="copyText(\`${text.replace(/`/g,"'")}\`)">Copy full analysis</button>
-      </div>
-    </div>`;
-  panel.appendChild(aiCard);
+    <p style="font-size:12px;color:var(--muted);" id="loadingMsg">Validating case criteria…</p>
+  </div>`;
+  if(demoMode||!apiKey){await runDemo(c);}else{await runLive(c);}
+  document.getElementById('runBtn').disabled=false;
 }
+function sPS(id,st){const el=document.getElementById('ps-'+id);if(el)el.className='ps '+st;}
+function sMsg(m){const el=document.getElementById('loadingMsg');if(el)el.textContent=m;}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
 
+async function runLive(c){
+  const isFatal=c.seriousness.includes('fatal')||c.seriousness.includes('life_threatening');
+  const isCT=!c.phase.includes('marketed')&&c.phase!=='post_approval_ct';
+  const isUnexpected=c.expectedness==='unexpected'||c.expectedness==='unknown';
+  const isRelated=['related','possibly'].includes(c.causality);
+  const isSUSAR=isCT&&c.seriousness.some(s=>s!=='non_serious')&&isUnexpected&&isRelated;
+  const isSerious=c.seriousness.some(s=>s!=='non_serious');
+  const tl=isFatal?7:isSerious?15:90;
+  const steps=['classify','geo','expect','oblig','timeline','narr','output'];
+  const msgs=['Coding MedDRA PT/SOC…','Resolving geography…','Checking expectedness…','Querying obligation database…','Calculating due dates…','Drafting CIOMS narrative…','Assembling output…'];
+  const prompt=`You are RegIntel PV Regulatory Intelligence. Analyze this AE case and resolve all global reporting obligations.
+Product: ${c.product} (${c.type}) | Phase: ${c.phase} | Reg#: ${c.reg||'N/A'} | Indication: ${c.indication||'N/A'}
+AE: ${c.ae} | Day 0: ${c.day0} | Seriousness: ${c.seriousness.join(',')} | Causality: ${c.causality} | Expectedness: ${c.expectedness}
+Sponsor: ${c.sponsor} | Trial countries: ${c.countries||'N/A'} | HAs in scope: ${c.has.join(',')}
+SUSAR: ${isSUSAR?'YES':'NO'} | Timeline: ${tl}-day
+Provide: 1) Case summary 2) MedDRA coding 3) Obligation table per HA with exact regulation article, timeline, due date from ${c.day0}, domestic/foreign, format, route 4) Periodic obligations 5) Timeline all due dates 6) CIOMS narrative draft 7) Gap analysis 8) Action plan. Be precise with regulation citations.`;
+  try{
+    sPS('intake','done'); for(let i=0;i<steps.length;i++){sPS(steps[i-1]||'intake','done');sPS(steps[i],'run');sMsg(msgs[i]);await delay(280);}
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:6000,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API '+res.status);}
+    const data=await res.json();
+    sPS('output','done');
+    const day0=new Date(c.day0);
+    renderTree(c,isSUSAR,isFatal,isSerious,isCT,day0,tl);
+    // Append AI analysis
+    const rs=document.getElementById('resultsScroll');
+    const aiCard=document.createElement('div');
+    aiCard.className='tree-shell';
+    aiCard.innerHTML=`<div class="coll-hdr" onclick="toggleColl(this)"><span style="font-size:14px;">✦</span><span class="coll-title">Full AI Analysis — Claude Sonnet</span><span class="coll-caret">▶</span></div><div class="coll-body"><div style="padding:16px 18px;font-size:13px;line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:500px;overflow-y:auto;">${escHtml(data.content[0].text)}</div></div>`;
+    rs.appendChild(aiCard);
+    addToHistory(c,isSUSAR,tl);
+  }catch(e){
+    document.getElementById('resultsScroll').innerHTML=`<div class="empty-state"><div class="ei">⚠</div><h3>API Error</h3><p>${e.message}</p></div>`;
+  }
+}
 
 async function runDemo(c){
-  const isFatal = c.seriousness.includes('fatal')||c.seriousness.includes('life_threatening');
-  const isCT = !c.phase.includes('marketed')&&c.phase!=='post_approval_ct';
-  const isUnexpected = c.expectedness==='unexpected'||c.expectedness==='unknown';
-  const isRelated = ['related','possibly'].includes(c.causality);
-  const isSUSAR = isCT && c.seriousness.some(s=>s!=='non_serious') && isUnexpected && isRelated;
-  const isSerious = c.seriousness.some(s=>s!=='non_serious');
-  const tl = isFatal?7:isSerious?15:90;
-
-  const steps=['intake','classify','geo','expect','oblig','timeline','narr','output'];
-  const msgs=['Validating case criteria…','Coding MedDRA PT/SOC…','Resolving geography…',
-    'Checking expectedness vs RSI…','Querying obligation database…',
-    'Calculating due dates…','Drafting CIOMS narrative…','Assembling full output…'];
-
-  for(let i=0;i<steps.length;i++){
-    if(i>0) setPS(steps[i-1],'done');
-    setPS(steps[i],'running'); setMsg(msgs[i]);
-    await delay(500);
-  }
-  setPS('output','done');
-
-  const day0 = new Date(c.day0);
-  const buildRows = () => c.has.map(ha=>{
-    const cfg = HA_CONFIG[ha]||{reg:'National regulation',report:'ICSR',fmt:'E2B R2/R3',route:'National portal',tl:15};
-    const htl = isFatal?(cfg.tl7||7):isSerious?(cfg.tl15||15):(cfg.tl90||90);
-    const due = new Date(day0); due.setDate(due.getDate()+htl);
-    const daysLeft = Math.ceil((due-new Date())/86400000);
-    const stCls = daysLeft<0?'tover':daysLeft<=2?'trisk':'tok';
-    const stTxt = daysLeft<0?`${Math.abs(daysLeft)}d OVERDUE`:daysLeft<=1?'DUE TODAY':`${daysLeft}d left`;
-    const isDom = isCountryDomestic(ha, c.sponsor, c.countries);
-    const report = isSUSAR?(cfg.susar||cfg.report+' (SUSAR)'):cfg.report;
-    const tlTag = htl<=7?'t7':htl<=15?'t15':htl<=30?'t30':htl<=90?'t90':'tper';
-    return `<tr class="${daysLeft<0?'overdue':htl>30?'periodic':''}">
-      <td><strong>${ha}</strong></td>
-      <td style="font-size:10.5px;color:var(--muted);">${cfg.reg}</td>
-      <td>${report} ${isSUSAR?'<span class="tag tsusar">SUSAR</span>':''}</td>
-      <td><span class="tag ${tlTag}">${htl===7?'7 cal. days':htl===15?'15 cal. days':htl===30?'30 days':htl===90?'90 days':'Periodic'}</span></td>
-      <td style="font-weight:600;">${due.toISOString().slice(0,10)}</td>
-      <td><span class="tag ${isDom?'tdom':'tfor'}">${isDom?'DOM':'FOR'}</span></td>
-      <td style="font-size:10.5px;">${cfg.fmt}</td>
-      <td style="font-size:10.5px;">${cfg.route}</td>
-      <td><span class="tag ${stCls}">${stTxt}</span></td>
-    </tr>`;
-  }).join('');
-
-  const panel = document.getElementById('resultsPanel');
-  panel.innerHTML = '';
-  renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl);
+  const isFatal=c.seriousness.includes('fatal')||c.seriousness.includes('life_threatening');
+  const isCT=!c.phase.includes('marketed')&&c.phase!=='post_approval_ct';
+  const isUnexpected=c.expectedness==='unexpected'||c.expectedness==='unknown';
+  const isRelated=['related','possibly'].includes(c.causality);
+  const isSUSAR=isCT&&c.seriousness.some(s=>s!=='non_serious')&&isUnexpected&&isRelated;
+  const isSerious=c.seriousness.some(s=>s!=='non_serious');
+  const tl=isFatal?7:isSerious?15:90;
+  const steps=['classify','geo','expect','oblig','timeline','narr','output'];
+  const msgs=['Coding MedDRA PT/SOC…','Resolving geography…','Checking expectedness…','Querying obligation database (73 rows)…','Calculating due dates…','Drafting CIOMS narrative…','Assembling output…'];
+  sPS('intake','done');
+  for(let i=0;i<steps.length;i++){sPS(steps[i-1]||'intake','done');sPS(steps[i],'run');sMsg(msgs[i]);await delay(420);}
+  sPS('output','done');
+  const day0=new Date(c.day0);
+  renderTree(c,isSUSAR,isFatal,isSerious,isCT,day0,tl);
+  addToHistory(c,isSUSAR,tl);
 }
 
+
+// ── TREE RENDERER ──
 // ── TREE RENDERER ──
 function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
   const panel = document.getElementById('resultsPanel');
@@ -1428,7 +1550,6 @@ function toggleSection(bodyId, hdrId){
 }
 function showDetail(id){ const el=document.getElementById(id); if(el) el.style.display='block'; }
 function hideDetail(id){ const el=document.getElementById(id); if(el) el.style.display='none'; }
-
 
 // ── DATA HELPERS ──
 
@@ -1849,6 +1970,5 @@ function copyObligations(){
 function printResults(){ window.print(); }
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
-</div><!-- /appRoot -->
 </body>
 </html>
