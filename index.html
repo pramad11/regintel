@@ -116,8 +116,8 @@ body{font-family:var(--sans);background:#F0EDE6;color:var(--text);display:flex;f
 .sb-footer-txt{font-family:var(--mono);font-size:9px;color:rgba(181,212,244,0.18);line-height:1.8;}
 
 /* ─── WORKSPACE ─── */
-.workspace{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.view{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.workspace{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.view{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0;}
 .view.active{display:flex;}
 
 /* ─── DASHBOARD ─── */
@@ -182,7 +182,7 @@ body{font-family:var(--sans);background:#F0EDE6;color:var(--text);display:flex;f
 .af-time{font-size:10px;color:var(--muted);font-family:var(--mono);flex-shrink:0;}
 
 /* ─── CASE INTAKE VIEW ─── */
-.intake-shell{display:flex;flex:1;overflow:hidden;}
+.intake-shell{display:flex;flex:1;overflow:hidden;min-height:0;}
 .form-panel{
   width:400px;flex-shrink:0;background:#fff;
   border-right:1px solid var(--border);overflow-y:auto;
@@ -244,8 +244,8 @@ select{appearance:none;
 .demo-link:hover{background:var(--cream);}
 
 /* ─── RESULTS PANEL ─── */
-.results-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.results-scroll{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+.results-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.results-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 24px;display:flex;flex-direction:column;gap:16px;min-height:0;}
 .empty-state{
   flex:1;display:flex;flex-direction:column;align-items:center;
   justify-content:center;padding:40px;text-align:center;
