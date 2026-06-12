@@ -689,6 +689,9 @@ select{appearance:none;
               <select id="f-expect"><option value="unexpected">Unexpected — NOT listed in IB/labeling</option><option value="expected">Expected — listed in IB/labeling</option><option value="unknown">Unknown — RSI not available</option></select>
             </div>
             <div class="fg"><label class="fl">Patient country (AE occurrence)</label><input type="text" id="f-patient-country" placeholder="e.g. United States"/></div>
+            <div class="fg"><label class="fl">Report source</label>
+              <select id="f-source"><option value="spontaneous">Spontaneous (unsolicited)</option><option value="solicited">Solicited (study, registry, MAH-sponsored)</option></select>
+            </div>
 
             <div class="form-sec-label" style="display:flex;justify-content:space-between;align-items:center;">
               <span>Health Authorities</span>
@@ -906,6 +909,7 @@ function getCase(){
     causality:document.getElementById('f-causality').value,
     expectedness:document.getElementById('f-expect').value,
     patientCountry:document.getElementById('f-patient-country').value.trim(),
+    source:document.getElementById('f-source').value,
     has:[...document.querySelectorAll('#haGrid input:checked')].map(c=>c.value),
     timestamp: new Date().toISOString()
   };
@@ -1635,8 +1639,183 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
     WHO:      {name:'WHO/UMC',fullname:'World Health Organization — VigiBase',flag:'🌍',country:'Global / International',countryCode:'WW',color:'#5F5E5A',bg:'#F1EFE8'},
   };
 
-  // Map case attributes to condition string
+  // ── PER-HA DECISION ENGINE ─────────────────────────────────────────────────
+  // Implements the reportability decision trees (MHRA workflow diagram + equivalents
+  // for all other HAs) as executable JS logic. Returns a condition string per HA.
+  //
+  // Condition vocabulary:
+  //   ct_susar_fatal           CT: SUSAR, fatal or life-threatening
+  //   ct_susar_serious         CT: SUSAR, other serious
+  //   mkt_unexpected_serious   Marketed: unexpected, serious → expedited (15d)
+  //   mkt_fatal_lt_expedited   Marketed: expected but fatal/LT → expedited (15d, FDA/EMA only)
+  //   mkt_expected_serious     Marketed: expected, serious → non-expedited (30d)
+  //   mkt_solicited_no_exp     Marketed: solicited + causality combo → no expedited (MHRA/EMA)
+  //   mkt_domestic_no_exp      Marketed: non-serious domestic → no submission (some HAs)
+  //   non_serious              Non-serious: periodic only
+  //   no_submission            No reporting obligation for this HA/case combo
+
+  function getHACondition(ha, isFatal, isSerious, isSUSAR, isCT, c){
+    const isUnexp  = c.expectedness==='unexpected'||c.expectedness==='unknown';
+    const isRelated= ['related','possibly'].includes(c.causality);
+    const isSolic  = c.source==='solicited';
+    const patCty   = (c.patientCountry||'').toLowerCase();
+    const allCty   = ((c.countries||'')+' '+(c.patientCountry||'')).toLowerCase();
+
+    // ── CT path (same across all HAs) ──────────────────────────────────────
+    if(isCT){
+      if(!isRelated || !isUnexp) return 'mkt_expected_serious'; // not a SUSAR
+      if(isFatal) return 'ct_susar_fatal';
+      if(isSerious) return 'ct_susar_serious';
+      return 'non_serious';
+    }
+
+    // ── Marketed path: per-HA trees ─────────────────────────────────────────
+    if(!isSerious) {
+      // MHRA: non-serious from GB/NI → no submission; from elsewhere → no submission
+      if(ha==='MHRA') return 'no_submission';
+      // EMA: non-serious → 90-day periodic (EudraVigilance)
+      if(ha==='EMA') return 'non_serious';
+      // FDA: non-serious → PADER periodic (no expedited)
+      if(ha==='FDA') return 'non_serious';
+      // All others: periodic
+      return 'non_serious';
+    }
+
+    // From here: serious case
+    switch(ha){
+
+      case 'MHRA': {
+        // Non-serious: no submission (handled above)
+        // Serious: check GB/NI gate — non-serious from outside GB/NI → no submission
+        // (already confirmed serious from above)
+        // Causality tree:
+        // Reporter/Sponsor causality combos:
+        //   NR/Related | Unknown/Related | Related/Related | NR/Related → solicited=15/90d, spont=15/90d
+        //   NR/NR | Unknown/NR (solicited) → NO expedited
+        //   NR/NR | Unknown/NR (spontaneous) → 15/90d
+        //   Related/NR → solicited=15/90d, spont=15/90d
+        //   NR/NR (both NR) → No expedited (solicited or spontaneous)
+        const cauRep = c.causality; // as-reported
+        // "Not related / Not related" → no expedited regardless of source
+        if((cauRep==='unrelated'||cauRep==='unlikely') && !isRelated) return 'no_submission';
+        // "NR/NR or Unknown/NR" — solicited → no expedited
+        if(!isRelated && isSolic) return 'mkt_solicited_no_exp';
+        // All other serious combos (unexpected or related) → expedited
+        if(isUnexp) return 'mkt_unexpected_serious';
+        return 'mkt_expected_serious';
+      }
+
+      case 'FDA': {
+        if(!isUnexp){
+          // Expected serious: 15-day only if fatal/LT; otherwise periodic PADER
+          if(isFatal) return 'mkt_fatal_lt_expedited';
+          return 'mkt_expected_serious';
+        }
+        // Unexpected serious: 15-day (both domestic and foreign)
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'EMA': {
+        // Geography gate: only EU/EEA-authorised products in scope
+        // (we assume selected HAs means product is authorised there)
+        if(!isUnexp){
+          // Expected: 15-day only if fatal/LT; 90-day periodic otherwise
+          if(isFatal) return 'mkt_fatal_lt_expedited';
+          return 'mkt_expected_serious';
+        }
+        // Solicited + unrelated → no expedited (mirrors MHRA logic per GVP VI)
+        if(isSolic && !isRelated) return 'mkt_solicited_no_exp';
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'HC': {
+        if(!isUnexp) return 'mkt_expected_serious'; // 30-day
+        return 'mkt_unexpected_serious'; // 15-day (domestic or overseas)
+      }
+
+      case 'TGA': {
+        if(!isUnexp){
+          // Expected serious: TGA = 90-day (not 30-day like most)
+          return 'mkt_expected_serious';
+        }
+        // Domestic unexpected serious: 15-day
+        // Overseas unexpected serious: 15-day
+        // Overseas expected: no submission required
+        const isDomAU = allCty.includes('australia');
+        if(!isUnexp && !isDomAU) return 'no_submission'; // overseas expected
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'PMDA': {
+        if(!isUnexp) return 'mkt_expected_serious'; // 30-day
+        // Fatal/LT unexpected → 15-day; other serious unexpected → 15-day (same TL)
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'MFDS': {
+        if(!isUnexp) return 'mkt_expected_serious'; // 30-day
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'SWISSMEDIC': {
+        // Only CH/Liechtenstein-authorised products; geography already gated by HA selection
+        if(!isUnexp) return 'mkt_expected_serious'; // 30-day
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'CDSCO': {
+        if(!isUnexp){
+          // Overseas expected: 30-day; domestic expected: 30-day
+          return 'mkt_expected_serious';
+        }
+        return 'mkt_unexpected_serious'; // 15-day
+      }
+
+      case 'ANVISA': {
+        // ANVISA: serious (both unexpected and expected) → 15-day or 30-day
+        if(!isUnexp) return 'mkt_expected_serious'; // 30-day
+        return 'mkt_unexpected_serious'; // 15-day
+      }
+
+      case 'SFDA': {
+        if(!isUnexp) return 'mkt_expected_serious'; // 30-day
+        return 'mkt_unexpected_serious'; // 15-day
+      }
+
+      case 'NMPA': {
+        // China: overseas serious unexpected = 30-day (longer than most)
+        const isDomCN = allCty.includes('china');
+        if(!isUnexp) return 'mkt_expected_serious'; // 30-day
+        if(!isDomCN) return 'mkt_overseas_30'; // overseas unexpected → 30-day
+        return 'mkt_unexpected_serious'; // domestic unexpected → 15-day
+      }
+
+      case 'MEDSAFE': {
+        if(!isUnexp) return 'mkt_expected_serious';
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'COFEPRIS': {
+        if(!isUnexp) return 'mkt_expected_serious';
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'HSA': {
+        if(!isUnexp) return 'mkt_expected_serious';
+        return 'mkt_unexpected_serious';
+      }
+
+      case 'WHO': return 'mkt_unexpected_serious'; // WHO VigiBase: all serious
+
+      default:
+        if(!isUnexp) return 'mkt_expected_serious';
+        return 'mkt_unexpected_serious';
+    }
+  }
+
+  // Backward-compatible wrapper (used by legacy callers that pass a single condition)
   function getCaseCondition(isFatal, isSerious, isSUSAR, isCT, c){
+    // Return the "global" condition for display purposes (no HA-specific logic here)
     const isUnexp = c.expectedness==='unexpected'||c.expectedness==='unknown';
     const isRelated = ['related','possibly'].includes(c.causality);
     if(isCT && isFatal && isUnexp && isRelated) return 'ct_susar_fatal';
@@ -1648,36 +1827,65 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
     return 'ct_susar_serious';
   }
 
-  // Filter which report rows apply to this case
-  function getApplicableReports(ha, condition){
+  // Filter which report rows apply to this case — now uses per-HA condition
+  function getApplicableReports(ha, _legacyCondition){
     const cfg = HA_CONFIG[ha];
     if(!cfg || !cfg.reports) return [];
+    // Resolve per-HA condition using the decision engine
+    const haCondition = getHACondition(ha, isFatal, isSerious, isSUSAR, isCT, c);
     return cfg.reports.filter(r => {
       if(r.condition === 'always') return true;
       if(r.condition === 'periodic') return true;
-      if(r.condition === 'signal') return false; // shown separately
-      if(r.condition === condition) return true;
-      // escalation: ct_susar_fatal also shows ct_susar_serious (follow-up)
-      if(condition === 'ct_susar_fatal' && r.condition === 'ct_susar_serious') return false;
-      if(condition === 'mkt_unexpected_serious' && r.condition === 'mkt_expected_serious') return false;
+      if(r.condition === 'signal') return false;
+      // No-submission: suppress all expedited/non-expedited rows, keep periodic/always
+      if(haCondition === 'no_submission') return r.condition === 'always' || r.condition === 'periodic';
+      // Solicited no-exp: suppress expedited rows, show periodic
+      if(haCondition === 'mkt_solicited_no_exp'){
+        if(r.condition === 'mkt_solicited_no_exp') return true;
+        return r.condition === 'always' || r.condition === 'periodic';
+      }
+      if(haCondition === 'mkt_fatal_lt_expedited'){
+        if(r.condition === 'mkt_fatal_lt_expedited' || r.condition === 'mkt_unexpected_serious') return true;
+        return r.condition === 'always' || r.condition === 'periodic';
+      }
+      if(haCondition === 'mkt_overseas_30'){
+        if(r.condition === 'mkt_overseas_30' || r.condition === 'mkt_expected_serious') return true;
+        return r.condition === 'always' || r.condition === 'periodic';
+      }
+      if(r.condition === haCondition) return true;
+      // ct_susar_fatal also triggers ct_susar_serious follow-up rows? No — separate submission
       return false;
     });
   }
 
   function getHAObligation(ha, c, isFatal, isSerious, isSUSAR, isCT, day0) {
     const cfg = HA_CONFIG[ha]||{reg:'National regulation',report:'ICSR',susar:'SAE Report',fmt:'E2B R3',route:'National portal',tl7:7,tl15:15,tl90:90,reports:[]};
-    const htl = isFatal?(cfg.tl7||7):isSerious?(cfg.tl15||15):(cfg.tl90||90);
+    // Use per-HA decision engine to determine correct timeline
+    const haCondition = getHACondition(ha, isFatal, isSerious, isSUSAR, isCT, c);
+    let htl;
+    switch(haCondition){
+      case 'ct_susar_fatal':         htl = cfg.tl7  || 7;  break;
+      case 'ct_susar_serious':       htl = cfg.tl15 || 15; break;
+      case 'mkt_unexpected_serious': htl = cfg.tl15 || 15; break;
+      case 'mkt_fatal_lt_expedited': htl = 15;             break;
+      case 'mkt_expected_serious':   htl = cfg.tl90 === 30 ? 30 : 30; break; // most HAs 30d for expected
+      case 'mkt_overseas_30':        htl = 30;             break;
+      case 'mkt_solicited_no_exp':   htl = cfg.tl90 || 90; break; // periodic
+      case 'no_submission':          htl = 999;            break; // sentinel
+      case 'non_serious':            htl = cfg.tl90 || 90; break;
+      default:                       htl = isFatal?(cfg.tl7||7):isSerious?(cfg.tl15||15):(cfg.tl90||90);
+    }
     const isDom = isCountryDomestic(ha, c.sponsor, c.countries);
-    const due = new Date(day0); due.setDate(due.getDate()+htl);
-    const daysLeft = Math.ceil((due-new Date())/86400000);
+    const due = new Date(day0); due.setDate(due.getDate()+(htl===999?0:htl));
+    const daysLeft = htl===999 ? 9999 : Math.ceil((due-new Date())/86400000);
     const isNonSerious = c.seriousness.includes('non_serious') && !isSerious;
-    const statusStr = daysLeft<0?'over':daysLeft<=2?'risk':'ok';
-    const statusTxt = daysLeft<0?`${Math.abs(daysLeft)}d OVERDUE`:daysLeft===0?'DUE TODAY':`${daysLeft}d left`;
-    const tlTag = htl<=7?'t7':htl<=15?'t15':htl<=30?'t30':htl<=90?'t90':'tper';
-    const tlLabel = htl===7?'7 calendar days':htl===15?'15 calendar days':htl===30?'30 days':htl===90?'90 days':'Periodic';
-    const stripeColor = daysLeft<0?'#E24B4A':daysLeft<=2?'#EF9F27':htl>30?'#7F77DD':'#1D9E75';
+    const statusStr = htl===999?'ok':daysLeft<0?'over':daysLeft<=2?'risk':'ok';
+    const statusTxt = htl===999?'No submission':daysLeft<0?`${Math.abs(daysLeft)}d OVERDUE`:daysLeft===0?'DUE TODAY':`${daysLeft}d left`;
+    const tlTag = htl===999?'tper':htl<=7?'t7':htl<=15?'t15':htl<=30?'t30':htl<=90?'t90':'tper';
+    const tlLabel = htl===999?'No submission required':htl===7?'7 calendar days':htl===15?'15 calendar days':htl===30?'30 days':htl===90?'90 days':'Periodic';
+    const stripeColor = htl===999?'#888780':daysLeft<0?'#E24B4A':daysLeft<=2?'#EF9F27':htl>30?'#7F77DD':'#1D9E75';
     return {
-      cfg, htl, isDom, due, daysLeft, isNonSerious,
+      cfg, htl, isDom, due, daysLeft, isNonSerious, haCondition,
       status: statusStr, statusTxt, tlTag, tlLabel, stripeColor,
       reportName: isSUSAR ? (cfg.susar||cfg.report) : cfg.report,
     };
@@ -1964,6 +2172,7 @@ const HA_CONFIG = {
       {label:'NDA/BLA 15-day Alert Report',reg:'21 CFR 314.81(b)(2)(i)',regFull:'Post-marketing 15-day Alert Report — serious unexpected ADR',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 (mandatory electronic)',route:'FDA ESG — FAERS gateway',notes:'Applies to marketed products. Both domestic and foreign cases. Unexpected = not in current USPI.'},
       {label:'15-day Alert — Biologic',reg:'21 CFR 600.80(c)',regFull:'Biological product 15-day expedited safety report',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'FDA ESG — FAERS gateway',notes:'Applies to BLA-approved biologics. Same 15-day timeline as NDA post-marketing.'},
       {label:'Post-mkt ICSR — marketed drug (NDA) 15-day',reg:'21 CFR 314.80',regFull:'21 CFR 314.80 — Post-marketing reporting of adverse drug experiences for marketed drugs (NDA)',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 / MedWatch 3500A',route:'FDA ESG — FAERS gateway',notes:'21 CFR 314.80 is the primary post-marketing ADR reporting regulation for NDA-approved drugs. Serious unexpected ADRs — 15-day expedited alert report to FDA FAERS. Distinct from 314.81 (which covers periodic reports). Both domestic and foreign cases. Per FDA FAERS Electronic Submission Guidance (June 2015).'},
+      {label:'15-day Alert — expected but fatal/LT',reg:'21 CFR 314.81(b)(2)(i) / 312.32',regFull:'FDA post-marketing 15-day Alert — serious expected ADR that is fatal or life-threatening',condition:'mkt_fatal_lt_expedited',tl:15,tlBasis:'calendar days',format:'E2B R3 / MedWatch 3500A',route:'FDA ESG — FAERS gateway',notes:'Even if the ADR is expected (listed in USPI), a serious expected ADR that is fatal or life-threatening still requires a 15-day Alert Report to FDA. Applies per FDA post-marketing safety reporting guidance. Non-fatal expected serious ADRs go in PADER periodic report.'},
       {label:'IND Annual Safety Report',reg:'21 CFR 312.33',regFull:'Annual IND Safety Report — aggregate safety summary',condition:'periodic',tl:null,tlBasis:'annual',format:'Narrative report + line listing',route:'IND filing via ESG',notes:'Due within 60 days of IND anniversary. Includes all SAEs from prior 12 months. Subsumes DSUR for FDA IND purposes.'},
       {label:'PADER — Periodic ADR Report',reg:'21 CFR 314.81(b)(2)(ii)',regFull:'Periodic Adverse Drug Experience Report (PADER)',condition:'periodic',tl:null,tlBasis:'quarterly yr1-3, then annual',format:'Aggregate report + line listing',route:'FDA ESG eCTD',notes:'Quarterly for first 3 years post-NDA approval, then annually. Due 90 days after period end.'},
       {label:'DSUR',reg:'21 CFR 312.70 / ICH E2F',regFull:'Development Safety Update Report (ICH E2F)',condition:'periodic',tl:null,tlBasis:'annual',format:'ICH E2F DSUR format',route:'FDA ESG',notes:'Due 60 days after DIBD (Development International Birth Date) anniversary. Required for IND-held products.'},
@@ -1979,6 +2188,8 @@ const HA_CONFIG = {
       {label:'Annual Safety Report (ASR/DSUR)',reg:'EU CT Reg 536/2014 Art.43',regFull:'Annual Safety Report — development safety summary for EU CTs',condition:'periodic',tl:null,tlBasis:'annual',format:'ASR per Annex III of 536/2014 / ICH E2F DSUR',route:'CTIS portal',notes:'Due annually from first approval of CT in EU. Covers all SUSARs and line listings. Includes cumulative tabulation of SAEs.'},
       {label:'Post-mkt ICSR — unexpected serious (foreign)',reg:'Dir 2001/83/EC Art.107a(1) · GVP Module VI Rev 2',regFull:'GVP Module VI — Management and Reporting of Adverse Reactions to Medicinal Products, Rev 2 (EMA/873138/2011 Rev2)',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3 mandatory',route:'EudraVigilance (EV) gateway — EVWEB / E2B gateway',notes:'GVP Module VI Section VI.B.6.2: Serious unexpected ADRs from third-country (non-EEA) sources — 15-day expedited report to EudraVigilance. MAH must hold valid EV account. Applies to all EU centrally authorised (CAP) and nationally authorised products.'},
       {label:'Post-mkt ICSR — unexpected serious (domestic/EEA)',reg:'Dir 2001/83/EC Art.107a(1) · GVP Module VI Rev 2 §VI.B.6.1',regFull:'GVP Module VI §VI.B.6.1 — Serious unexpected ADRs from EEA sources',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'EudraVigilance gateway',notes:'EEA-sourced serious unexpected ADRs: 15-day expedited reporting to EudraVigilance. Replaces direct NCA reporting for CAPs; NCA reporting required for nationally authorised products (NAPs).'},
+      {label:'Post-mkt ICSR — expected but fatal/LT (15-day)',reg:'Dir 2001/83/EC Art.107a · GVP Module VI §VI.B.6',regFull:'GVP Module VI — Expected serious ADR that is fatal or life-threatening: 15-day expedited to EudraVigilance',condition:'mkt_fatal_lt_expedited',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'EudraVigilance gateway',notes:'Per GVP Module VI decision tree: expected serious ADRs that are fatal or life-threatening still require 15-day expedited reporting to EudraVigilance. Non-fatal expected serious ADRs are 90-day periodic. Applies to all EEA and non-EEA sources.'},
+      {label:'Post-mkt — no expedited (solicited, causality-gated)',reg:'GVP Module VI §VI.B.6 · Dir 2001/83/EC Art.107a',regFull:'GVP Module VI — Solicited serious ADRs where sponsor causality is not related/possibly related: no expedited submission required',condition:'mkt_solicited_no_exp',tl:null,tlBasis:'No expedited — include in PSUR',format:'N/A — periodic only',route:'No EudraVigilance ICSR submission required',notes:'Per GVP Module VI §VI.B.6: solicited serious ADRs where the as-determined (sponsor) causality is Not Related are not subject to expedited reporting. Include aggregate data in PSUR/PBRER. Applies to post-marketing solicited sources (patient registries, MAH-sponsored programmes).'},
       {label:'Post-mkt ICSR — non-serious (EEA)',reg:'Dir 2001/83/EC Art.107a(2) · GVP Module VI §VI.B.6.3',regFull:'GVP Module VI §VI.B.6.3 — Non-serious ADRs from EEA sources',condition:'non_serious',tl:90,tlBasis:'calendar days',format:'E2B R3',route:'EudraVigilance',notes:'Non-serious ADRs from EEA sources: 90-day reporting to EudraVigilance. Non-serious ADRs from non-EEA sources: NOT required in EudraVigilance but included in PSUR.'},
       {label:'PSUR / PBRER',reg:'Dir 2001/83/EC Art.107b · Reg 726/2004 Art.28 · GVP Module VII',regFull:'GVP Module VII — Periodic Safety Update Report (PSUR/PBRER per ICH E2C(R2))',condition:'periodic',tl:null,tlBasis:'per EURD list',format:'PSUR/PBRER per ICH E2C(R2) — eCTD format',route:'EMA eSubmission portal (eCTD) — PSUR repository',notes:'Submission schedule per EU Reference Date (EURD) list published on EMA website. Assessed by PRAC (Pharmacovigilance Risk Assessment Committee). CAPs: single PSUR to EMA. NAPs: submit to each relevant NCA. Includes benefit-risk evaluation (PBRER format per ICH E2C(R2)).'},
       {label:'Signal Detection & Management',reg:'Reg 726/2004 Art.28a · GVP Module IX Rev 1',regFull:'GVP Module IX — Signal Management (EMA/827661/2011 Rev 1)',condition:'signal',tl:null,tlBasis:'ongoing/quarterly',format:'Signal evaluation report',route:'EVDAS (EudraVigilance Data Analysis System) — PRAC quarterly agenda',notes:'MAH must perform signal detection using EudraVigilance data at minimum monthly. Validated signals submitted to PRAC quarterly. Uses EVDAS for disproportionality analysis (ROR/PRR). GVP Module IX defines signal detection, validation, prioritisation, assessment workflow.'},
@@ -1994,6 +2205,7 @@ const HA_CONFIG = {
       {label:'SUSAR — fatal/life-threatening',reg:'SI 2004/1031 Sch.1 Part 2 Para.7(1)',regFull:'Medicines for Human Use (Clinical Trials) Regulations 2004 — Schedule 1 Part 2 Para 7(1)',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'E2B R3',route:'MHRA ICSR Gateway (separate from EudraVigilance post-Brexit)',notes:'UK is no longer part of EudraVigilance network post-Brexit (Jan 2021). MHRA maintains own ICSR database. Must also notify Ethics Committee. Applies to all UK CTAs and foreign SUSARs for UK CTA holders.'},
       {label:'SUSAR — other serious',reg:'SI 2004/1031 Sch.1 Part 2 Para.7(2)',regFull:'CT Regulations 2004 — SUSAR non-fatal/non-LT serious',condition:'ct_susar_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'MHRA ICSR Gateway',notes:'Simultaneous notification to UK Ethics Committee required. MHRA eSub portal: submissions.mhra.gov.uk.'},
       {label:'Post-mkt ICSR — serious unexpected',reg:'SI 2012/1916 Reg.187',regFull:'Human Medicines Regulations 2012 — Regulation 187: Expedited reporting of unexpected serious ADRs',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'E2B R3',route:'MHRA ICSR Gateway / eSub portal',notes:'Post-Brexit: MHRA operates independently from EMA. Foreign serious unexpected ADRs for UK-authorised products — 15-day expedited report to MHRA. Not reported via EudraVigilance.'},
+      {label:'Post-mkt — no expedited (solicited, causality-gated)',reg:'UK GVP Module VI §VI.B.6 · SI 2012/1916',regFull:'UK GVP Module VI — Solicited serious ADRs where sponsor causality is not related/possibly related: no expedited submission required',condition:'mkt_solicited_no_exp',tl:null,tlBasis:'No expedited — periodic PSUR only',format:'N/A — include in PSUR',route:'No MHRA ICSR submission required',notes:'Per UK GVP Module VI decision tree: if source is solicited AND as-determined causality is "Unknown/Not related" or "Not reported/Not related", no expedited ICSR is required. Include in periodic safety report. Mirrors MHRA Reportability Assessment for Post Marketed ICSRs workflow diagram.'},
       {label:'UK PSUR',reg:'SI 2012/1916 Reg.188 · UK GVP Module VII',regFull:'UK GVP Module VII — Periodic Safety Update Report (UK-adapted post-Brexit)',condition:'periodic',tl:null,tlBasis:'per MHRA schedule',format:'PSUR/PBRER format — eCTD',route:'MHRA eSub portal',notes:'Post-Brexit UK PSURs may be decoupled from EU PSUR cycle. Separate submission to MHRA. Check MHRA product-specific PSUR schedule. UK retains ICH E2C(R2) PBRER format.'},
       {label:'UK GVP Module VI — ICSR reporting framework',reg:'UK GVP Module VI (MHRA adapted post-Brexit)',regFull:'UK GVP Module VI — Management and Reporting of Adverse Reactions to Medicinal Products (UK-adapted, largely aligned to EU GVP Module VI Rev 2)',condition:'always',tl:null,tlBasis:'per event type',format:'E2B R3 via MHRA gateway',route:'MHRA ICSR Gateway (separate from EudraVigilance since Jan 2021)',notes:'Post-Brexit, MHRA maintains its own UK GVP guidance largely aligned to EU GVP Module VI. UK GVP Module VI covers: collection, management, and submission of ICSRs for UK-authorised products. Serious unexpected ADRs: 15-day expedited. Non-serious: 90-day. All submissions go to MHRA, NOT EudraVigilance. Yellow Card Scheme is the UK spontaneous reporting system.'},
       {label:'UK Signal Management',reg:'UK GVP Module IX (retained EU law + UK guidance)',regFull:'UK GVP Module IX — Signal management post-Brexit',condition:'signal',tl:null,tlBasis:'ongoing',format:'Signal evaluation',route:'MHRA safety assessment',notes:'MAH must report confirmed new safety signals to MHRA promptly. MHRA PHC (Pharmacovigilance Expert Advisory Group) reviews signals. UK Yellow Card Scheme supplements spontaneous signal detection.'},
@@ -2068,7 +2280,8 @@ const HA_CONFIG = {
   NMPA:{reg:'NMPA PV Regulations 2021 · CT Technical Guidelines 2020',report:'China ICSR',susar:'China SAE Report',fmt:'China E2B R3',route:'NMPA ADR portal',tl7:7,tl15:15,tl90:30,
     reports:[
       {label:'CT SAE — fatal/LT',reg:'NMPA CT Technical Guidelines 2020 §5.2',regFull:'NMPA Clinical Trial Safety Reporting Technical Guidelines — fatal/life-threatening SUSAR',condition:'ct_susar_fatal',tl:7,tlBasis:'calendar days',format:'China E2B R3',route:'NMPA Adverse Drug Reaction (ADR) reporting portal',notes:'China NMPA ICH member since 2017. Simplified Chinese narrative required. Domestic case priority — China-originating cases treated as domestic.'},
-      {label:'Post-mkt ICSR — serious unexpected',reg:'NMPA PV Regulations 2021 Art.67',regFull:'NMPA Pharmacovigilance Regulations 2021 — Post-marketing ICSR',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'China E2B R3',route:'NMPA ADR portal',notes:'15-day for serious unexpected. Chinese narrative required.'},
+      {label:'Post-mkt ICSR — serious unexpected',reg:'NMPA PV Regulations 2021 Art.67',regFull:'NMPA Pharmacovigilance Regulations 2021 — Post-marketing ICSR',condition:'mkt_unexpected_serious',tl:15,tlBasis:'calendar days',format:'China E2B R3',route:'NMPA ADR portal',notes:'15-day for serious unexpected domestic (China-originating) cases. Chinese narrative required.'},
+      {label:'Post-mkt ICSR — overseas unexpected serious (30-day)',reg:'NMPA PV Regulations 2021 Art.67',regFull:'NMPA PV Regulations 2021 — Overseas serious unexpected ADR: 30-day',condition:'mkt_overseas_30',tl:30,tlBasis:'calendar days',format:'China E2B R3',route:'NMPA ADR portal',notes:'China NMPA applies a 30-day timeline for overseas (non-China originating) serious unexpected ADRs — longer than the ICH E2A/FDA/EMA 15-day standard. Chinese narrative required. Clock starts from China MAH awareness.'},
       {label:'Post-mkt ICSR — serious expected (foreign)',reg:'NMPA PV Regulations 2021 Art.67',regFull:'NMPA — Expected serious foreign ADR',condition:'mkt_expected_serious',tl:30,tlBasis:'calendar days',format:'China E2B R3',route:'NMPA ADR portal',notes:'30-day for serious expected foreign ADRs.'},
       {label:'Annual PSUR (国家药监局)',reg:'NMPA PV Regulations 2021 Art.72',regFull:'NMPA — Annual pharmacovigilance report',condition:'periodic',tl:null,tlBasis:'annual',format:'NMPA PSUR format',route:'NMPA portal',notes:'Annual Chinese-specific PSUR. Due per marketing approval anniversary.'},
     ]
