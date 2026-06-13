@@ -1244,10 +1244,17 @@ var KG_EDGES = [
 function showView(name, el, label) {
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
-  document.getElementById('view-'+name).classList.add('active');
+  var viewEl = document.getElementById('view-'+name);
+  if (!viewEl) return;
+  viewEl.classList.add('active');
   if (el) el.classList.add('active');
+  var nav = document.getElementById('nav-'+name);
+  if (nav && !el) nav.classList.add('active');
   document.getElementById('tb-section').textContent = label || name;
   if (name === 'knowledge') setTimeout(drawKG, 100);
+  if (name === 'reports')   setTimeout(renderReports, 50);
+  if (name === 'history')   { if(typeof renderHistGrid==='function') renderHistGrid(); }
+  if (name === 'settings')  { if(typeof updateSettingsPage==='function') updateSettingsPage(); }
 }
 
 // ══════════════════════════════════════════
@@ -1759,279 +1766,317 @@ function renderFlowDiagram(haId) {
 }
 
 function buildFlowSVG(haId) {
-  // Shared drawing helpers
-  var DEFS = '<defs><marker id="farr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#9AAAB8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
-  var C = {exp:'#1D9E75',nexp:'#185FA5',none:'#888780',dec:'#D85A30',src:'#534AB7'};
-  var BG= {exp:'#E1F5EE',nexp:'#E6F1FB',none:'#F1EFE8',dec:'#FAECE7',src:'#EEEDFE'};
-  var TC= {exp:'#085041',nexp:'#0C447C',none:'#444441',dec:'#712B13',src:'#3C3489'};
+  var D='<defs><marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="#AAB4C0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>';
+  var C={exp:'#1D9E75',nexp:'#185FA5',none:'#6B7280',dec:'#C05621',src:'#534AB7'};
+  var BG={exp:'#ECFDF5',nexp:'#EFF6FF',none:'#F3F4F6',dec:'#FFF7ED',src:'#EEF2FF'};
+  var TC={exp:'#065F46',nexp:'#1E40AF',none:'#374151',dec:'#92400E',src:'#3730A3'};
 
-  function r(x,y,w,h,type,rx){rx=rx||8;var f=BG[type],s=C[type];return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+rx+'" fill="'+f+'" stroke="'+s+'" stroke-width="0.8"/>';}
-  function t(x,y,s,anch,sz,w,col){sz=sz||11;anch=anch||'middle';col=col||'#2D3748';return '<text x="'+x+'" y="'+y+'" text-anchor="'+anch+'" font-size="'+sz+'" font-weight="'+(w||500)+'" fill="'+col+'" dominant-baseline="central" font-family="Inter,system-ui,sans-serif">'+s+'</text>';}
-  function node(x,y,w,h,label,sub,type){var s=r(x,y,w,h,type);s+=t(x+w/2,y+(sub?h/2-7:h/2),label,'middle',10.5,600,TC[type]);if(sub)s+=t(x+w/2,y+h/2+7,sub,'middle',9.5,400,C[type]);return s;}
-  function diam(cx,cy,hw,hh,label,sub){var pts=cx+','+(cy-hh)+' '+(cx+hw)+','+cy+' '+cx+','+(cy+hh)+' '+(cx-hw)+','+cy;var s='<polygon points="'+pts+'" fill="'+BG.dec+'" stroke="'+C.dec+'" stroke-width="0.8"/>';s+=t(cx,cy+(sub?-7:0),label,'middle',10.5,600,TC.dec);if(sub)s+=t(cx,cy+8,sub,'middle',9.5,400,C.dec);return s;}
-  function ln(x1,y1,x2,y2){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#9AAAB8" stroke-width="0.8" marker-end="url(#farr)"/>';}
-  function pt(d){return '<path d="'+d+'" stroke="#9AAAB8" stroke-width="0.8" fill="none" marker-end="url(#farr)"/>';}
-  function lb(x,y,s){return '<text x="'+x+'" y="'+y+'" font-size="9.5" fill="#9AAAB8" font-family="Inter,sans-serif" dominant-baseline="central">'+s+'</text>';}
-  function wrap(h,body){return '<svg width="100%" viewBox="0 0 680 '+h+'" style="display:block;">'+DEFS+body+'</svg>';}
+  // ── helpers ──────────────────────────────────────────────────────────────
+  function bx(x,y,w,h,type){
+    var f=BG[type]||BG.dec,s=C[type]||C.dec;
+    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="7" fill="'+f+'" stroke="'+s+'" stroke-width="1"/>';
+  }
+  function tx(x,y,txt,col,sz,bold){
+    return '<text x="'+x+'" y="'+y+'" text-anchor="middle" dominant-baseline="central" font-size="'+(sz||11)+'" font-weight="'+(bold?600:400)+'" fill="'+(col||'#1F2937')+'" font-family="Inter,system-ui,sans-serif">'+txt+'</text>';
+  }
+  function nd(x,y,w,h,line1,line2,type){
+    var s=bx(x,y,w,h,type);
+    var col=TC[type]||TC.dec;
+    if(line2){s+=tx(x+w/2,y+h/2-7,line1,col,10.5,true);s+=tx(x+w/2,y+h/2+7,line2,C[type]||C.dec,9.5,false);}
+    else{s+=tx(x+w/2,y+h/2,line1,col,10.5,true);}
+    return s;
+  }
+  function dm(cx,cy,hw,hh,l1,l2){
+    var pts=cx+','+(cy-hh)+' '+(cx+hw)+','+cy+' '+cx+','+(cy+hh)+' '+(cx-hw)+','+cy;
+    var s='<polygon points="'+pts+'" fill="'+BG.dec+'" stroke="'+C.dec+'" stroke-width="1"/>';
+    if(l2){s+=tx(cx,cy-7,l1,TC.dec,10.5,true);s+=tx(cx,cy+7,l2,C.dec,9.5,false);}
+    else{s+=tx(cx,cy,l1,TC.dec,10.5,true);}
+    return s;
+  }
+  function ar(x1,y1,x2,y2){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#AAB4C0" stroke-width="0.9" marker-end="url(#fa)"/>';}
+  function pa(d){return '<path d="'+d+'" stroke="#AAB4C0" stroke-width="0.9" fill="none" marker-end="url(#fa)"/>';}
+  function lb(x,y,txt,anchor){return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'start')+'" dominant-baseline="central" font-size="9" fill="#9CA3AF" font-family="Inter,sans-serif">'+txt+'</text>';}
+  function svg(h,body){return '<svg width="100%" viewBox="0 0 500 '+h+'" preserveAspectRatio="xMidYMin meet" style="display:block;max-width:900px;margin:0 auto;">'+D+body+'</svg>';}
 
   var s='';
   switch(haId){
-    case 'MHRA':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72);
-      s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L528,100'); s+=lb(460,93,'No (non-serious)');
-      s+=diam(578,100,88,28,'GB / NI?');
-      s+=ln(578,128,578,158); s+=lb(581,145,'Yes → causality');
-      s+=pt('M578,72 M666,100 L666,100'); s+=node(620,158,106,32,'No expedited submission','','none');
-      s+=ln(340,130,340,162); s+=lb(343,148,'Yes (serious)');
-      s+=pt('M490,100 L490,196 L458,196'); s+=lb(493,104,'Yes');
-      s+=diam(340,196,118,30,'Causality','As Reported / Determined');
-      // Branch 1
-      s+=pt('M222,196 L90,196 L90,252'); s+=lb(93,192,'NR/Related or');
-      s+=node(28,256,124,40,'NR/Related · Unknown/Related','Related/Related · NR/Related','dec');
-      s+=ln(90,296,58,326); s+=lb(30,318,'Solicited'); s+=ln(90,296,122,326); s+=lb(103,318,'Spont.');
-      s+=node(20,330,68,30,'15 or 90d','submission','nexp'); s+=node(90,330,68,30,'15 or 90d','submission','nexp');
-      // Branch 2
-      s+=pt('M280,224 L200,252');
-      s+=node(138,256,124,40,'NR/NR or','Unknown/NR','dec');
-      s+=ln(200,296,175,326); s+=lb(147,318,'Solicited'); s+=ln(200,296,225,326); s+=lb(216,318,'Spont.');
-      s+=node(136,330,72,30,'No expedited','submission','none'); s+=node(214,330,72,30,'15 or 90d','submission','nexp');
-      // Branch 3
-      s+=pt('M400,224 L450,252');
-      s+=node(388,256,124,40,'Related /','Not Related','dec');
-      s+=ln(450,296,425,326); s+=lb(397,318,'Solicited'); s+=ln(450,296,475,326); s+=lb(466,318,'Spont.');
-      s+=node(384,330,76,30,'15 or 90d','submission','nexp'); s+=node(462,330,76,30,'15 or 90d','submission','nexp');
-      // Branch 4
-      s+=pt('M458,196 L566,196 L566,252');
-      s+=node(504,256,124,40,'Not Related /','Not Related','dec');
-      s+=ln(566,296,541,326); s+=lb(513,318,'Solicited'); s+=ln(566,296,591,326); s+=lb(582,318,'Spont.');
-      s+=node(502,330,76,30,'No expedited','submission','none'); s+=node(580,330,76,30,'No expedited','submission','none');
-      return wrap(385,s);
 
-    case 'FDA':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L528,100'); s+=lb(460,93,'No'); s+=node(530,84,112,32,'Periodic report','PADER/PBRER','nexp');
-      s+=ln(340,130,340,162); s+=lb(343,147,'Yes');
-      s+=diam(340,192,118,30,'Unexpected?','vs USPI/SmPC');
-      s+=pt('M458,192 L528,192'); s+=lb(460,185,'No (expected)');
-      s+=diam(572,192,88,28,'Fatal / LT?');
-      s+=ln(572,220,572,250); s+=lb(575,237,'Yes');
-      s+=node(522,254,100,30,'15-day Alert','(fatal/LT expected)','exp');
-      s+=pt('M660,192 L660,268 L626,268'); s+=lb(574,188,'No');
-      s+=node(526,260,0,0,'','','none');
-      s+=node(528,254,0,0,'','','none');
-      s+=node(528,256,100,30,'PADER periodic','(non-fatal expected)','nexp');
-      s+=ln(340,222,340,252); s+=lb(343,239,'Yes (unexpected)');
-      s+=diam(340,280,118,30,'Fatal or LT?');
-      s+=ln(340,310,340,338); s+=lb(343,326,'Yes');
-      s+=node(270,342,140,30,'7-day IND Safety Report','fatal/LT unexpected','exp');
-      s+=pt('M222,280 L150,280 L150,338'); s+=lb(153,274,'No');
-      s+=node(80,342,138,30,'15-day Safety Report','serious unexpected','exp');
-      return wrap(395,s);
+  // ── MHRA ─────────────────────────────────────────────────────────────────
+  case 'MHRA':
+    // Source
+    s+=nd(150,10,200,34,'ICSRs — global post-market','sources','src');
+    s+=ar(250,44,250,74);
+    // Serious?
+    s+=dm(250,102,110,30,'ICSR serious?');
+    // No → right branch
+    s+=pa('M360,102 L430,102 L430,64');
+    s+=lb(362,93,'No'); s+=nd(370,46,120,34,'Non-serious','no expedited','none');
+    // Yes → down
+    s+=ar(250,132,250,162); s+=lb(253,149,'Yes (serious)');
+    // Causality
+    s+=dm(250,192,130,32,'Causality','As Reported / Determined');
+    // Branch A left — any "related" component
+    s+=pa('M120,192 L60,192 L60,242');
+    s+=lb(62,183,'Any related'); 
+    s+=nd(10,246,100,36,'Related','component','dec');
+    s+=ar(60,282,60,312);
+    // Solicited / Spontaneous split
+    s+=pa('M60,312 L30,312 L30,342'); s+=pa('M60,312 L90,312 L90,342');
+    s+=lb(10,304,'Sol.'); s+=lb(72,304,'Spont.');
+    s+=nd(4,346,54,30,'15/90d','sub','nexp'); s+=nd(62,346,54,30,'15/90d','sub','nexp');
+    // Branch B — NR/NR or Unknown/NR solicited
+    s+=pa('M200,224 L140,260');
+    s+=nd(90,264,100,36,'NR or Unknown','/ Not Related','dec');
+    s+=ar(140,300,140,328);
+    s+=pa('M140,328 L110,328 L110,354'); s+=pa('M140,328 L170,328 L170,354');
+    s+=lb(82,321,'Sol.'); s+=lb(152,321,'Spont.');
+    s+=nd(80,358,60,30,'No exp.','sub','none'); s+=nd(144,358,60,30,'15/90d','sub','nexp');
+    // Branch C — Related / Not Related (right)
+    s+=pa('M300,224 L360,260');
+    s+=nd(310,264,100,36,'Related /','Not Related','dec');
+    s+=ar(360,300,360,328);
+    s+=pa('M360,328 L330,328 L330,354'); s+=pa('M360,328 L390,328 L390,354');
+    s+=lb(302,321,'Sol.'); s+=lb(372,321,'Spont.');
+    s+=nd(300,358,60,30,'15/90d','sub','nexp'); s+=nd(362,358,60,30,'15/90d','sub','nexp');
+    // Branch D — NR / NR (both)
+    s+=pa('M380,192 L440,192 L440,242');
+    s+=nd(390,246,100,36,'Not Related /','Not Related','dec');
+    s+=ar(440,282,440,310);
+    s+=pa('M440,310 L415,310 L415,338'); s+=pa('M440,310 L465,310 L465,338');
+    s+=lb(397,302,'Sol.'); s+=lb(447,302,'Spont.');
+    s+=nd(385,342,58,28,'No exp.','sub','none'); s+=nd(445,342,58,28,'No exp.','sub','none');
+    return svg(395,s);
 
-    case 'EMA':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L528,100'); s+=lb(460,93,'No'); s+=node(530,84,112,32,'90-day periodic','EudraVigilance','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'EU/EEA scope?','EU-authorised product');
-      s+=pt('M222,190 L130,190'); s+=lb(133,183,'No'); s+=node(18,174,110,32,'No EV submission','required','none');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Yes');
-      s+=diam(340,280,118,30,'Unexpected?','vs SmPC');
-      s+=pt('M458,280 L528,280'); s+=lb(460,273,'No (expected)');
-      s+=diam(572,280,88,28,'Fatal / LT?');
-      s+=ln(572,308,572,338); s+=lb(575,325,'Yes'); s+=node(520,342,104,30,'15-day to','EudraVigilance','exp');
-      s+=pt('M660,280 L660,355 L628,355'); s+=lb(578,276,'No');
-      s+=node(526,340,0,0,'','','none');
-      s+=node(524,349,104,30,'90-day periodic','EudraVigilance','nexp');
-      s+=pt('M458,280 L458,190'); // solicited no-exp
-      s+=ln(340,310,340,338); s+=lb(343,326,'Yes (unexpected)');
-      s+=node(268,342,144,30,'15-day to EudraVigilance','serious unexpected','exp');
-      s+=lb(88,190,'Solicited+NR →');
-      s+=node(18,174+30,140,30,'No expedited (solicited,','causality-gated)','none');
-      return wrap(400,s);
+  // ── FDA ──────────────────────────────────────────────────────────────────
+  case 'FDA':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L430,102'); s+=lb(363,93,'No');
+    s+=nd(372,86,120,32,'Periodic report','PADER / PBRER','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Unexpected?','vs USPI / labelling');
+    s+=pa('M370,188 L440,188'); s+=lb(373,179,'No (expected)');
+    s+=dm(440,220,70,24,'Fatal / LT?');
+    s+=ar(440,244,440,268); s+=lb(443,258,'Yes');
+    s+=nd(390,272,100,32,'15-day Alert','fatal/LT expected','exp');
+    s+=pa('M510,220 L510,285 L494,285'); s+=lb(514,244,'No');
+    s+=nd(394,278,0,0,'','','nexp');
+    s+=nd(358,289,100,28,'90-day Periodic','expected non-fatal','nexp');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes (unexpected)');
+    s+=dm(250,274,110,28,'Fatal or LT?');
+    s+=ar(250,302,250,328); s+=lb(253,317,'Yes');
+    s+=nd(185,332,130,32,'7-day IND Safety','Report — fatal/LT','exp');
+    s+=pa('M140,274 L70,274 L70,328'); s+=lb(72,265,'No');
+    s+=nd(18,332,105,32,'15-day Safety','Report — unexp.','exp');
+    return svg(385,s);
 
-    case 'HC':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L528,100'); s+=lb(460,93,'No'); s+=node(530,84,112,32,'90-day periodic','MHPD submission','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'Unexpected?','vs Canadian product info');
-      s+=pt('M458,190 L528,190'); s+=lb(460,183,'No (expected)'); s+=node(530,174,112,32,'30-day to MHPD','MedEffect Canada','nexp');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Yes (unexpected)');
-      s+=diam(340,280,118,30,'Domestic (CA)','or overseas?');
-      s+=ln(340,310,340,338); s+=lb(343,325,'Domestic'); s+=node(268,342,144,30,'15-day to MHPD','MedEffect Canada','exp');
-      s+=pt('M458,280 L528,280'); s+=lb(460,273,'Overseas'); s+=node(530,264,112,32,'15-day to MHPD','MedEffect Canada','exp');
-      return wrap(400,s);
+  // ── EMA ──────────────────────────────────────────────────────────────────
+  case 'EMA':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L430,102'); s+=lb(363,93,'No');
+    s+=nd(372,86,120,32,'90-day Periodic','EudraVigilance','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'EU/EEA scope?','EU-authorised product');
+    s+=pa('M130,188 L60,188'); s+=lb(62,179,'No');
+    s+=nd(2,172,100,32,'No EV sub.','required','none');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes');
+    s+=dm(250,274,120,28,'Unexpected?','vs SmPC');
+    s+=ar(250,302,250,328); s+=lb(253,316,'Yes (unexpected)');
+    s+=nd(184,332,132,32,'15-day to','EudraVigilance','exp');
+    s+=pa('M370,274 L440,274'); s+=lb(373,265,'No (expected)');
+    s+=dm(440,300,68,24,'Fatal/LT?');
+    s+=ar(440,324,440,348); s+=lb(443,337,'Yes');
+    s+=nd(390,352,100,30,'15-day to EV','fatal/LT expected','exp');
+    s+=pa('M508,300 L508,368 L494,368'); s+=lb(512,328,'No');
+    s+=nd(360,362,0,0,'','','nexp');
+    s+=nd(358,370,100,28,'90-day Periodic','EudraVigilance','nexp');
+    // Solicited NR footnote
+    s+=pa('M370,274 L440,220 L440,200'); s+=lb(443,210,'Solicited+NR');
+    s+=nd(380,168,118,28,'No exp. (solicited,','causality-gated)','none');
+    return svg(420,s);
 
-    case 'TGA':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L538,100'); s+=lb(460,93,'No'); s+=node(540,84,114,32,'Not required','overseas non-serious','none');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'Domestic (AU)','or overseas?');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Domestic');
-      s+=diam(340,280,118,30,'Unexpected?');
-      s+=ln(340,310,340,338); s+=lb(343,325,'Yes'); s+=node(268,342,144,30,'15-day to TGA','Blue Card / DAEN','exp');
-      s+=pt('M222,280 L130,280'); s+=lb(133,273,'No'); s+=node(18,264,110,32,'30-day to TGA','domestic expected','nexp');
-      s+=pt('M458,190 L538,190'); s+=lb(460,183,'Overseas');
-      s+=diam(578,190,88,28,'Unexpected?');
-      s+=ln(578,218,578,248); s+=lb(581,235,'Yes'); s+=node(526,252,106,30,'15-day to TGA','overseas unexpected','exp');
-      s+=pt('M578,162 L578,144 L640,144'); s+=lb(583,154,'No'); s+=node(604,128,110,32,'Not required','overseas expected','none');
-      return wrap(400,s);
+  // ── Health Canada ─────────────────────────────────────────────────────────
+  case 'HC':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,120,32,'90-day Periodic','MHPD submission','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Unexpected?','vs Canadian product info');
+    s+=pa('M370,188 L440,188'); s+=lb(373,179,'No (expected)');
+    s+=nd(382,172,118,32,'30-day to MHPD','MedEffect Canada','nexp');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes (unexpected)');
+    s+=dm(250,274,120,28,'Domestic (CA)?');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(184,330,132,32,'15-day to MHPD','domestic unexpected','exp');
+    s+=pa('M370,274 L440,274'); s+=lb(373,265,'Overseas');
+    s+=nd(382,258,118,32,'15-day to MHPD','overseas unexpected','exp');
+    return svg(385,s);
 
-    case 'PMDA':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L538,100'); s+=lb(460,93,'No'); s+=node(540,84,114,32,'Periodic report','PSUR to PMDA','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'Unexpected?','vs Japan labelling');
-      s+=pt('M458,190 L538,190'); s+=lb(460,183,'No (expected)'); s+=node(540,174,114,32,'30-day to PMDA','J-LINK E2B R3','nexp');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Yes (unexpected)');
-      s+=diam(340,280,118,30,'Fatal or LT?');
-      s+=ln(340,310,340,338); s+=lb(343,325,'Yes'); s+=node(264,342,152,30,'15-day to PMDA','J-LINK fatal/LT unexpected','exp');
-      s+=pt('M222,280 L140,280'); s+=lb(143,273,'No'); s+=node(24,264,114,32,'15-day to PMDA','non-fatal unexpected','exp');
-      return wrap(395,s);
+  // ── TGA ──────────────────────────────────────────────────────────────────
+  case 'TGA':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Not required','non-serious overseas','none');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Domestic (AU)','or overseas?');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Domestic');
+    s+=dm(250,274,110,28,'Unexpected?');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(184,330,132,32,'15-day to TGA','Blue Card / DAEN','exp');
+    s+=pa('M140,274 L70,274'); s+=lb(72,265,'No');
+    s+=nd(4,258,100,32,'30-day to TGA','domestic expected','nexp');
+    // Overseas branch
+    s+=pa('M370,188 L440,188 L440,220');
+    s+=lb(373,180,'Overseas'); s+=dm(440,248,70,26,'Unexp.?');
+    s+=ar(440,274,440,298); s+=lb(443,287,'Yes');
+    s+=nd(382,302,116,30,'15-day to TGA','overseas unexpected','exp');
+    s+=pa('M440,222 L440,200 L480,200'); s+=lb(443,194,'No');
+    s+=nd(382,168,0,0,'','','none');
+    s+=nd(382,156,116,28,'Not required','overseas expected','none');
+    return svg(355,s);
 
-    case 'MFDS':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L538,100'); s+=lb(460,93,'No'); s+=node(540,84,114,32,'Periodic report','KPVS database','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'Unexpected?','vs Korean labelling');
-      s+=pt('M458,190 L538,190'); s+=lb(460,183,'No (expected)'); s+=node(540,174,114,32,'30-day to MFDS','e-DUR portal','nexp');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Yes (unexpected)');
-      s+=diam(340,280,118,30,'Fatal or LT?');
-      s+=ln(340,310,340,338); s+=lb(343,325,'Yes'); s+=node(264,342,152,30,'15-day to MFDS','KGVP E2B R3','exp');
-      s+=pt('M222,280 L140,280'); s+=lb(143,273,'No'); s+=node(24,264,114,32,'15-day to MFDS','non-fatal unexpected','exp');
-      return wrap(395,s);
+  // ── PMDA ─────────────────────────────────────────────────────────────────
+  case 'PMDA':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Periodic report','PSUR to PMDA','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Unexpected?','vs Japan labelling (添付文書)');
+    s+=pa('M370,188 L440,188'); s+=lb(373,179,'No (expected)');
+    s+=nd(382,172,116,32,'30-day to PMDA','J-LINK E2B R3','nexp');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes (unexpected)');
+    s+=dm(250,274,110,28,'Fatal or LT?');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(184,330,132,32,'15-day to PMDA','J-LINK fatal/LT','exp');
+    s+=pa('M140,274 L70,274'); s+=lb(72,265,'No');
+    s+=nd(4,258,110,32,'15-day to PMDA','non-fatal unexpected','exp');
+    return svg(380,s);
 
-    case 'SMC':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L538,100'); s+=lb(460,93,'No'); s+=node(540,84,114,32,'Periodic report','PSUR/PBRER','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'CH / Liechtenstein','MA or occurrence?');
-      s+=pt('M222,190 L130,190'); s+=lb(133,183,'No'); s+=node(18,174,110,32,'No submission','required','none');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Yes');
-      s+=diam(340,280,118,30,'Unexpected?','vs CH-approved info');
-      s+=ln(340,310,340,338); s+=lb(343,325,'Yes'); s+=node(264,342,152,30,'15-day to Swissmedic','ElViS E2B R3','exp');
-      s+=pt('M458,280 L538,280'); s+=lb(460,273,'No (expected)'); s+=node(540,264,114,32,'30-day to','Swissmedic ElViS','nexp');
-      return wrap(395,s);
+  // ── MFDS ─────────────────────────────────────────────────────────────────
+  case 'MFDS':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Periodic report','KPVS database','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Unexpected?','vs Korean labelling');
+    s+=pa('M370,188 L440,188'); s+=lb(373,179,'No (expected)');
+    s+=nd(382,172,116,32,'30-day to MFDS','e-DUR portal','nexp');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes (unexpected)');
+    s+=dm(250,274,110,28,'Fatal or LT?');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(184,330,132,32,'15-day to MFDS','KGVP E2B R3','exp');
+    s+=pa('M140,274 L70,274'); s+=lb(72,265,'No');
+    s+=nd(4,258,110,32,'15-day to MFDS','non-fatal unexpected','exp');
+    return svg(380,s);
 
-    case 'CDSCO':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L538,100'); s+=lb(460,93,'No'); s+=node(540,84,114,32,'Periodic report','PSUR via PvPI','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'Domestic (IN)','or overseas?');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Domestic');
-      s+=diam(340,280,118,30,'Unexpected?');
-      s+=ln(340,310,340,338); s+=lb(343,325,'Yes'); s+=node(264,342,152,30,'15-day to CDSCO','PvPI portal E2B R2','exp');
-      s+=pt('M222,280 L130,280'); s+=lb(133,273,'No'); s+=node(18,264,110,32,'30-day to CDSCO','domestic expected','nexp');
-      s+=pt('M458,190 L538,190'); s+=lb(460,183,'Overseas'); s+=node(540,174,114,32,'30-day to CDSCO','overseas serious','nexp');
-      return wrap(395,s);
+  // ── Swissmedic ───────────────────────────────────────────────────────────
+  case 'SMC':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Periodic report','PSUR / PBRER','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'CH/Liechtenstein','MA or occurrence?');
+    s+=pa('M130,188 L60,188'); s+=lb(62,179,'No');
+    s+=nd(2,172,100,32,'No submission','required','none');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes');
+    s+=dm(250,274,120,28,'Unexpected?','vs CH-approved info');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(184,330,132,32,'15-day Swissmedic','ElViS E2B R3','exp');
+    s+=pa('M370,274 L440,274'); s+=lb(373,265,'No (expected)');
+    s+=nd(382,258,116,32,'30-day Swissmedic','ElViS E2B R3','nexp');
+    return svg(380,s);
 
-    case 'ANVISA':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L538,100'); s+=lb(460,93,'No'); s+=node(540,84,114,32,'Periodic report','PSUR to ANVISA','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'Unexpected?','vs BR ANVISA labelling');
-      s+=pt('M458,190 L538,190'); s+=lb(460,183,'No (expected)'); s+=node(540,174,114,32,'30-day to ANVISA','Notivisa','nexp');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Yes (unexpected)');
-      s+=diam(340,280,118,30,'Domestic (BR)?');
-      s+=ln(340,310,340,338); s+=lb(343,325,'Yes'); s+=node(264,342,152,30,'15-day to ANVISA','Notivisa E2B','exp');
-      s+=pt('M458,280 L538,280'); s+=lb(460,273,'Overseas'); s+=node(540,264,114,32,'15-day to ANVISA','overseas unexpected','exp');
-      return wrap(395,s);
+  // ── CDSCO ────────────────────────────────────────────────────────────────
+  case 'CDSCO':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Periodic report','PSUR via PvPI','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Domestic (IN)','or overseas?');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Domestic');
+    s+=dm(250,274,110,28,'Unexpected?');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(184,330,132,32,'15-day to CDSCO','PvPI portal E2B','exp');
+    s+=pa('M140,274 L70,274'); s+=lb(72,265,'No');
+    s+=nd(4,258,110,32,'30-day to CDSCO','domestic expected','nexp');
+    s+=pa('M370,188 L440,188'); s+=lb(373,179,'Overseas');
+    s+=nd(382,172,116,32,'30-day to CDSCO','overseas serious','nexp');
+    return svg(380,s);
 
-    case 'SFDA':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L538,100'); s+=lb(460,93,'No'); s+=node(540,84,114,32,'Periodic report','PSUR/PBRER','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'Unexpected?','vs SA-approved labelling');
-      s+=pt('M458,190 L538,190'); s+=lb(460,183,'No (expected)'); s+=node(540,174,114,32,'30-day to SFDA','SFDA gateway','nexp');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Yes (unexpected)'); s+=node(264,254,152,30,'15-day to SFDA','E2B R3 gateway','exp');
-      return wrap(310,s);
+  // ── ANVISA ───────────────────────────────────────────────────────────────
+  case 'ANVISA':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Periodic report','PSUR to ANVISA','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Unexpected?','vs ANVISA labelling');
+    s+=pa('M370,188 L440,188'); s+=lb(373,179,'No (expected)');
+    s+=nd(382,172,116,32,'30-day ANVISA','Notivisa','nexp');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes (unexpected)');
+    s+=dm(250,274,110,28,'Domestic (BR)?');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(184,330,132,32,'15-day ANVISA','Notivisa E2B','exp');
+    s+=pa('M360,274 L440,274'); s+=lb(363,265,'Overseas');
+    s+=nd(382,258,116,32,'15-day ANVISA','overseas unexpected','exp');
+    return svg(380,s);
 
-    case 'NMPA':
-      s+=node(240,8,200,34,'ICSRs — all global post-market sources','','src');
-      s+=ln(340,42,340,72); s+=diam(340,100,118,30,'ICSR serious?');
-      s+=pt('M458,100 L538,100'); s+=lb(460,93,'No'); s+=node(540,84,114,32,'Periodic report','PSUR to NMPA','nexp');
-      s+=ln(340,130,340,160); s+=lb(343,147,'Yes');
-      s+=diam(340,190,118,30,'Domestic (CN)','or overseas?');
-      s+=ln(340,220,340,250); s+=lb(343,237,'Domestic');
-      s+=diam(340,280,118,30,'Unexpected?');
-      s+=ln(340,310,340,338); s+=lb(343,325,'Yes'); s+=node(258,342,164,30,'15-day to NMPA','CNPV domestic unexpected','exp');
-      s+=pt('M222,280 L130,280'); s+=lb(133,273,'No'); s+=node(18,264,110,32,'30-day to NMPA','domestic expected','nexp');
-      s+=pt('M458,190 L538,190'); s+=lb(460,183,'Overseas');
-      s+=diam(578,190,88,28,'Unexpected?');
-      s+=ln(578,218,578,248); s+=lb(581,235,'Yes'); s+=node(522,252,112,30,'30-day to NMPA','overseas unexpected (CN rule)','nexp');
-      s+=pt('M578,162 L578,144 L640,144'); s+=lb(583,154,'No'); s+=node(604,128,110,32,'30-day to NMPA','overseas expected','nexp');
-      return wrap(400,s);
+  // ── SFDA ─────────────────────────────────────────────────────────────────
+  case 'SFDA':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Periodic report','PSUR / PBRER','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Unexpected?','vs SA-approved labelling');
+    s+=pa('M370,188 L440,188'); s+=lb(373,179,'No (expected)');
+    s+=nd(382,172,116,32,'30-day to SFDA','SFDA gateway','nexp');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes (unexpected)');
+    s+=nd(184,250,132,32,'15-day to SFDA','E2B R3 gateway','exp');
+    return svg(300,s);
 
-    default: return '<p style="padding:20px;color:#9AAAB8;">Select a health authority above.</p>';
+  // ── NMPA ─────────────────────────────────────────────────────────────────
+  case 'NMPA':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Periodic report','PSUR to NMPA','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Domestic (CN)','or overseas?');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Domestic');
+    s+=dm(250,274,110,28,'Unexpected?');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(178,330,144,32,'15-day CNPV','domestic unexpected','exp');
+    s+=pa('M140,274 L70,274'); s+=lb(72,265,'No');
+    s+=nd(4,258,110,32,'30-day NMPA','domestic expected','nexp');
+    // Overseas branch
+    s+=pa('M370,188 L440,188 L440,220');
+    s+=lb(373,180,'Overseas'); s+=dm(440,248,70,26,'Unexp.?');
+    s+=ar(440,274,440,298); s+=lb(443,287,'Yes');
+    s+=nd(382,302,116,30,'30-day NMPA','overseas unexpected (CN rule)','nexp');
+    s+=pa('M440,222 L440,205 L480,205'); s+=lb(443,198,'No');
+    s+=nd(382,172,0,0,'','','nexp');
+    s+=nd(382,160,116,28,'30-day NMPA','overseas expected','nexp');
+    return svg(360,s);
+
+  default:
+    return '<p style="padding:20px;color:#9CA3AF;font-size:13px;">Select a health authority above.</p>';
   }
 }
-
-// ══════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════
-window.addEventListener('load', function() {
-  renderDashFeed();
-  renderDashCompliance();
-  renderIntelTable();
-  renderImpactTable();
-  renderKanban();
-  renderActionsList();
-  renderReports();
-  renderAdmin();
-  renderSlidePanel();
-});
-
-/* ── CASE RESOLVER JS (from index.html) ── */
-
-// ── STATE ──
-let apiKey = '';
-let demoMode = true;
-const HIST_KEY = 'regintel_searches';
-
-// ── INIT ──
-window.addEventListener('load', () => {
-  document.getElementById('f-day0').valueAsDate = new Date();
-  setGreeting();
-  loadHistory();
-  updateHistCount();
-  setTimeout(()=>{ document.getElementById('apiPanel').classList.add('open'); }, 400);
-  document.querySelectorAll('.ha-item input:checked').forEach(cb=>cb.closest('.ha-item').classList.add('ck'));
-});
-
-document.addEventListener('click', e=>{
-  const panel = document.getElementById('apiPanel');
-  const btn = document.getElementById('apiToggleBtn');
-  if(panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)){
-    panel.classList.remove('open');
-  }
-});
 
 function setGreeting(){
   const h = new Date().getHours();
   document.getElementById('greeting').textContent = h<12?'Good morning.':h<17?'Good afternoon.':'Good evening.';
 }
 
-// ── NAV ──
-function showView(name){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.sb-item[id^=nav-]').forEach(i=>i.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
-  const nav = document.getElementById('nav-'+name);
-  if(nav) nav.classList.add('active');
-  if(name==='history') renderHistGrid();
-  if(name==='settings') updateSettingsPage();
-}
+// ── NAV (index.html duplicate removed — handled by platform showView above) ──
 
 // ── API PANEL ──
 function toggleApiPanel(){
