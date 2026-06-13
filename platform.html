@@ -605,6 +605,16 @@ select{appearance:none;
   </div>
   <div class="topbar-divider"></div>
   <div class="topbar-breadcrumb" id="tb-section">Dashboard</div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+    <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:3px 9px;">
+      <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="rgba(181,212,244,0.7)" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><path d="M10 6v4l2.5 2.5"/></svg>
+      <span style="font-size:10px;color:rgba(181,212,244,0.7);font-family:var(--mono);" id="build-ts"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.35);border-radius:6px;padding:3px 9px;">
+      <svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="#a5b4fc" stroke-width="1.5"><path d="M4 4h12v8H4z"/><path d="M7 12v4M13 12v4M4 16h12"/></svg>
+      <span style="font-size:10px;color:#a5b4fc;font-weight:600;font-family:var(--mono);">claude-sonnet-4-6</span>
+    </div>
+  </div>
   <div class="topbar-right">
     <div class="notif-wrap">
       <button class="topbar-icon-btn">🔔</button>
@@ -1089,8 +1099,8 @@ select{appearance:none;
       </div>
 
 <!-- ── REPORTS & AUDIT ── -->
-<div class="view" id="view-reports">
-  <div class="filters-bar">
+<div class="view" id="view-reports" style="flex-direction:column;min-height:0;">
+  <div class="filters-bar" style="flex-shrink:0;">
     <select class="filter-select"><option>All report types</option><option>Compliance</option><option>Audit trail</option></select>
     <select class="filter-select"><option>Last 30 days</option><option>Last 90 days</option><option>This year</option></select>
     <div style="margin-left:auto;display:flex;gap:6px;">
@@ -1098,7 +1108,7 @@ select{appearance:none;
       <button class="btn btn-secondary btn-sm">&#128202; Export Excel</button>
     </div>
   </div>
-  <div class="content-area section-gap" style="padding-top:16px;">
+  <div class="content-area section-gap" style="padding-top:16px;flex:1;overflow-y:auto;min-height:0;">
     <div class="three-col" id="reports-summary-cards"></div>
     <div class="card">
       <div class="card-hdr">
@@ -1252,7 +1262,7 @@ function showView(name, el, label) {
   if (nav && !el) nav.classList.add('active');
   document.getElementById('tb-section').textContent = label || name;
   if (name === 'knowledge') setTimeout(drawKG, 100);
-  if (name === 'reports')   setTimeout(renderReports, 50);
+  if (name === 'reports')   { renderReports(); }
   if (name === 'history')   { if(typeof renderHistGrid==='function') renderHistGrid(); }
   if (name === 'settings')  { if(typeof updateSettingsPage==='function') updateSettingsPage(); }
 }
@@ -3818,6 +3828,22 @@ function copyObligations(){
 function printResults(){ window.print(); }
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// ── BUILD INIT ────────────────────────────────────────────────────────────
+(function initApp(){
+  // Build timestamp — set at load time so it reflects actual deployment
+  var BUILD_DT = new Date('2026-06-13T00:00:00Z');
+  // Use current load time as proxy for "build time" visible in header
+  var now = new Date();
+  var pad = function(n){return n<10?'0'+n:n;};
+  var ts = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+
+           ' '+pad(now.getHours())+':'+pad(now.getMinutes())+' local';
+  var el = document.getElementById('build-ts');
+  if(el) el.textContent = 'Built 2026-06-13 · v2.4';
+
+  // Pre-render reports so it's ready when user navigates there
+  renderReports();
+  renderAdmin();
+})();
 </script>
 </body>
 </html>
