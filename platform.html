@@ -936,8 +936,7 @@ select{appearance:none;
 </div>
 
 <!-- ── CASE RESOLVER (merged from index.html) ── -->
-<div class="view" id="view-resolver">
-    <div class="view" id="view-intake">
+<div class="view" id="view-resolver" style="flex-direction:column;overflow:hidden;min-height:0;">
       <div class="intake-shell">
         <div class="form-panel">
           <div class="form-panel-hdr">
@@ -1088,65 +1087,7 @@ select{appearance:none;
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- ── HISTORY ── -->
-    <div class="view" id="view-history">
-      <div class="hist-scroll">
-        <div class="hist-hdr">
-          <h2>Search History</h2>
-          <button onclick="clearHistory()" style="font-size:12px;color:var(--red);background:#FCEBEB;border:1px solid rgba(163,45,45,0.2);border-radius:6px;padding:6px 14px;cursor:pointer;">Clear all</button>
-        </div>
-        <div class="hist-grid" id="histGrid">
-          <div class="hist-empty" style="grid-column:1/-1;">
-            <h3>No searches saved yet</h3>
-            <p style="font-size:13px;color:var(--muted);">Every case you analyze is automatically saved here for quick re-run.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── SETTINGS ── -->
-    <div class="view" id="view-settings">
-      <div class="settings-scroll">
-        <h2>Settings</h2>
-        <div class="settings-section">
-          <div class="ss-hdr"><h3>API Configuration</h3></div>
-          <div class="ss-row">
-            <div><div class="ss-row-label">Claude API Key</div><div class="ss-row-sub">Required for live AI-powered obligation resolution</div></div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="password" class="ss-input" id="settingsApiKey" placeholder="sk-ant-api03-…"/>
-              <button class="ss-btn primary" onclick="saveSettingsKey()">Save</button>
-            </div>
-          </div>
-          <div class="ss-row">
-            <div><div class="ss-row-label">Current mode</div><div class="ss-row-sub" id="settingsMode">Demo mode — no API key connected</div></div>
-            <button class="ss-btn" onclick="useDemoMode()">Reset to Demo</button>
-          </div>
-        </div>
-        <div class="settings-section">
-          <div class="ss-hdr"><h3>Search History</h3></div>
-          <div class="ss-row">
-            <div><div class="ss-row-label">Saved searches</div><div class="ss-row-sub" id="settingsHistCount">0 cases stored</div></div>
-            <button class="ss-btn danger" onclick="clearHistory()">Clear history</button>
-          </div>
-          <div class="ss-row">
-            <div><div class="ss-row-label">Storage</div><div class="ss-row-sub">Searches are saved in your browser's localStorage</div></div>
-            <span style="font-size:12px;color:var(--teal);">Local only</span>
-          </div>
-        </div>
-        <div class="settings-section">
-          <div class="ss-hdr"><h3>Platform Info</h3></div>
-          <div class="ss-row"><div class="ss-row-label">Version</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">RegIntel v1.0</span></div>
-          <div class="ss-row"><div class="ss-row-label">Health Authorities</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">16 HAs · 73 regulation rows</span></div>
-          <div class="ss-row"><div class="ss-row-label">ICH Guidelines</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">E2A · E2B R3 · E2C(R2) · E2D · E2F</span></div>
-          <div class="ss-row"><div class="ss-row-label">GVP Coverage</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">Modules I · V · VI · VII · IX</span></div>
-          <div class="ss-row"><div class="ss-row-label">Model</div><span style="font-size:12px;font-family:var(--mono);color:var(--muted);">claude-sonnet-4-6</span></div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /workspace -->
+</div><!-- /workspace -->
 </div><!-- /shell -->
 </div><!-- /appRoot -->
 </div>
