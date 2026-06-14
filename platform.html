@@ -916,6 +916,7 @@ select{appearance:none;
         <option value="ANVISA">ANVISA (BR)</option>
         <option value="SFDA">SFDA (SA)</option>
         <option value="NMPA">NMPA (CN)</option>
+        <option value="MEDSAFE">Medsafe (NZ)</option>
       </select>
     </div>
   </div>
@@ -1763,7 +1764,8 @@ var FLOW_HA_INFO = {
   CDSCO:{name:'CDSCO',reg:'PvPI Guidance · New Drugs Rules 2019 · Drugs & Cosmetics Act',info:'India post-market: domestic unexpected serious = 15-day to CDSCO SUGAM/PvPI. Overseas serious = 30-day. PvPI programme coordinates national database. E2B R2 format.'},
   ANVISA:{name:'ANVISA',reg:'RDC 204/2017 · RDC 9/2015 Art.11',info:'Brazil post-market: unexpected serious = 15-day to NOTIVISA (E2B). Expected serious = 30-day. Portuguese narrative mandatory. Both domestic and overseas cases with Brazil MA obligation.'},
   SFDA:{name:'SFDA',reg:'Saudi GVP Module VI · SFDA Pharmacovigilance Resolution 2020',info:'Saudi Arabia post-market: unexpected serious = 15-day to SFDA/NPC portal. Expected serious = 30-day. Arabic narrative preferred. Local Saudi MAH bears reporting obligation. Aligned to ICH E2A.'},
-  NMPA:{name:'NMPA',reg:'NMPA PV Regulations 2021 Art.67 · CT Guidelines 2020',info:'China post-market: domestic unexpected serious = 15-day to CNPV. Overseas unexpected serious = 30-day (longer than ICH standard). Expected serious = 30-day. Chinese narrative required. China MAH awareness date is clock start.'}
+  NMPA:{name:'NMPA',reg:'NMPA PV Regulations 2021 Art.67 · CT Guidelines 2020',info:'China post-market: domestic unexpected serious = 15-day to CNPV. Overseas unexpected serious = 30-day (longer than ICH standard). Expected serious = 30-day. Chinese narrative required. China MAH awareness date is clock start.'},
+  MEDSAFE:{name:'Medsafe',reg:'Medicines Act 1981 S.29 · Medsafe PV Guidance · CARM NZ',info:'New Zealand post-market: serious unexpected ADRs = 15-day to Medsafe via CARM (Centre for Adverse Reactions Monitoring). Serious expected = 30-day. Non-serious = periodic PSUR. Medsafe broadly aligns with TGA Australia. E2B R2 or CIOMS I format. NZ consent holders bear reporting obligation.'}
 };
 
 function renderFlowDiagram(haId) {
@@ -2075,6 +2077,24 @@ function buildFlowSVG(haId) {
     s+=nd(382,172,0,0,'','','nexp');
     s+=nd(382,160,116,28,'30-day NMPA','overseas expected','nexp');
     return svg(360,s);
+
+  // ── Medsafe (NZ) ─────────────────────────────────────────────────────────
+  case 'MEDSAFE':
+    s+=nd(150,10,200,34,'ICSRs — global post-market sources','','src');
+    s+=ar(250,44,250,74); s+=dm(250,102,110,30,'ICSR serious?');
+    s+=pa('M360,102 L440,102'); s+=lb(363,93,'No');
+    s+=nd(382,86,116,32,'Periodic report','PSUR — Medsafe schedule','nexp');
+    s+=ar(250,132,250,160); s+=lb(253,148,'Yes');
+    s+=dm(250,188,120,30,'Unexpected?','vs NZ approved labelling');
+    s+=pa('M370,188 L440,188'); s+=lb(373,179,'No (expected)');
+    s+=nd(382,172,116,32,'30-day to Medsafe','via CARM NZ','nexp');
+    s+=ar(250,218,250,246); s+=lb(253,234,'Yes (unexpected)');
+    s+=dm(250,274,110,28,'Domestic (NZ)?');
+    s+=ar(250,302,250,326); s+=lb(253,315,'Yes');
+    s+=nd(184,330,132,32,'15-day to Medsafe','CARM — E2B R2 / CIOMS I','exp');
+    s+=pa('M360,274 L440,274'); s+=lb(363,265,'Overseas');
+    s+=nd(382,258,116,32,'15-day to Medsafe','overseas unexpected','exp');
+    return svg(380,s);
 
   default:
     return '<p style="padding:20px;color:#9CA3AF;font-size:13px;">Select a health authority above.</p>';
