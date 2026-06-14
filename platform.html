@@ -980,7 +980,7 @@ select{appearance:none;
               <label class="fl">Name <span class="req">*</span></label>
               <div class="dict-wrap">
                 <div class="dict-input-row">
-                  <input type="text" id="f-product" placeholder="Type drug name or INN, e.g. avutometinib, apixaban…" oninput="whoddTypeahead(this.value)"/>
+                  <input type="text" id="f-product" placeholder="Type drug name or INN, e.g. avutometinib, apixaban…" oninput="whoddTypeahead(this.value)" onblur="whoddOnBlur(this.value)"/>
                   <button class="lookup-btn" id="whoddBtn" onclick="whoddLookup()" title="Lookup in WHO Drug Dictionary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     WHODD
@@ -988,6 +988,19 @@ select{appearance:none;
                 </div>
                 <div class="dict-loading" id="whoddLoading">Looking up in WHO Drug Dictionary…</div>
                 <div class="dict-badge whodd" id="whoddBadge"></div>
+                <!-- Auto-populated WHODD fields -->
+                <div id="whoddFields" style="display:none;margin-top:8px;display:none;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;">
+                    <div><label class="fl" style="font-size:9.5px;">INN / Generic name</label><input type="text" id="w-inn" readonly style="background:#F8FAFC;font-size:11px;padding:5px 8px;"/></div>
+                    <div><label class="fl" style="font-size:9.5px;">Trade name / Brand</label><input type="text" id="w-brand" readonly style="background:#F8FAFC;font-size:11px;padding:5px 8px;"/></div>
+                    <div><label class="fl" style="font-size:9.5px;">ATC code</label><input type="text" id="w-atc" readonly style="background:#F8FAFC;font-size:11px;padding:5px 8px;font-family:var(--mono);"/></div>
+                    <div><label class="fl" style="font-size:9.5px;">ATC class</label><input type="text" id="w-atcname" readonly style="background:#F8FAFC;font-size:11px;padding:5px 8px;"/></div>
+                    <div><label class="fl" style="font-size:9.5px;">Dosage form / Route</label><input type="text" id="w-form" readonly style="background:#F8FAFC;font-size:11px;padding:5px 8px;"/></div>
+                    <div><label class="fl" style="font-size:9.5px;">MAH / Company</label><input type="text" id="w-company" readonly style="background:#F8FAFC;font-size:11px;padding:5px 8px;"/></div>
+                    <div style="grid-column:1/-1;"><label class="fl" style="font-size:9.5px;">Drug class / Pharmacology</label><input type="text" id="w-class" readonly style="background:#F8FAFC;font-size:11px;padding:5px 8px;"/></div>
+                    <div style="grid-column:1/-1;"><label class="fl" style="font-size:9.5px;">Approval status</label><input type="text" id="w-status" readonly style="background:#F8FAFC;font-size:11px;padding:5px 8px;"/></div>
+                  </div>
+                </div>
               </div>
             </div>
             <div class="fg">
@@ -2651,118 +2664,230 @@ async function runDemo(c){
 // ══════════════════════════════════════════════════════════════════
 
 const WHODD_DEMO_DB = {
-  'avutometinib':  { inn:'Avutometinib',brand:'VS-6766',atc:'L01EE06',atcName:'RAF inhibitors',type:'drug_small_molecule',class:'Antineoplastic — RAF/MEK inhibitor (small molecule kinase inhibitor)',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational (IND 153742)'},
-  'vs-6766':       { inn:'Avutometinib',brand:'VS-6766',atc:'L01EE06',atcName:'RAF inhibitors',type:'drug_small_molecule',class:'Antineoplastic — RAF/MEK inhibitor (small molecule kinase inhibitor)',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational'},
-  'defactinib':    { inn:'Defactinib',brand:'VS-6063',atc:'L01EX',atcName:'Protein kinase inhibitors NEC',type:'drug_small_molecule',class:'Antineoplastic — FAK inhibitor (small molecule kinase inhibitor)',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational'},
-  'apixaban':      { inn:'Apixaban',brand:'Eliquis',atc:'B01AF02',atcName:'Direct factor Xa inhibitors',type:'drug_small_molecule',class:'Anticoagulant — direct oral factor Xa inhibitor (small molecule)',form:'Oral tablet',company:'Bristol Myers Squibb / Pfizer',status:'Approved (NDA 202155, EMA EU/1/11/691)'},
-  'eliquis':       { inn:'Apixaban',brand:'Eliquis',atc:'B01AF02',atcName:'Direct factor Xa inhibitors',type:'drug_small_molecule',class:'Anticoagulant — direct oral factor Xa inhibitor',form:'Oral tablet',company:'BMS / Pfizer',status:'Approved'},
-  'pembrolizumab': { inn:'Pembrolizumab',brand:'Keytruda',atc:'L01FF02',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-1 monoclonal antibody (IgG4 humanized mAb)',form:'IV infusion',company:'Merck & Co.',status:'Approved (BLA 125514)'},
-  'keytruda':      { inn:'Pembrolizumab',brand:'Keytruda',atc:'L01FF02',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Anti-PD-1 monoclonal antibody',form:'IV infusion',company:'Merck & Co.',status:'Approved'},
-  'nivolumab':     { inn:'Nivolumab',brand:'Opdivo',atc:'L01FF01',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-1 monoclonal antibody (IgG4 human mAb)',form:'IV infusion',company:'Bristol Myers Squibb',status:'Approved (BLA 125554)'},
-  'trastuzumab':   { inn:'Trastuzumab',brand:'Herceptin',atc:'L01FD01',atcName:'HER2 inhibitors',type:'biologic',class:'Antineoplastic — anti-HER2 monoclonal antibody (IgG1 humanized mAb)',form:'IV infusion / SC injection',company:'Roche / Genentech',status:'Approved'},
-  'rituximab':     { inn:'Rituximab',brand:'Rituxan / MabThera',atc:'L01FA01',atcName:'Anti-CD20 monoclonal antibodies',type:'biologic',class:'Antineoplastic/Immunomodulator — anti-CD20 monoclonal antibody (IgG1 chimeric mAb)',form:'IV infusion',company:'Roche / Biogen',status:'Approved'},
-  'semaglutide':   { inn:'Semaglutide',brand:'Ozempic / Wegovy / Rybelsus',atc:'A10BJ06',atcName:'GLP-1 receptor agonists',type:'biologic',class:'Antidiabetic / Anti-obesity — GLP-1 receptor agonist (peptide analogue)',form:'SC injection / Oral tablet',company:'Novo Nordisk',status:'Approved'},
-  'atezolizumab':  { inn:'Atezolizumab',brand:'Tecentriq',atc:'L01FF05',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-L1 monoclonal antibody (IgG1 humanized mAb)',form:'IV infusion',company:'Roche / Genentech',status:'Approved'},
-  'osimertinib':   { inn:'Osimertinib',brand:'Tagrisso',atc:'L01EB04',atcName:'EGFR inhibitors',type:'drug_small_molecule',class:'Antineoplastic — 3rd gen EGFR TKI (small molecule kinase inhibitor)',form:'Oral tablet',company:'AstraZeneca',status:'Approved (NDA 208065)'},
-  'durvalumab':    { inn:'Durvalumab',brand:'Imfinzi',atc:'L01FF06',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-L1 monoclonal antibody (IgG1 human mAb)',form:'IV infusion',company:'AstraZeneca',status:'Approved'},
-  'ixazomib':      { inn:'Ixazomib',brand:'Ninlaro',atc:'L01XG02',atcName:'Proteasome inhibitors',type:'drug_small_molecule',class:'Antineoplastic — oral proteasome inhibitor (small molecule)',form:'Oral capsule',company:'Takeda',status:'Approved'},
-  'lenalidomide':  { inn:'Lenalidomide',brand:'Revlimid',atc:'L04AX04',atcName:'Immunosuppressants NEC',type:'drug_small_molecule',class:'Immunomodulatory agent / Antineoplastic — thalidomide analogue (IMiD)',form:'Oral capsule',company:'Bristol Myers Squibb / Celgene',status:'Approved'},
-  'venetoclax':    { inn:'Venetoclax',brand:'Venclexta',atc:'L01XX52',atcName:'Other antineoplastic agents',type:'drug_small_molecule',class:'Antineoplastic — BCL-2 inhibitor (small molecule)',form:'Oral tablet',company:'AbbVie / Roche',status:'Approved'},
-  'infliximab':    { inn:'Infliximab',brand:'Remicade',atc:'L04AB02',atcName:'TNF-alpha inhibitors',type:'biologic',class:'Immunosuppressant — anti-TNF-α monoclonal antibody (IgG1 chimeric mAb)',form:'IV infusion',company:'Janssen / Merck & Co.',status:'Approved'},
+  // ── Oncology small molecules ──
+  'avutometinib':   {inn:'Avutometinib',brand:'VS-6766 (Lifirafenib)',atc:'L01EE06',atcName:'RAF inhibitors',type:'drug_small_molecule',class:'Antineoplastic — dual RAF/MEK inhibitor (small molecule kinase inhibitor)',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational (IND 153742)'},
+  'vs-6766':        {inn:'Avutometinib',brand:'VS-6766',atc:'L01EE06',atcName:'RAF inhibitors',type:'drug_small_molecule',class:'Antineoplastic — dual RAF/MEK clamp inhibitor',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational'},
+  'defactinib':     {inn:'Defactinib',brand:'VS-6063',atc:'L01EX',atcName:'Protein kinase inhibitors NEC',type:'drug_small_molecule',class:'Antineoplastic — FAK (focal adhesion kinase) inhibitor',form:'Oral tablet',company:'Verastem Oncology',status:'Investigational'},
+  'osimertinib':    {inn:'Osimertinib',brand:'Tagrisso',atc:'L01EB04',atcName:'EGFR inhibitors',type:'drug_small_molecule',class:'Antineoplastic — 3rd gen EGFR TKI (small molecule kinase inhibitor)',form:'Oral tablet (40mg, 80mg)',company:'AstraZeneca',status:'Approved (NDA 208065, EMA EU/1/16/1087)'},
+  'sotorasib':      {inn:'Sotorasib',brand:'Lumakras / Lumykras',atc:'L01EH01',atcName:'KRAS G12C inhibitors',type:'drug_small_molecule',class:'Antineoplastic — KRAS G12C inhibitor (small molecule)',form:'Oral tablet (120mg, 960mg)',company:'Amgen',status:'Approved (NDA 214665, EMA EU/1/21/1596)'},
+  'adagrasib':      {inn:'Adagrasib',brand:'Krazati',atc:'L01EH02',atcName:'KRAS G12C inhibitors',type:'drug_small_molecule',class:'Antineoplastic — KRAS G12C inhibitor (covalent small molecule)',form:'Oral tablet (200mg)',company:'Mirati Therapeutics / BMS',status:'Approved (NDA 216340)'},
+  'venetoclax':     {inn:'Venetoclax',brand:'Venclexta / Venclyxto',atc:'L01XX52',atcName:'BCL-2 inhibitors',type:'drug_small_molecule',class:'Antineoplastic — selective BCL-2 inhibitor (small molecule)',form:'Oral tablet (10mg, 50mg, 100mg)',company:'AbbVie / Roche-Genentech',status:'Approved (NDA 208573)'},
+  'palbociclib':    {inn:'Palbociclib',brand:'Ibrance',atc:'L01EF01',atcName:'CDK4/6 inhibitors',type:'drug_small_molecule',class:'Antineoplastic — CDK4/6 inhibitor (small molecule kinase inhibitor)',form:'Oral capsule (75mg, 100mg, 125mg)',company:'Pfizer',status:'Approved (NDA 207103)'},
+  'ribociclib':     {inn:'Ribociclib',brand:'Kisqali',atc:'L01EF02',atcName:'CDK4/6 inhibitors',type:'drug_small_molecule',class:'Antineoplastic — CDK4/6 inhibitor (small molecule)',form:'Oral tablet (200mg)',company:'Novartis',status:'Approved (NDA 209092)'},
+  'ixazomib':       {inn:'Ixazomib',brand:'Ninlaro',atc:'L01XG02',atcName:'Proteasome inhibitors',type:'drug_small_molecule',class:'Antineoplastic — oral proteasome inhibitor (boronate)',form:'Oral capsule (2.3mg, 3mg, 4mg)',company:'Takeda',status:'Approved (NDA 208462)'},
+  'lenalidomide':   {inn:'Lenalidomide',brand:'Revlimid',atc:'L04AX04',atcName:'Immunosuppressants NEC',type:'drug_small_molecule',class:'Immunomodulatory drug (IMiD) / Antineoplastic — thalidomide analogue',form:'Oral capsule (2.5–25mg)',company:'Bristol Myers Squibb / Celgene',status:'Approved (NDA 021880)'},
+  'imatinib':       {inn:'Imatinib',brand:'Gleevec / Glivec',atc:'L01EA01',atcName:'BCR-ABL tyrosine kinase inhibitors',type:'drug_small_molecule',class:'Antineoplastic — BCR-ABL / c-Kit / PDGFR kinase inhibitor',form:'Oral tablet (100mg, 400mg)',company:'Novartis',status:'Approved (NDA 021588)'},
+  // ── Oncology biologics ──
+  'pembrolizumab':  {inn:'Pembrolizumab',brand:'Keytruda',atc:'L01FF02',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-1 humanized IgG4 monoclonal antibody',form:'IV infusion (25mg/mL, 100mg/4mL)',company:'Merck & Co. (MSD)',status:'Approved (BLA 125514, EMA EU/1/15/1024)'},
+  'keytruda':       {inn:'Pembrolizumab',brand:'Keytruda',atc:'L01FF02',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Anti-PD-1 monoclonal antibody (IgG4 humanized)',form:'IV infusion',company:'Merck & Co.',status:'Approved'},
+  'nivolumab':      {inn:'Nivolumab',brand:'Opdivo',atc:'L01FF01',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-1 human IgG4 monoclonal antibody',form:'IV infusion (10mg/mL)',company:'Bristol Myers Squibb',status:'Approved (BLA 125554, EMA EU/1/15/1014)'},
+  'atezolizumab':   {inn:'Atezolizumab',brand:'Tecentriq',atc:'L01FF05',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-L1 humanized IgG1 monoclonal antibody',form:'IV infusion (60mg/mL)',company:'Roche / Genentech',status:'Approved (BLA 761034, EMA EU/1/17/1220)'},
+  'durvalumab':     {inn:'Durvalumab',brand:'Imfinzi',atc:'L01FF06',atcName:'PD-1/PDL-1 inhibitors',type:'biologic',class:'Antineoplastic — anti-PD-L1 human IgG1 monoclonal antibody',form:'IV infusion (50mg/mL)',company:'AstraZeneca',status:'Approved (BLA 761069)'},
+  'trastuzumab':    {inn:'Trastuzumab',brand:'Herceptin',atc:'L01FD01',atcName:'HER2 inhibitors',type:'biologic',class:'Antineoplastic — anti-HER2 humanized IgG1 monoclonal antibody',form:'IV infusion / SC injection (150mg, 420mg powder)',company:'Roche / Genentech',status:'Approved (BLA 103792, EMA EU/1/00/145)'},
+  'rituximab':      {inn:'Rituximab',brand:'Rituxan / MabThera',atc:'L01FA01',atcName:'Anti-CD20 monoclonal antibodies',type:'biologic',class:'Antineoplastic / Immunosuppressant — anti-CD20 chimeric IgG1 monoclonal antibody',form:'IV infusion (10mg/mL)',company:'Roche / Biogen / Genentech',status:'Approved (BLA 103705, EMA EU/1/98/067)'},
+  'cetuximab':      {inn:'Cetuximab',brand:'Erbitux',atc:'L01FE01',atcName:'EGFR inhibitors',type:'biologic',class:'Antineoplastic — anti-EGFR chimeric IgG1 monoclonal antibody',form:'IV infusion (2mg/mL)',company:'Eli Lilly / Merck KGaA',status:'Approved (BLA 125084, EMA EU/1/04/281)'},
+  'bevacizumab':    {inn:'Bevacizumab',brand:'Avastin',atc:'L01FG01',atcName:'VEGF/VEGFR inhibitors',type:'biologic',class:'Antineoplastic — anti-VEGF humanized IgG1 monoclonal antibody',form:'IV infusion (25mg/mL)',company:'Roche / Genentech',status:'Approved (BLA 125085, EMA EU/1/04/300)'},
+  // ── Cardiovascular / anticoagulants ──
+  'apixaban':       {inn:'Apixaban',brand:'Eliquis',atc:'B01AF02',atcName:'Direct factor Xa inhibitors',type:'drug_small_molecule',class:'Anticoagulant — direct oral factor Xa inhibitor (small molecule)',form:'Oral tablet (2.5mg, 5mg)',company:'Bristol Myers Squibb / Pfizer',status:'Approved (NDA 202155, EMA EU/1/11/691)'},
+  'eliquis':        {inn:'Apixaban',brand:'Eliquis',atc:'B01AF02',atcName:'Direct factor Xa inhibitors',type:'drug_small_molecule',class:'Anticoagulant — direct oral factor Xa inhibitor',form:'Oral tablet (2.5mg, 5mg)',company:'BMS / Pfizer',status:'Approved'},
+  'rivaroxaban':    {inn:'Rivaroxaban',brand:'Xarelto',atc:'B01AF01',atcName:'Direct factor Xa inhibitors',type:'drug_small_molecule',class:'Anticoagulant — direct oral factor Xa inhibitor (oxazolidinone)',form:'Oral tablet (2.5mg, 10mg, 15mg, 20mg)',company:'Bayer / Janssen',status:'Approved (NDA 202439, EMA EU/1/08/472)'},
+  'warfarin':       {inn:'Warfarin',brand:'Coumadin / Jantoven',atc:'B01AA03',atcName:'Vitamin K antagonists',type:'drug_small_molecule',class:'Anticoagulant — vitamin K antagonist (coumarin derivative)',form:'Oral tablet (1–10mg)',company:'Various (generic)',status:'Approved'},
+  'atorvastatin':   {inn:'Atorvastatin',brand:'Lipitor',atc:'C10AA05',atcName:'HMG CoA reductase inhibitors (statins)',type:'drug_small_molecule',class:'Antihyperlipidemic — HMG-CoA reductase inhibitor (statin)',form:'Oral tablet (10mg, 20mg, 40mg, 80mg)',company:'Pfizer (generic available)',status:'Approved (NDA 020702)'},
+  // ── Diabetes / metabolic ──
+  'semaglutide':    {inn:'Semaglutide',brand:'Ozempic / Wegovy / Rybelsus',atc:'A10BJ06',atcName:'GLP-1 receptor agonists',type:'biologic',class:'Antidiabetic / Anti-obesity — GLP-1 receptor agonist (acylated peptide)',form:'SC injection (0.25–1mg) / Oral tablet (3–14mg)',company:'Novo Nordisk',status:'Approved (NDA 209637 / NDA 213051 / BLA 761169)'},
+  'ozempic':        {inn:'Semaglutide',brand:'Ozempic',atc:'A10BJ06',atcName:'GLP-1 receptor agonists',type:'biologic',class:'GLP-1 receptor agonist (SC formulation for T2DM)',form:'SC injection (0.25–1mg/week)',company:'Novo Nordisk',status:'Approved'},
+  'wegovy':         {inn:'Semaglutide',brand:'Wegovy',atc:'A10BJ06',atcName:'GLP-1 receptor agonists',type:'biologic',class:'GLP-1 receptor agonist (higher dose for obesity)',form:'SC injection (0.25–2.4mg/week)',company:'Novo Nordisk',status:'Approved (BLA 761169)'},
+  'tirzepatide':    {inn:'Tirzepatide',brand:'Mounjaro / Zepbound',atc:'A10BJ07',atcName:'GLP-1 receptor agonists',type:'biologic',class:'Antidiabetic / Anti-obesity — dual GIP/GLP-1 receptor agonist (peptide)',form:'SC injection (2.5–15mg/week)',company:'Eli Lilly',status:'Approved (NDA 215866 / NDA 217806)'},
+  'metformin':      {inn:'Metformin',brand:'Glucophage / Fortamet',atc:'A10BA02',atcName:'Biguanides',type:'drug_small_molecule',class:'Antidiabetic — biguanide (AMPK activator)',form:'Oral tablet (500mg, 850mg, 1000mg)',company:'Various (generic)',status:'Approved (NDA 020357)'},
+  // ── Immunology / rheumatology ──
+  'adalimumab':     {inn:'Adalimumab',brand:'Humira / Hadlima / Hyrimoz',atc:'L04AB04',atcName:'TNF-alpha inhibitors',type:'biologic',class:'Immunosuppressant — anti-TNF-α human IgG1 monoclonal antibody',form:'SC injection (40mg/0.8mL, 80mg/0.8mL)',company:'AbbVie (biosimilars by multiple)',status:'Approved (BLA 125057, EMA EU/1/03/256)'},
+  'infliximab':     {inn:'Infliximab',brand:'Remicade / Inflectra / Remsima',atc:'L04AB02',atcName:'TNF-alpha inhibitors',type:'biologic',class:'Immunosuppressant — anti-TNF-α chimeric IgG1 monoclonal antibody',form:'IV infusion (100mg powder)',company:'Janssen / Merck & Co. (biosimilars available)',status:'Approved (BLA 103772, EMA EU/1/99/116)'},
+  'ustekinumab':    {inn:'Ustekinumab',brand:'Stelara',atc:'L04AC05',atcName:'IL-12/IL-23 inhibitors',type:'biologic',class:'Immunosuppressant — anti-IL-12/23 human IgG1κ monoclonal antibody',form:'SC injection / IV infusion',company:'Janssen',status:'Approved (BLA 125261, EMA EU/1/09/515)'},
+  'dupilumab':      {inn:'Dupilumab',brand:'Dupixent',atc:'D11AH05',atcName:'IL-4/IL-13 inhibitors',type:'biologic',class:'Immunosuppressant — anti-IL-4Rα human IgG4 monoclonal antibody',form:'SC injection (200mg/1.14mL, 300mg/2mL)',company:'Sanofi / Regeneron',status:'Approved (BLA 761055, EMA EU/1/17/1229)'},
+  // ── Neurology / CNS ──
+  'lecanemab':      {inn:'Lecanemab',brand:'Leqembi',atc:'N06DX',atcName:'Anti-amyloid antibodies',type:'biologic',class:'Anti-amyloid — anti-Aβ protofibril humanized IgG1 monoclonal antibody',form:'IV infusion (10mg/mL)',company:'Eisai / Biogen',status:'Approved (BLA 761269, accelerated approval 2023)'},
+  'natalizumab':    {inn:'Natalizumab',brand:'Tysabri',atc:'L04AA23',atcName:'Selective immunosuppressants',type:'biologic',class:'Immunosuppressant / MS therapy — anti-α4-integrin humanized IgG4 mAb',form:'IV infusion (300mg/15mL)',company:'Biogen / Elan',status:'Approved (BLA 125104)'},
+  // ── Antivirals ──
+  'nirmatrelvir':   {inn:'Nirmatrelvir',brand:'Paxlovid (with ritonavir)',atc:'J05AE',atcName:'Protease inhibitors',type:'drug_small_molecule',class:'Antiviral — SARS-CoV-2 main protease (Mpro/3CL protease) inhibitor',form:'Oral tablet (150mg nirmatrelvir + 100mg ritonavir)',company:'Pfizer',status:'Approved (NDA 217188 / EMA EU/1/21/1618)'},
+  'paxlovid':       {inn:'Nirmatrelvir/Ritonavir',brand:'Paxlovid',atc:'J05AE',atcName:'Protease inhibitors',type:'drug_small_molecule',class:'Antiviral — SARS-CoV-2 3CL protease inhibitor + ritonavir booster',form:'Oral tablet co-packaged',company:'Pfizer',status:'Approved'},
+  'remdesivir':     {inn:'Remdesivir',brand:'Veklury',atc:'J05AB16',atcName:'Nucleoside/nucleotide reverse transcriptase inhibitors',type:'drug_small_molecule',class:'Antiviral — RNA-dependent RNA polymerase (RdRp) inhibitor / nucleotide prodrug',form:'IV infusion (100mg lyophilized) / IV solution',company:'Gilead Sciences',status:'Approved (NDA 214787, EMA EU/1/20/1492)'},
+  // ── Endocrinology ──
+  'enzalutamide':   {inn:'Enzalutamide',brand:'Xtandi',atc:'L02BB04',atcName:'Antiandrogens',type:'drug_small_molecule',class:'Antineoplastic — androgen receptor (AR) signaling inhibitor',form:'Oral capsule (40mg)',company:'Astellas / Pfizer',status:'Approved (NDA 203415, EMA EU/1/13/849)'},
+  'abiraterone':    {inn:'Abiraterone acetate',brand:'Zytiga / Yonsa',atc:'L02BX03',atcName:'Other hormone antagonists',type:'drug_small_molecule',class:'Antineoplastic — CYP17A1 (17α-hydroxylase/C17,20-lyase) inhibitor',form:'Oral tablet (250mg, 500mg)',company:'Janssen / Sun Pharma',status:'Approved (NDA 202379, EMA EU/1/11/714)'},
 };
 
+// Fuzzy match helper — returns best WHODD_DEMO_DB entry for a query
+function whoddFuzzyMatch(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) return null;
+  // 1. Exact key match
+  if (WHODD_DEMO_DB[q]) return WHODD_DEMO_DB[q];
+  // 2. Key starts with query or query starts with key
+  const startMatch = Object.entries(WHODD_DEMO_DB).find(([k]) => k.startsWith(q) || q.startsWith(k));
+  if (startMatch) return startMatch[1];
+  // 3. Match against INN or brand
+  const innMatch = Object.entries(WHODD_DEMO_DB).find(([k,v]) =>
+    v.inn.toLowerCase().includes(q) || q.includes(v.inn.toLowerCase()) ||
+    v.brand.toLowerCase().includes(q) || q.includes(v.brand.toLowerCase().split('/')[0].trim())
+  );
+  if (innMatch) return innMatch[1];
+  // 4. Partial key match
+  const partialMatch = Object.entries(WHODD_DEMO_DB).find(([k]) => k.includes(q) || q.includes(k));
+  if (partialMatch) return partialMatch[1];
+  return null;
+}
+
+// Called on blur (tab-out) — always fires lookup
+function whoddOnBlur(val) {
+  if (!val || val.trim().length < 2) return;
+  // Don't re-run if badge already showing this drug
+  const badge = document.getElementById('whoddBadge');
+  if (badge && badge.dataset.drug === val.toLowerCase().trim()) return;
+  whoddLookup();
+}
+
 let whoddDebounce = null;
-function whoddTypeahead(val){ clearTimeout(whoddDebounce); if(val.length<3) return; whoddDebounce = setTimeout(()=>{ if(!demoMode&&apiKey) return; const key=val.toLowerCase().trim(); const match = WHODD_DEMO_DB[key]; if(match){ showWHODDResult(match, true); } },600); }
+function whoddTypeahead(val) {
+  clearTimeout(whoddDebounce);
+  if (val.length < 2) return;
+  whoddDebounce = setTimeout(() => {
+    // Always try local DB first for instant feedback
+    const match = whoddFuzzyMatch(val);
+    if (match) {
+      showWHODDResult(match, true);
+    }
+    // If live API available, also fire live lookup for unknown drugs
+    else if (!demoMode && apiKey) {
+      whoddLiveCall(val);
+    }
+  }, 400);
+}
 
-async function whoddLookup(){
+async function whoddLookup() {
   const val = document.getElementById('f-product').value.trim();
-  if(!val){ alert('Enter a drug name first.'); return; }
-  const btn=document.getElementById('whoddBtn');
-  const loading=document.getElementById('whoddLoading');
-  const badge=document.getElementById('whoddBadge');
-  btn.disabled=true; btn.textContent='Looking up…';
-  loading.style.display='block'; badge.style.display='none';
+  if (!val) { alert('Enter a drug name first.'); return; }
+  const btn     = document.getElementById('whoddBtn');
+  const loading = document.getElementById('whoddLoading');
+  const badge   = document.getElementById('whoddBadge');
+  btn.disabled = true;
+  btn.textContent = 'Looking up…';
+  loading.style.display = 'block';
+  badge.style.display = 'none';
 
-  if(demoMode||!apiKey){
-    await new Promise(r=>setTimeout(r,800));
-    const key=val.toLowerCase().trim();
-    const exact = WHODD_DEMO_DB[key];
-    const fuzzy = !exact && Object.entries(WHODD_DEMO_DB).find(([k,v])=>k.includes(key)||key.includes(k)||v.inn.toLowerCase().includes(key)||v.brand.toLowerCase().includes(key));
-    const result = exact || (fuzzy&&fuzzy[1]) || null;
-    if(result){ showWHODDResult(result, false); }
-    else { showWHODDDemo(val); }
-  } else {
+  // Try local DB first
+  const local = whoddFuzzyMatch(val);
+  if (local) {
+    await new Promise(r => setTimeout(r, 300)); // brief UX pause
+    showWHODDResult(local, false);
+  } else if (!demoMode && apiKey) {
+    // Live API call
     await whoddLiveCall(val);
+  } else {
+    showWHODDDemo(val);
   }
-  btn.disabled=false; btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> WHODD';
-  loading.style.display='none';
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> WHODD';
+  loading.style.display = 'none';
 }
 
-async function whoddLiveCall(drugName){
-  const prompt=`You are a WHO Drug Dictionary (WHODD) resolver. For the drug "${drugName}", provide structured dictionary data as ONLY a JSON object with no other text:
-{"inn":"INN/generic name","brand":"brand name(s)","atc_code":"ATC code (e.g. L01EE06)","atc_name":"ATC class name","product_type":"one of: drug_small_molecule|biologic|vaccine|gene_therapy|medical_device|combination_product","drug_class":"pharmacological class description","dosage_form":"e.g. Oral tablet, IV infusion","company":"marketing authorization holder","approval_status":"e.g. Approved (NDA 202155) or Investigational (IND 123456)","mechanism":"brief mechanism of action","not_found": false}
-If drug not found: return {"not_found": true, "message": "reason"}.
-Base answers on real WHODD data. Be precise with ATC codes.`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})});
-    if(!res.ok){const e=await res.json();throw new Error(e.error?.message||'API error');}
-    const data=await res.json();
-    const text=data.content[0].text.trim().replace(/^```json?\n?/,'').replace(/\n?```$/,'').trim();
-    const d=JSON.parse(text);
-    if(d.not_found){ showWHODDNotFound(document.getElementById('f-product').value, d.message); return; }
-    // Map to display format
-    showWHODDResult({
-      inn:d.inn, brand:d.brand, atc:d.atc_code, atcName:d.atc_name,
-      type:d.product_type, class:d.drug_class+' | '+d.mechanism,
-      form:d.dosage_form, company:d.company, status:d.approval_status
-    }, false);
-  }catch(e){
-    showWHODDError('API error: '+e.message);
+async function whoddLiveCall(drugName) {
+  const prompt = `You are a WHO Drug Dictionary (WHODD) expert. For the drug "${drugName}", return ONLY a JSON object (no markdown, no extra text):
+{"inn":"INN/generic name","brand":"brand/trade name(s)","atc_code":"ATC code e.g. L01EE06","atc_name":"ATC class name","product_type":"drug_small_molecule|biologic|vaccine|gene_therapy|medical_device|combination_product","drug_class":"full pharmacological class + mechanism","dosage_form":"e.g. Oral tablet 80mg, IV infusion 10mg/mL","company":"MAH / marketing company","approval_status":"e.g. Approved (NDA 202155) or Investigational (IND 123456)","not_found":false}
+If unknown: {"not_found":true,"message":"brief reason"}
+Use real WHO Drug Dictionary and ATC data. Be precise.`;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 600, messages: [{ role: 'user', content: prompt }] })
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API error'); }
+    const data = await res.json();
+    const text = data.content[0].text.trim().replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim();
+    const d = JSON.parse(text);
+    if (d.not_found) { showWHODDNotFound(document.getElementById('f-product').value, d.message); return; }
+    showWHODDResult({ inn: d.inn, brand: d.brand, atc: d.atc_code, atcName: d.atc_name, type: d.product_type, class: d.drug_class, form: d.dosage_form, company: d.company, status: d.approval_status }, false);
+  } catch(e) {
+    showWHODDError('API error: ' + e.message);
   }
 }
 
-function showWHODDResult(d, isTypeahead){
-  const badge=document.getElementById('whoddBadge');
-  // Auto-populate INN if not already set
-  if(d.inn) document.getElementById('f-product').value = d.inn + (d.brand?' ('+d.brand+')':'');
-  // Auto-populate product type
-  if(d.type) document.getElementById('f-type').value = d.type;
-  badge.className='dict-badge whodd';
-  badge.style.display='block';
-  badge.innerHTML=`
-    <div class="dict-row"><span class="dict-label">INN</span><span class="dict-val">${d.inn||'—'}</span><span class="dict-tag">${d.atc||'—'}</span></div>
-    <div class="dict-row"><span class="dict-label">Brand</span><span class="dict-val">${d.brand||'—'}</span></div>
-    <div class="dict-row"><span class="dict-label">ATC class</span><span class="dict-val">${d.atcName||'—'}</span></div>
-    <div class="dict-row"><span class="dict-label">Drug class</span><span class="dict-val">${d.class||'—'}</span></div>
-    <div class="dict-row"><span class="dict-label">Form</span><span class="dict-val">${d.form||'—'}</span></div>
-    <div class="dict-row"><span class="dict-label">Company</span><span class="dict-val">${d.company||'—'}</span></div>
-    <div class="dict-row"><span class="dict-label">Status</span><span class="dict-val">${d.status||'—'}</span></div>
-    <div class="dict-source">Source: WHO Drug Dictionary (WHODD) · ATC classification · ${isTypeahead?'Demo lookup':'Live resolution'}</div>`;
+function showWHODDResult(d, isTypeahead) {
+  const badge = document.getElementById('whoddBadge');
+  badge.dataset.drug = document.getElementById('f-product').value.toLowerCase().trim();
+
+  // ── Auto-populate product name field ──
+  if (d.inn) document.getElementById('f-product').value = d.inn + (d.brand ? ' (' + d.brand.split('/')[0].trim() + ')' : '');
+
+  // ── Auto-populate product type dropdown ──
+  if (d.type) {
+    const sel = document.getElementById('f-type');
+    if (sel) sel.value = d.type;
+  }
+
+  // ── Populate dedicated WHODD detail fields ──
+  const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || '—'; };
+  setVal('w-inn',     d.inn);
+  setVal('w-brand',   d.brand);
+  setVal('w-atc',     d.atc);
+  setVal('w-atcname', d.atcName);
+  setVal('w-form',    d.form);
+  setVal('w-company', d.company);
+  setVal('w-class',   d.class);
+  setVal('w-status',  d.status);
+
+  // Show the fields panel
+  const fields = document.getElementById('whoddFields');
+  if (fields) fields.style.display = 'block';
+
+  // ── Badge header (compact) ──
+  badge.className = 'dict-badge whodd';
+  badge.style.display = 'block';
+  badge.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span style="font-weight:600;font-size:12px;color:#042C53;">${d.inn || '—'}</span>
+      ${d.brand ? '<span style="font-size:11px;color:#0A5F9A;background:rgba(10,95,154,0.08);padding:1px 7px;border-radius:10px;">' + d.brand + '</span>' : ''}
+      ${d.atc ? '<code style="font-size:10px;background:#EEF2FF;color:#3730A3;padding:2px 6px;border-radius:4px;">' + d.atc + '</code>' : ''}
+      <span style="margin-left:auto;font-size:9.5px;color:#9AAAB8;">${isTypeahead ? '⚡ instant match' : '✓ WHODD resolved'}</span>
+    </div>
+    <div style="font-size:10.5px;color:#4A5D72;margin-top:4px;">${d.class || ''}</div>
+    <div style="font-size:10px;color:#6B7E95;margin-top:2px;">${d.status || ''}</div>`;
 }
 
-function showWHODDDemo(val){
-  const badge=document.getElementById('whoddBadge');
-  badge.className='dict-badge whodd';
-  badge.style.display='block';
-  // Generate plausible demo result for unknown drug
-  const isLikelyBiologic = /mab|umab|zumab|ximab|kinase|nib\b/i.test(val);
-  const guessedType = isLikelyBiologic&&/mab$/i.test(val)?'biologic':'drug_small_molecule';
-  document.getElementById('f-type').value = guessedType;
-  badge.innerHTML=`
-    <div class="dict-row"><span class="dict-label">INN</span><span class="dict-val">${val}</span><span class="dict-tag">WHODD lookup</span></div>
-    <div class="dict-row"><span class="dict-label">Type</span><span class="dict-val">${guessedType==='biologic'?'Biologic / mAb':'Small molecule drug'} <span style="font-size:10px;color:var(--amber);">(inferred from INN stem)</span></span></div>
-    <div class="dict-row"><span class="dict-label">ATC code</span><span class="dict-val" style="color:var(--amber);">Not in demo DB — connect Claude API for full WHODD resolution</span></div>
-    <div class="dict-source">Demo mode · Connect live API for full WHO Drug Dictionary lookup</div>`;
+function showWHODDDemo(val) {
+  const badge = document.getElementById('whoddBadge');
+  badge.className = 'dict-badge whodd';
+  badge.style.display = 'block';
+  const isLikelyBiologic = /mab$|umab|zumab|ximab/i.test(val);
+  const guessedType = isLikelyBiologic ? 'biologic' : 'drug_small_molecule';
+  const sel = document.getElementById('f-type');
+  if (sel) sel.value = guessedType;
+  badge.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-weight:600;font-size:12px;color:#042C53;">${val}</span>
+      <span style="font-size:10px;color:#B7720A;background:#FEF6E8;padding:2px 7px;border-radius:10px;">not in local DB</span>
+    </div>
+    <div style="font-size:10.5px;color:#9AAAB8;margin-top:4px;">Type inferred: ${guessedType === 'biologic' ? 'Biologic / mAb' : 'Small molecule drug'} · Connect API key for full WHODD resolution</div>`;
 }
-function showWHODDNotFound(val, msg){
-  const badge=document.getElementById('whoddBadge');
-  badge.className='dict-badge error'; badge.style.display='block';
-  badge.innerHTML=`<strong>Not found in WHODD:</strong> ${val}<br><span style="font-size:11px;">${msg||'Check spelling or try the INN name.'}</span>`;
+
+function showWHODDNotFound(val, msg) {
+  const badge = document.getElementById('whoddBadge');
+  badge.className = 'dict-badge error';
+  badge.style.display = 'block';
+  badge.innerHTML = `<strong>Not found in WHODD:</strong> ${val}<br><span style="font-size:11px;">${msg || 'Check spelling or try the INN name.'}</span>`;
 }
-function showWHODDError(msg){
-  const badge=document.getElementById('whoddBadge');
-  badge.className='dict-badge error'; badge.style.display='block';
-  badge.innerHTML=`<strong>Error:</strong> ${msg}`;
+
+function showWHODDError(msg) {
+  const badge = document.getElementById('whoddBadge');
+  badge.className = 'dict-badge error';
+  badge.style.display = 'block';
+  badge.innerHTML = `<strong>WHODD lookup error:</strong> ${msg}`;
 }
 
 // ══════════════════════════════════════════════════════════════════
