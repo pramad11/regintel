@@ -673,6 +673,10 @@ select{appearance:none;
   </div>
   <div class="sidebar-section">
     <div class="sidebar-section-label">System</div>
+    <div class="nav-item" id="nav-productdict" onclick="showView('productdict',this,'Product Dictionary')">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="14" rx="1.5"/><path d="M7 6h4M7 9h4M7 12h2"/><path d="M13 6h4v11a1 1 0 01-1 1H6"/></svg>
+      Product Dictionary
+    </div>
     <div class="nav-item" id="nav-admin" onclick="showView('admin',this,'Admin')">
       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42"/></svg>
       Admin
@@ -1135,6 +1139,208 @@ select{appearance:none;
 </div>
 
 <!-- ── ADMIN ── -->
+<!-- ── PRODUCT DICTIONARY ── -->
+<div class="view" id="view-productdict" style="flex-direction:column;min-height:0;">
+  <div class="filters-bar" style="flex-shrink:0;gap:8px;">
+    <div class="search-box" style="flex:1;max-width:320px;">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#9AAAB8" stroke-width="1.5"><circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/></svg>
+      <input type="text" id="pd-search" placeholder="Search by generic name, trade name, ATC code…" oninput="pdSearch(this.value)"/>
+    </div>
+    <select class="filter-select" id="pd-filter-type" onchange="pdSearch(document.getElementById('pd-search').value)">
+      <option value="">All types</option>
+      <option value="drug_small_molecule">Small molecule</option>
+      <option value="biologic">Biologic / mAb</option>
+      <option value="vaccine">Vaccine</option>
+      <option value="gene_therapy">Gene / Cell therapy</option>
+      <option value="combination_product">Combination product</option>
+    </select>
+    <select class="filter-select" id="pd-filter-status" onchange="pdSearch(document.getElementById('pd-search').value)">
+      <option value="">All statuses</option>
+      <option value="Approved">Approved</option>
+      <option value="Investigational">Investigational</option>
+      <option value="Discontinued">Discontinued</option>
+    </select>
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="btn btn-secondary btn-sm" onclick="pdExport()">&#128196; Export CSV</button>
+      <button class="btn btn-primary btn-sm" onclick="pdOpenAdd()">&#43; Add Product</button>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;overflow:hidden;min-height:0;">
+    <!-- Product list -->
+    <div style="width:340px;flex-shrink:0;border-right:1px solid var(--c-border);overflow-y:auto;background:#fff;">
+      <div id="pd-list" style="padding:8px;"></div>
+    </div>
+
+    <!-- Product detail / form panel -->
+    <div style="flex:1;overflow-y:auto;padding:0;" id="pd-detail-wrap">
+      <div id="pd-detail" style="padding:24px 28px;">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:#9AAAB8;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#CBD2DC" stroke-width="1"><rect x="3" y="2" width="12" height="17" rx="1.5"/><path d="M7 7h5M7 10h5M7 13h3"/><path d="M15 7h6v14a1 1 0 01-1 1H7"/></svg>
+          <div style="font-size:13px;">Select a product or add a new one</div>
+          <button class="btn btn-primary btn-sm" onclick="pdOpenAdd()">+ Add first product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pd-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(4,44,83,.45);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;width:700px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(4,44,83,.25);">
+    <div style="background:var(--navy);padding:16px 22px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#fff;" id="pd-modal-title">Add Product</div>
+        <div style="font-size:11px;color:rgba(181,212,244,.6);margin-top:2px;">Company Product Dictionary — GxP compliant record</div>
+      </div>
+      <button onclick="pdCloseModal()" style="background:rgba(255,255,255,.12);border:none;border-radius:6px;padding:5px 10px;color:#fff;cursor:pointer;font-size:13px;">✕</button>
+    </div>
+    <div style="padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="pd-modal-body">
+
+      <div style="grid-column:1/-1;font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #EEF2F7;padding-bottom:6px;margin-bottom:2px;">Core Identification</div>
+
+      <div><label class="fl">INN / Generic name <span class="req">*</span></label>
+        <input type="text" id="pd-inn" placeholder="e.g. Avutometinib"/></div>
+      <div><label class="fl">Trade name / Brand <span class="req">*</span></label>
+        <input type="text" id="pd-brand" placeholder="e.g. VS-6766, Eliquis"/></div>
+      <div><label class="fl">Code name(s)</label>
+        <input type="text" id="pd-code" placeholder="e.g. VS-6766, RO5126766"/></div>
+      <div><label class="fl">Product type <span class="req">*</span></label>
+        <select id="pd-type">
+          <option value="">— Select —</option>
+          <option value="drug_small_molecule">Small molecule drug</option>
+          <option value="biologic">Biologic / mAb / Protein</option>
+          <option value="vaccine">Vaccine</option>
+          <option value="gene_therapy">Gene / Cell therapy</option>
+          <option value="medical_device">Medical device</option>
+          <option value="combination_product">Combination product</option>
+        </select></div>
+
+      <div style="grid-column:1/-1;font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #EEF2F7;padding-bottom:6px;margin-top:6px;margin-bottom:2px;">Classification</div>
+
+      <div><label class="fl">ATC code</label>
+        <input type="text" id="pd-atc" placeholder="e.g. L01EE06" style="font-family:var(--mono);"/></div>
+      <div><label class="fl">ATC class name</label>
+        <input type="text" id="pd-atcname" placeholder="e.g. RAF inhibitors"/></div>
+      <div style="grid-column:1/-1;"><label class="fl">Drug class / Pharmacology</label>
+        <input type="text" id="pd-class" placeholder="e.g. Antineoplastic — dual RAF/MEK inhibitor (small molecule kinase inhibitor)"/></div>
+      <div style="grid-column:1/-1;"><label class="fl">Mechanism of action</label>
+        <textarea id="pd-moa" rows="2" placeholder="e.g. Covalently binds and inhibits KRAS G12C mutation, blocking RAS-MAPK signalling…"></textarea></div>
+
+      <div style="grid-column:1/-1;font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #EEF2F7;padding-bottom:6px;margin-top:6px;margin-bottom:2px;">Dosage & Formulation</div>
+
+      <div><label class="fl">Dosage form</label>
+        <select id="pd-form">
+          <option value="">— Select —</option>
+          <option>Oral tablet</option>
+          <option>Oral capsule</option>
+          <option>IV infusion</option>
+          <option>SC injection</option>
+          <option>IM injection</option>
+          <option>Topical</option>
+          <option>Inhaled</option>
+          <option>Transdermal patch</option>
+          <option>Oral solution</option>
+          <option>Lyophilized powder for reconstitution</option>
+        </select></div>
+      <div><label class="fl">Strength / Concentration</label>
+        <input type="text" id="pd-strength" placeholder="e.g. 80mg, 100mg/4mL, 25mg/mL"/></div>
+      <div><label class="fl">Route of administration</label>
+        <select id="pd-route">
+          <option value="">— Select —</option>
+          <option>Oral</option>
+          <option>Intravenous (IV)</option>
+          <option>Subcutaneous (SC)</option>
+          <option>Intramuscular (IM)</option>
+          <option>Topical</option>
+          <option>Inhalation</option>
+          <option>Intrathecal</option>
+          <option>Ophthalmic</option>
+        </select></div>
+      <div><label class="fl">Dose regimen</label>
+        <input type="text" id="pd-regimen" placeholder="e.g. 3.2mg twice weekly, 200mg IV q3w"/></div>
+
+      <div style="grid-column:1/-1;font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #EEF2F7;padding-bottom:6px;margin-top:6px;margin-bottom:2px;">Regulatory & Authorization</div>
+
+      <div><label class="fl">MAH / Sponsor company</label>
+        <input type="text" id="pd-company" placeholder="e.g. Verastem Oncology"/></div>
+      <div><label class="fl">Development status</label>
+        <select id="pd-devstatus">
+          <option value="">— Select —</option>
+          <option value="Investigational">Investigational</option>
+          <option value="Approved">Approved</option>
+          <option value="Approved (accelerated)">Approved (accelerated approval)</option>
+          <option value="Discontinued">Discontinued</option>
+          <option value="Withdrawn">Withdrawn</option>
+        </select></div>
+      <div><label class="fl">IND / CTA number</label>
+        <input type="text" id="pd-ind" placeholder="e.g. IND 153742"/></div>
+      <div><label class="fl">NDA / BLA / MA number</label>
+        <input type="text" id="pd-nda" placeholder="e.g. NDA 202155, EMA EU/1/11/691"/></div>
+      <div><label class="fl">Approved indication(s)</label>
+        <input type="text" id="pd-indication" placeholder="e.g. KRAS G12C+ NSCLC, 2L+"/></div>
+      <div><label class="fl">Approval date</label>
+        <input type="date" id="pd-approvaldate"/></div>
+
+      <div style="grid-column:1/-1;font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #EEF2F7;padding-bottom:6px;margin-top:6px;margin-bottom:2px;">PV / Safety Configuration</div>
+
+      <div><label class="fl">Reference safety information (RSI)</label>
+        <input type="text" id="pd-rsi" placeholder="e.g. IB v7.0 (2025-03), USPI Rev.12"/></div>
+      <div><label class="fl">PSUR / PBRER cycle</label>
+        <select id="pd-psur">
+          <option value="">— Select —</option>
+          <option>Annual</option>
+          <option>6-monthly</option>
+          <option>3-monthly</option>
+          <option>PBRER (ICH E2C)</option>
+          <option>DSUR (ICH E2F)</option>
+        </select></div>
+      <div><label class="fl">DLP (Data lock point)</label>
+        <input type="date" id="pd-dlp"/></div>
+      <div><label class="fl">CCDS / Core datasheet version</label>
+        <input type="text" id="pd-ccds" placeholder="e.g. CCDS v4.2, IB Edition 7"/></div>
+      <div><label class="fl">Signal management system</label>
+        <input type="text" id="pd-signal" placeholder="e.g. Oracle Empirica Signal, VigiLyze"/></div>
+      <div><label class="fl">Argus Safety product ID</label>
+        <input type="text" id="pd-argus" placeholder="e.g. PROD_0042 (from lm_product)" style="font-family:var(--mono);"/></div>
+
+      <div style="grid-column:1/-1;font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid #EEF2F7;padding-bottom:6px;margin-top:6px;margin-bottom:2px;">Active Markets & HAs</div>
+
+      <div style="grid-column:1/-1;"><label class="fl">Active marketing countries</label>
+        <input type="text" id="pd-markets" placeholder="e.g. USA, EU, UK, Japan, Canada, Australia"/></div>
+      <div style="grid-column:1/-1;"><label class="fl">Applicable health authorities</label>
+        <div id="pd-ha-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px;">
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="FDA"/> FDA (USA)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="EMA"/> EMA (EU)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="MHRA"/> MHRA (UK)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="PMDA"/> PMDA (Japan)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="HC"/> Health Canada</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="TGA"/> TGA (AU)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="SWISSMEDIC"/> Swissmedic</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="MFDS"/> MFDS (Korea)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="ANVISA"/> ANVISA (Brazil)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="NMPA"/> NMPA (China)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="CDSCO"/> CDSCO (India)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="SFDA"/> SFDA (Saudi)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="MEDSAFE"/> Medsafe (NZ)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="COFEPRIS"/> COFEPRIS (MX)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="HSA"/> HSA (Singapore)</label>
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="WHO"/> WHO/VigiBase</label>
+        </div></div>
+
+      <div style="grid-column:1/-1;"><label class="fl">Notes / Comments</label>
+        <textarea id="pd-notes" rows="2" placeholder="Additional PV or regulatory notes…"></textarea></div>
+
+    </div>
+    <div style="padding:14px 24px;border-top:1px solid #EEF2F7;display:flex;justify-content:space-between;align-items:center;background:#FAFBFD;border-radius:0 0 12px 12px;">
+      <div style="font-size:11px;color:#9AAAB8;" id="pd-modal-meta"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" onclick="pdCloseModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="pdSave()" id="pd-save-btn">Save Product</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="view" id="view-admin">
   <div style="flex:1;overflow-y:auto;">
     <div class="tabs-bar" style="padding:0 24px;">
@@ -1275,10 +1481,11 @@ function showView(name, el, label) {
   var nav = document.getElementById('nav-'+name);
   if (nav && !el) nav.classList.add('active');
   document.getElementById('tb-section').textContent = label || name;
-  if (name === 'knowledge') setTimeout(drawKG, 100);
-  if (name === 'reports')   { renderReports(); }
-  if (name === 'history')   { if(typeof renderHistGrid==='function') renderHistGrid(); }
-  if (name === 'settings')  { if(typeof updateSettingsPage==='function') updateSettingsPage(); }
+  if (name === 'knowledge')    setTimeout(drawKG, 100);
+  if (name === 'reports')      { renderReports(); }
+  if (name === 'history')      { if(typeof renderHistGrid==='function') renderHistGrid(); }
+  if (name === 'settings')     { if(typeof updateSettingsPage==='function') updateSettingsPage(); }
+  if (name === 'productdict')  { initProductDict(); }
 }
 
 // ══════════════════════════════════════════
@@ -3973,6 +4180,161 @@ function copyObligations(){
 function printResults(){ window.print(); }
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// ══════════════════════════════════════════════════════════════════
+// PRODUCT DICTIONARY
+// ══════════════════════════════════════════════════════════════════
+
+var PD_STORE_KEY = 'regintel_product_dict_v1';
+var pd_editing_id = null;
+
+function pdLoad() {
+  try { return JSON.parse(localStorage.getItem(PD_STORE_KEY) || '[]'); } catch(e) { return []; }
+}
+function pdSaveStore(arr) {
+  try { localStorage.setItem(PD_STORE_KEY, JSON.stringify(arr)); } catch(e) {}
+}
+
+function pdSeedDefaults() {
+  if (pdLoad().length > 0) return;
+  var now = new Date().toISOString();
+  pdSaveStore([
+    {id:'pd_seed_1', inn:'Avutometinib', brand:'VS-6766', code:'RO5126766', type:'drug_small_molecule', atc:'L01EE06', atcName:'RAF inhibitors', class:'Antineoplastic — dual RAF/MEK clamp inhibitor', moa:'Inhibits RAF kinase and prevents MEK phosphorylation by forming a stable RAF-MEK complex. Active against KRAS-mutant tumours.', form:'Oral tablet', strength:'3.2mg', route:'Oral', regimen:'3.2mg BIW, 3 weeks on / 1 week off', company:'Verastem Oncology', devstatus:'Investigational', ind:'IND 153742', nda:'', indication:'Low-grade serous ovarian cancer (LGSOC); KRAS-mutant solid tumours', approvaldate:'', rsi:'IB Edition 7 (2025-03)', psur:'DSUR (ICH E2F)', dlp:'', ccds:'IB v7', signal:'Oracle Empirica Signal', argus:'PROD_0001', markets:'USA, UK, EU, Canada, Australia', has:['FDA','EMA','MHRA','HC','TGA'], notes:'Co-development partner: Roche (RO5126766). RAMP-201/301 trials.', created:now},
+    {id:'pd_seed_2', inn:'Defactinib', brand:'VS-6063', code:'VS-6063', type:'drug_small_molecule', atc:'L01EX', atcName:'Protein kinase inhibitors NEC', class:'Antineoplastic — FAK inhibitor', moa:'Selectively inhibits FAK (PTK2) and PYK2, blocking tumour cell survival and stromal signalling.', form:'Oral tablet', strength:'200mg', route:'Oral', regimen:'200mg BID continuously', company:'Verastem Oncology', devstatus:'Investigational', ind:'IND 119005', nda:'', indication:'KRAS-mutant NSCLC; mesothelioma', approvaldate:'', rsi:'IB Edition 5', psur:'DSUR (ICH E2F)', dlp:'', ccds:'IB v5', signal:'Oracle Empirica Signal', argus:'PROD_0002', markets:'USA, UK', has:['FDA','MHRA'], notes:'RAMP-201 combination trial with avutometinib.', created:now}
+  ]);
+}
+
+function pdRenderList(query, typeFilter, statusFilter) {
+  var arr = pdLoad();
+  var q = (query||'').toLowerCase().trim();
+  var filtered = arr.filter(function(p) {
+    var mq = !q || [p.inn,p.brand,p.code,p.atc,p.company,p.indication].some(function(f){return f&&f.toLowerCase().includes(q);});
+    var mt = !typeFilter || p.type===typeFilter;
+    var ms = !statusFilter || (p.devstatus||'').includes(statusFilter);
+    return mq && mt && ms;
+  });
+  var TL = {drug_small_molecule:'SM',biologic:'Bio',vaccine:'Vac',gene_therapy:'GT',combination_product:'Combo',medical_device:'Dev'};
+  var SC = {Approved:'#1D9E75',Investigational:'#185FA5',Discontinued:'#9AAAB8',Withdrawn:'#C05621'};
+  var html = filtered.length===0 ? '<div style="padding:20px;text-align:center;color:#9AAAB8;font-size:12px;">No products match</div>'
+    : filtered.map(function(p){
+      var sc=SC[p.devstatus]||'#9AAAB8';
+      return '<div onclick="pdShowDetail(\''+p.id+'\')" style="padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:3px;border:1px solid transparent;transition:all .1s;" onmouseover="this.style.background=\'#F7F9FC\';this.style.borderColor=\'#E2E8F0\'" onmouseout="this.style.background=\'\';this.style.borderColor=\'transparent\'">'
+        +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">'
+        +'<span style="font-size:12px;font-weight:600;color:#042C53;">'+(p.inn||'—')+'</span>'
+        +'<span style="font-size:10px;background:#EEF2FF;color:#3730A3;padding:1px 6px;border-radius:8px;">'+(TL[p.type]||'—')+'</span></div>'
+        +'<div style="font-size:11px;color:#4A5D72;">'+(p.brand||'')+(p.code&&p.code!==p.brand?' · <code style="font-size:10px;color:#6B7E95;">'+p.code+'</code>':'')+'</div>'
+        +'<div style="display:flex;gap:5px;margin-top:4px;"><span style="font-size:10px;color:'+sc+';font-weight:500;">● '+(p.devstatus||'—')+'</span>'
+        +(p.company?'<span style="font-size:10px;color:#9AAAB8;">· '+p.company+'</span>':'')+'</div></div>';
+    }).join('');
+  var el=document.getElementById('pd-list');
+  if(el) el.innerHTML='<div style="padding:6px 4px 4px;"><span style="font-size:10px;color:#9AAAB8;">'+filtered.length+' product'+(filtered.length!==1?'s':'')+'</span></div>'+html;
+}
+
+function pdSearch(q) {
+  var tf=(document.getElementById('pd-filter-type')||{}).value||'';
+  var sf=(document.getElementById('pd-filter-status')||{}).value||'';
+  pdRenderList(q,tf,sf);
+}
+
+function pdShowDetail(id) {
+  var p=pdLoad().find(function(x){return x.id===id;}); if(!p) return;
+  var SC={Approved:'#1D9E75',Investigational:'#185FA5',Discontinued:'#9AAAB8',Withdrawn:'#C05621'};
+  var sc=SC[p.devstatus]||'#9AAAB8';
+  var row=function(l,v){return v?'<tr><td style="padding:4px 12px 4px 0;font-size:11px;color:#6B7E95;white-space:nowrap;vertical-align:top;">'+l+'</td><td style="padding:4px 0;font-size:11.5px;color:#1F2937;">'+v+'</td></tr>':'';};
+  document.getElementById('pd-detail').innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">'
+    +'<div><div style="font-size:18px;font-weight:700;color:#042C53;">'+(p.inn||'—')+'</div>'
+    +'<div style="font-size:13px;color:#4A5D72;margin-top:2px;">'+(p.brand||'')+(p.code?' <code style="font-size:11px;background:#EEF2FF;color:#3730A3;padding:2px 7px;border-radius:6px;">'+p.code+'</code>':'')+'</div>'
+    +'<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap;">'
+    +'<span style="font-size:11px;background:'+sc+'1A;color:'+sc+';padding:2px 10px;border-radius:10px;font-weight:500;">● '+(p.devstatus||'—')+'</span>'
+    +(p.type?'<span style="font-size:11px;background:#EEF2FF;color:#3730A3;padding:2px 10px;border-radius:10px;">'+p.type.replace(/_/g,' ')+'</span>':'')
+    +(p.atc?'<code style="font-size:11px;background:#F1F5F9;color:#1E40AF;padding:2px 8px;border-radius:6px;">'+p.atc+'</code>':'')
+    +'</div></div>'
+    +'<div style="display:flex;gap:6px;">'
+    +'<button class="btn btn-secondary btn-sm" onclick="pdOpenEdit(\''+p.id+'\')">✎ Edit</button>'
+    +'<button class="btn btn-sm" style="background:#FEF0EE;color:#C05621;border:1px solid #F4C4B8;" onclick="pdDelete(\''+p.id+'\')">🗑 Delete</button>'
+    +'</div></div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">'
+    +'<div><div style="font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;border-bottom:1px solid #EEF2F7;padding-bottom:5px;">Pharmacology</div><table>'+row('ATC code',p.atc)+row('ATC class',p.atcName)+row('Drug class',p.class)+'</table>'+(p.moa?'<div style="margin-top:8px;background:#F7F9FC;border-radius:6px;padding:10px;font-size:11.5px;color:#374151;line-height:1.6;">'+p.moa+'</div>':'')+'</div>'
+    +'<div><div style="font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;border-bottom:1px solid #EEF2F7;padding-bottom:5px;">Formulation</div><table>'+row('Dosage form',p.form)+row('Strength',p.strength)+row('Route',p.route)+row('Regimen',p.regimen)+'</table></div>'
+    +'<div><div style="font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;border-bottom:1px solid #EEF2F7;padding-bottom:5px;">Regulatory</div><table>'+row('Company',p.company)+row('IND/CTA',p.ind)+row('NDA/BLA/MA',p.nda)+row('Indication',p.indication)+row('Approval date',p.approvaldate)+'</table></div>'
+    +'<div><div style="font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;border-bottom:1px solid #EEF2F7;padding-bottom:5px;">PV Configuration</div><table>'+row('RSI',p.rsi)+row('PSUR/PBRER',p.psur)+row('CCDS',p.ccds)+row('Signal system',p.signal)+row('Argus product ID',p.argus)+'</table></div>'
+    +'<div style="grid-column:1/-1;"><div style="font-size:9.5px;font-weight:600;color:#9AAAB8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;border-bottom:1px solid #EEF2F7;padding-bottom:5px;">Markets & Health Authorities</div>'
+    +'<div style="font-size:12px;color:#374151;margin-bottom:6px;">'+(p.markets||'—')+'</div>'
+    +(p.has&&p.has.length?'<div style="display:flex;gap:4px;flex-wrap:wrap;">'+p.has.map(function(h){return '<span style="font-size:10.5px;background:#EEF2FF;color:#3730A3;padding:2px 8px;border-radius:6px;">'+h+'</span>';}).join('')+'</div>':'')
+    +'</div>'+(p.notes?'<div style="grid-column:1/-1;background:#FFFBEB;border:1px solid #FDE68A;border-radius:6px;padding:10px;font-size:11.5px;color:#92400E;">'+p.notes+'</div>':'')
+    +'</div>';
+}
+
+function pdOpenAdd() {
+  pd_editing_id=null;
+  document.getElementById('pd-modal-title').textContent='Add Product';
+  document.getElementById('pd-modal-meta').textContent='';
+  document.getElementById('pd-save-btn').textContent='Save Product';
+  ['pd-inn','pd-brand','pd-code','pd-atc','pd-atcname','pd-class','pd-moa','pd-strength','pd-regimen','pd-company','pd-ind','pd-nda','pd-indication','pd-rsi','pd-ccds','pd-signal','pd-argus','pd-markets','pd-notes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['pd-type','pd-form','pd-route','pd-devstatus','pd-psur'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  ['pd-dlp','pd-approvaldate'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.querySelectorAll('#pd-ha-grid input[type=checkbox]').forEach(function(cb){cb.checked=false;});
+  document.getElementById('pd-modal-overlay').style.display='flex';
+}
+
+function pdOpenEdit(id) {
+  var p=pdLoad().find(function(x){return x.id===id;}); if(!p) return;
+  pd_editing_id=id;
+  document.getElementById('pd-modal-title').textContent='Edit — '+(p.inn||'');
+  document.getElementById('pd-modal-meta').textContent='Created: '+(p.created?new Date(p.created).toLocaleString():'—');
+  document.getElementById('pd-save-btn').textContent='Update Product';
+  var sv=function(fid,val){var el=document.getElementById(fid);if(el)el.value=val||'';};
+  sv('pd-inn',p.inn);sv('pd-brand',p.brand);sv('pd-code',p.code);sv('pd-atc',p.atc);sv('pd-atcname',p.atcName);sv('pd-class',p.class);sv('pd-moa',p.moa);sv('pd-strength',p.strength);sv('pd-regimen',p.regimen);sv('pd-company',p.company);sv('pd-ind',p.ind);sv('pd-nda',p.nda);sv('pd-indication',p.indication);sv('pd-rsi',p.rsi);sv('pd-ccds',p.ccds);sv('pd-signal',p.signal);sv('pd-argus',p.argus);sv('pd-markets',p.markets);sv('pd-notes',p.notes);
+  sv('pd-type',p.type);sv('pd-form',p.form);sv('pd-route',p.route);sv('pd-devstatus',p.devstatus);sv('pd-psur',p.psur);
+  sv('pd-dlp',p.dlp);sv('pd-approvaldate',p.approvaldate);
+  document.querySelectorAll('#pd-ha-grid input[type=checkbox]').forEach(function(cb){cb.checked=!!(p.has&&p.has.includes(cb.value));});
+  document.getElementById('pd-modal-overlay').style.display='flex';
+}
+
+function pdCloseModal() {
+  document.getElementById('pd-modal-overlay').style.display='none';
+  pd_editing_id=null;
+}
+
+function pdSave() {
+  var g=function(id){var el=document.getElementById(id);return el?el.value.trim():'';};
+  var inn=g('pd-inn'); if(!inn){alert('INN / Generic name is required.');return;}
+  var has=[]; document.querySelectorAll('#pd-ha-grid input[type=checkbox]:checked').forEach(function(cb){has.push(cb.value);});
+  var rec={id:pd_editing_id||('pd_'+Date.now()),inn:inn,brand:g('pd-brand'),code:g('pd-code'),type:g('pd-type'),atc:g('pd-atc'),atcName:g('pd-atcname'),class:g('pd-class'),moa:g('pd-moa'),form:g('pd-form'),strength:g('pd-strength'),route:g('pd-route'),regimen:g('pd-regimen'),company:g('pd-company'),devstatus:g('pd-devstatus'),ind:g('pd-ind'),nda:g('pd-nda'),indication:g('pd-indication'),approvaldate:g('pd-approvaldate'),rsi:g('pd-rsi'),psur:g('pd-psur'),dlp:g('pd-dlp'),ccds:g('pd-ccds'),signal:g('pd-signal'),argus:g('pd-argus'),markets:g('pd-markets'),has:has,notes:g('pd-notes'),updated:new Date().toISOString()};
+  var arr=pdLoad();
+  if(pd_editing_id){var idx=arr.findIndex(function(x){return x.id===pd_editing_id;});if(idx>=0){rec.created=arr[idx].created;arr[idx]=rec;}else arr.push(rec);}
+  else{rec.created=new Date().toISOString();arr.push(rec);}
+  pdSaveStore(arr); pdCloseModal(); pdRenderList('','',''); pdShowDetail(rec.id); pdSyncToWHODD(rec);
+}
+
+function pdDelete(id) {
+  if(!confirm('Delete this product?')) return;
+  pdSaveStore(pdLoad().filter(function(x){return x.id!==id;}));
+  pdRenderList('','','');
+  document.getElementById('pd-detail').innerHTML='<div style="padding:40px;text-align:center;color:#9AAAB8;">Product deleted.</div>';
+}
+
+function pdSyncToWHODD(p) {
+  if(!p.inn) return;
+  var entry={inn:p.inn,brand:p.brand,atc:p.atc,atcName:p.atcName,type:p.type,class:(p.class||'')+(p.moa?' | '+p.moa:''),form:(p.form||'')+(p.strength?' '+p.strength:''),company:p.company,status:(p.devstatus||'')+(p.ind?' ('+p.ind+')':p.nda?' ('+p.nda+')':'')};
+  if(p.inn) WHODD_DEMO_DB[p.inn.toLowerCase()]=entry;
+  if(p.brand) WHODD_DEMO_DB[p.brand.toLowerCase()]=entry;
+  if(p.code&&p.code!==p.brand) WHODD_DEMO_DB[p.code.toLowerCase()]=entry;
+}
+
+function pdExport() {
+  var arr=pdLoad(); if(!arr.length){alert('No products to export.');return;}
+  var cols=['inn','brand','code','type','atc','atcName','class','form','strength','route','regimen','company','devstatus','ind','nda','indication','markets','rsi','ccds','argus','notes'];
+  var csv=cols.join(',')+'\n'+arr.map(function(p){return cols.map(function(c){return '"'+(p[c]||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='regintel_product_dict_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+}
+
+function initProductDict() {
+  pdSeedDefaults();
+  pdLoad().forEach(function(p){pdSyncToWHODD(p);});
+  pdRenderList('','','');
+}
+
 // ── BUILD INIT ────────────────────────────────────────────────────────────
 (function initApp(){
   // Build timestamp — set at load time so it reflects actual deployment
@@ -3988,6 +4350,8 @@ function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
   // Pre-render reports so it's ready when user navigates there
   renderReports();
   renderAdmin();
+  // Init product dictionary (seeds defaults + syncs to WHODD)
+  initProductDict();
 })();
 </script>
 </body>
