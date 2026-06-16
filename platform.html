@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Praxigent RegIntel Platform</title>
+<title>Praxigent VigilOne Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -600,7 +600,7 @@ select{appearance:none;
     <div class="topbar-logo-mark"><span>P</span></div>
     <div class="topbar-logo-text">
       <div class="brand">Praxigent</div>
-      <div class="product">RegIntel Platform</div>
+      <div class="product">VigilOne Platform</div>
     </div>
   </div>
   <div class="topbar-divider"></div>
@@ -691,7 +691,7 @@ select{appearance:none;
       <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4M7 2H3a1 1 0 00-1 1v16a1 1 0 001 1h14a1 1 0 001-1V8l-6-6H7z"/></svg>
       Documentation
     </div>
-    <div class="sidebar-footer-item" style="color:rgba(255,255,255,.2);font-size:10px;padding:4px 10px;">RegIntel v1.0 &middot; Praxigent</div>
+    <div class="sidebar-footer-item" style="color:rgba(255,255,255,.2);font-size:10px;padding:4px 10px;">VigilOne v1.0 &middot; Praxigent</div>
   </div>
 </div>
 
@@ -960,7 +960,7 @@ select{appearance:none;
         <div class="form-panel">
           <div class="form-panel-hdr">
             <h2>AE Case Analysis</h2>
-            <p>Paste a narrative or fill fields — RegIntel resolves all global obligations</p>
+            <p>Paste a narrative or fill fields — VigilOne resolves all global obligations</p>
           </div>
           <div class="form-body">
 
@@ -1433,7 +1433,7 @@ var KANBAN_DATA = {
     {title:'Update Argus EMA non-serious rule 90d→45d',system:'Argus Safety',owner:'PV Ops',priority:'P1',due:'08-06'},
     {title:'Register E2B R3 sender ID with FDA ESM',system:'FDA ESM',owner:'IT',priority:'P1',due:'10-01'},
     {title:'Update SOP-PV-004 §4.2 timeline reference',system:'QMS/SOP',owner:'Reg Affairs',priority:'P2',due:'08-01'},
-    {title:'Update RegIntel ROD — EMA non-serious tl90→45',system:'RegIntel ROD',owner:'Admin',priority:'P1',due:'09-04'},
+    {title:'Update VigilOne ROD — EMA non-serious tl90→45',system:'VigilOne ROD',owner:'Admin',priority:'P1',due:'09-04'},
   ],
   'In Progress':[
     {title:'Validate Argus EMA rule change in QA environment',system:'Argus QA',owner:'QA',priority:'P1',due:'08-20'},
@@ -1443,7 +1443,7 @@ var KANBAN_DATA = {
     {title:'Change control pack CCR-EMA-001 — QA sign-off',system:'Change Control',owner:'QA Manager',priority:'P1',due:'08-01'},
   ],
   'Completed':[
-    {title:'Gap analysis — EMA GVP Module VI Rev 3',system:'RegIntel',owner:'Pramod K.',priority:'P1',due:'06-07'},
+    {title:'Gap analysis — EMA GVP Module VI Rev 3',system:'VigilOne',owner:'Pramod K.',priority:'P1',due:'06-07'},
     {title:'SUSAR definition review — VS-6766 IB v8',system:'ARISg',owner:'Medical',priority:'P2',due:'06-01'},
   ]
 };
@@ -1559,7 +1559,7 @@ function renderDashCompliance() {
     {label:'Oracle Argus Safety',pct:74,cls:'progress-amber'},
     {label:'EudraVigilance',pct:81,cls:'progress-green'},
     {label:'SOP / QMS',pct:69,cls:'progress-red'},
-    {label:'RegIntel ROD',pct:96,cls:'progress-green'},
+    {label:'VigilOne ROD',pct:96,cls:'progress-green'},
   ];
   var el = document.getElementById('dash-compliance-grid');
   if (!el) return;
@@ -1627,7 +1627,7 @@ function showImpactDetail(reg) {
   var card = document.getElementById('impact-detail-card');
   var body = document.getElementById('impact-detail-body');
   card.style.display = 'block';
-  var systems = ['Oracle Argus Safety','EudraVigilance EVWEB','RegIntel ROD','SOP / QMS'];
+  var systems = ['Oracle Argus Safety','EudraVigilance EVWEB','VigilOne ROD','SOP / QMS'];
   var processes = ['ICSR Reporting (non-serious)','Case Processing (EEA)','E2B Batch Submission','Periodic Reporting (PSUR)'];
   body.innerHTML =
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">' +
@@ -1754,7 +1754,7 @@ function renderReports() {
     {user:'Sarah M.',action:'Submitted task TASK-GAP-CHG-EMA-001-01 for review',time:'2026-06-07 07:52',icon:'&#128228;',bg:'var(--c-blue-lt)'},
     {user:'IT Admin',action:'Updated Argus Safety rule EMA_NONSER_POST_MKT (90d &rarr; pending)',time:'2026-06-06 16:44',icon:'&#9881;&#65039;',bg:'var(--c-amber-lt)'},
     {user:'QA Manager',action:'Electronic signature applied &mdash; Change Control CCR-CHG-EMA-001',time:'2026-06-06 14:20',icon:'&#128394;',bg:'var(--c-purple-lt)'},
-    {user:'RegIntel AI',action:'Generated 4 compliance tasks for CHG-20260607-EMA-001',time:'2026-06-06 09:05',icon:'&#129302;',bg:'var(--c-gray-50)'},
+    {user:'VigilOne AI',action:'Generated 4 compliance tasks for CHG-20260607-EMA-001',time:'2026-06-06 09:05',icon:'&#129302;',bg:'var(--c-gray-50)'},
   ];
   var auditEl = document.getElementById('audit-trail-body');
   if (auditEl) {
@@ -1869,7 +1869,7 @@ function renderSlidePanel() {
 
   var areasEl = document.getElementById('sp-areas-body');
   if (areasEl) {
-    ['PhV','Argus Safety','EudraVigilance','SOP-PV-004','RegIntel ROD'].forEach(function(a) {
+    ['PhV','Argus Safety','EudraVigilance','SOP-PV-004','VigilOne ROD'].forEach(function(a) {
       var sp = document.createElement('span');
       sp.className = 'chip chip-blue';
       sp.textContent = a;
@@ -1883,7 +1883,7 @@ function renderSlidePanel() {
       {txt:'Update Argus Safety rule EMA_NONSER_POST_MKT: 90d \u2192 45d',p:'P1'},
       {txt:'Reconfigure EudraVigilance E2B export profile batch window',p:'P1'},
       {txt:'Update SOP-PV-004 \u00a74.2 \u2014 timeline reference',p:'P2'},
-      {txt:'Update RegIntel ROD row for EMA non-serious',p:'P1'},
+      {txt:'Update VigilOne ROD row for EMA non-serious',p:'P1'},
     ];
     actionsEl.innerHTML = actions.map(function(a) {
       return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--c-gray-50);border-radius:var(--radius);border:1px solid var(--c-border);">' +
@@ -3713,7 +3713,7 @@ function renderTree(c, isSUSAR, isFatal, isSerious, isCT, day0, tl){
       <button class="tf-btn primary" onclick="exportCSV()">Export CSV</button>
       <button class="tf-btn" onclick="printResults()">Print / PDF</button>
       <button class="tf-btn" onclick="copyObligations()">Copy obligations</button>
-      <span style="margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono);">Day 0: ${c.day0} · Generated: ${new Date().toISOString().slice(0,10)} · RegIntel v1.0</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono);">Day 0: ${c.day0} · Generated: ${new Date().toISOString().slice(0,10)} · VigilOne v1.0</span>
     </div>
   </div>`;
 
@@ -4162,7 +4162,7 @@ function exportCSV(){
   const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a');
   a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
-  a.download='regintel-obligations-'+c.product.replace(/[^a-z0-9]/gi,'_')+'.csv';
+  a.download='vigilone-obligations-'+c.product.replace(/[^a-z0-9]/gi,'_')+'.csv';
   a.click();
 }
 
@@ -4189,7 +4189,7 @@ function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
 // PRODUCT DICTIONARY
 // ══════════════════════════════════════════════════════════════════
 
-var PD_STORE_KEY = 'regintel_product_dict_v1';
+var PD_STORE_KEY = 'vigilone_product_dict_v1';
 var pd_editing_id = null;
 
 function pdLoad() {
@@ -4331,7 +4331,7 @@ function pdExport() {
   var arr=pdLoad(); if(!arr.length){alert('No products to export.');return;}
   var cols=['inn','brand','code','type','atc','atcName','class','form','strength','route','regimen','company','devstatus','ind','nda','indication','markets','rsi','ccds','argus','notes'];
   var csv=cols.join(',')+'\n'+arr.map(function(p){return cols.map(function(c){return '"'+(p[c]||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
-  var a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='regintel_product_dict_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
+  var a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='vigilone_product_dict_'+new Date().toISOString().slice(0,10)+'.csv'; a.click();
 }
 
 function initProductDict() {
@@ -4350,7 +4350,7 @@ function initProductDict() {
   var ts = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+
            ' '+pad(now.getHours())+':'+pad(now.getMinutes())+' local';
   var el = document.getElementById('build-ts');
-  if(el) el.textContent = 'Built 2026-06-13 · v2.4';
+  if(el) el.textContent = 'Built 2026-06-16 · v3.0';
 
   // Pre-render reports so it's ready when user navigates there
   renderReports();
