@@ -48,7 +48,7 @@ class ComplianceTask:
 
     # Ownership
     owner_role: str            # PV Operations | IT/Systems | Regulatory Affairs |
-                               # QA | Medical | Praxigent/System Admin
+                               # QA | Medical | System Admin
     owner_team: str
     reviewer_role: str
 
@@ -150,7 +150,7 @@ Each task:
   "description": "2-3 sentences explaining what, why, and the regulatory basis",
   "system": "exact system: Oracle Argus Safety | EudraVigilance EVWEB | SOP QMS | RegIntel ROD | JIRA | etc.",
   "task_type": "config_change|sop_update|validation_testing|gateway_setup|training|rod_update|change_control",
-  "owner_role": "PV Operations|IT/Regulatory Systems|Regulatory Affairs|QA|Medical|Praxigent Admin",
+  "owner_role": "PV Operations|IT/Regulatory Systems|Regulatory Affairs|QA|Medical|System Admin",
   "owner_team": "specific team name",
   "reviewer_role": "role that reviews/approves",
   "estimated_effort_days": 2,

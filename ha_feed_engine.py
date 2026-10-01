@@ -187,7 +187,7 @@ class SourceScraper:
     """Fetches HA source URLs and extracts meaningful text content."""
 
     HEADERS = {
-        "User-Agent": "RegIntel/1.0 (Praxigent PV Regulatory Intelligence; regulatory-monitoring-bot)",
+        "User-Agent": "VigilOne/1.0 (VigilOne PV Regulatory Intelligence; regulatory-monitoring-bot)",
         "Accept": "text/html,application/xhtml+xml,text/plain",
     }
     TIMEOUT = 30

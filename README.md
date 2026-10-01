@@ -1,6 +1,6 @@
 # RegIntel Change Management Platform
 
-**Praxigent RegIntel — Regulatory Change → Actionable Compliance Tasks**
+**VigilOne — Regulatory Change → Actionable Compliance Tasks**
 
 Translates global regulatory changes into precise, system-specific,
 GxP-compliant compliance tasks — automatically.
@@ -125,7 +125,7 @@ Tasks generated: 6
   [P2] Update SOP-PV-004 §4.2 timeline reference
        → Owner: Regulatory Affairs | Deadline: 2026-08-01 | Steps: 4
   [P1] Update RegIntel ROD row
-       → Owner: Praxigent Admin | Deadline: 2026-09-04 | Steps: 2
+       → Owner: System Admin | Deadline: 2026-09-04 | Steps: 2
   [P2] Issue staff training bulletin on timeline change
        → Owner: PV Training | Deadline: 2026-09-01 | Steps: 3
 
@@ -150,5 +150,5 @@ Change control pack: CCR-CHG-20260607-EMA-001
 
 ---
 
-## Praxigent · RegIntel v1.0
-Vensar Technology Inc. · praxigent.com
+## VigilOne v1.0
+Vensar Technology Inc.

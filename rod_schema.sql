@@ -1,5 +1,5 @@
 -- =============================================================
--- PRAXIGENT VIGILONE — GLOBAL REGULATORY INTELLIGENCE PLATFORM
+-- VIGILONE — GLOBAL REGULATORY INTELLIGENCE PLATFORM
 -- Regulatory Obligation Database (ROD) — PostgreSQL Schema v2.0
 -- =============================================================
 
